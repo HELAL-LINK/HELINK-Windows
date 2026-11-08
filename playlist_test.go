@@ -74,14 +74,14 @@ func jsonOf(v any) string { b, _ := json.Marshal(v); return string(b) }
 func TestYoutubeListOf(t *testing.T) {
 	for in, want := range map[string]string{
 		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=PLtest0001course&index=2": "https://www.youtube.com/playlist?list=PLtest0001course",
-		"https://youtu.be/aaaaaaaaaa1?list=PLtest0001course":                         "https://www.youtube.com/playlist?list=PLtest0001course",
-		"https://m.youtube.com/watch?v=aaaaaaaaaa1&list=OLAK5uy_abc":               "https://www.youtube.com/playlist?list=OLAK5uy_abc",
-		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=RDaaaaaaaaaa1":             "", // a mix: endless, made for one person
-		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=WL":                        "", // Watch later
-		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=LL":                        "",
-		"https://www.youtube.com/watch?v=aaaaaaaaaa1":                                "",
-		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=PL<script>":                "",
-		"https://www.tiktok.com/@a/video/1?list=PLx":                                 "",
+		"https://youtu.be/aaaaaaaaaa1?list=PLtest0001course":                        "https://www.youtube.com/playlist?list=PLtest0001course",
+		"https://m.youtube.com/watch?v=aaaaaaaaaa1&list=OLAK5uy_abc":                "https://www.youtube.com/playlist?list=OLAK5uy_abc",
+		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=RDaaaaaaaaaa1":            "", // a mix: endless, made for one person
+		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=WL":                       "", // Watch later
+		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=LL":                       "",
+		"https://www.youtube.com/watch?v=aaaaaaaaaa1":                               "",
+		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=PL<script>":               "",
+		"https://www.tiktok.com/@a/video/1?list=PLx":                                "",
 	} {
 		if got := youtubeListOf(in); got != want {
 			t.Errorf("%s: %q, want %q", in, got, want)
@@ -91,17 +91,17 @@ func TestYoutubeListOf(t *testing.T) {
 
 func TestYoutubeVideoID(t *testing.T) {
 	for in, want := range map[string]string{
-		"https://www.youtube.com/watch?v=aaaaaaaaaa1":                         "aaaaaaaaaa1",
-		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=PLtest0001course":   "aaaaaaaaaa1",
-		"https://m.youtube.com/watch?v=aaaaaaaaaa1&t=30s":                     "aaaaaaaaaa1",
-		"https://youtu.be/aaaaaaaaaa1?si=x":                                   "aaaaaaaaaa1",
-		"https://www.youtube.com/shorts/aaaaaaaaaa1":                          "aaaaaaaaaa1",
-		"https://www.youtube.com/live/aaaaaaaaaa1?feature=share":              "aaaaaaaaaa1",
-		"https://www.youtube.com/playlist?list=PLtest0001course":              "",
-		"https://www.youtube.com/watch?v=short":                               "",
-		"https://www.youtube.com/@prog":                                       "",
-		"https://www.tiktok.com/@a/video/1234567890123456789":                 "",
-		"https://example.com/watch?v=aaaaaaaaaa1":                             "",
+		"https://www.youtube.com/watch?v=aaaaaaaaaa1":                       "aaaaaaaaaa1",
+		"https://www.youtube.com/watch?v=aaaaaaaaaa1&list=PLtest0001course": "aaaaaaaaaa1",
+		"https://m.youtube.com/watch?v=aaaaaaaaaa1&t=30s":                   "aaaaaaaaaa1",
+		"https://youtu.be/aaaaaaaaaa1?si=x":                                 "aaaaaaaaaa1",
+		"https://www.youtube.com/shorts/aaaaaaaaaa1":                        "aaaaaaaaaa1",
+		"https://www.youtube.com/live/aaaaaaaaaa1?feature=share":            "aaaaaaaaaa1",
+		"https://www.youtube.com/playlist?list=PLtest0001course":            "",
+		"https://www.youtube.com/watch?v=short":                             "",
+		"https://www.youtube.com/@prog":                                     "",
+		"https://www.tiktok.com/@a/video/1234567890123456789":               "",
+		"https://example.com/watch?v=aaaaaaaaaa1":                           "",
 	} {
 		if got := youtubeVideoID(in); got != want {
 			t.Errorf("%s: %q, want %q", in, got, want)

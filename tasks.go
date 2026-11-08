@@ -41,13 +41,15 @@ type DownloadTask struct {
 	SortSpec     string
 	AudioQuality string
 	Parts        []dlPart
-	Base         string // the file name without extension
-	SaveDir      string // where the file goes; its temporary folder is inside it
-	Category     string // video, music, programs, documents, compressed, other
-	Page         string // the page it was found on, if any
-	NoMusic      bool   // the music is removed (a video or MP3 "without music"; always for typeSep)
-	List         string // the playlist (course) it was added from, if any
-	SrcPath      string // typeSep: the file whose music is removed (it stays as it is)
+	Base         string  // the file name without extension
+	SaveDir      string  // where the file goes; its temporary folder is inside it
+	Category     string  // video, music, programs, documents, compressed, other
+	Page         string  // the page it was found on, if any
+	NoMusic      bool    // the music is removed (a video or MP3 "without music"; always for typeSep)
+	List         string  // the playlist (course) it was added from, if any
+	SrcPath      string  // typeSep: the file whose music is removed (it stays as it is)
+	ClipStart    float64 // a part of the video only (ClipEnd > 0): from ClipStart to ClipEnd seconds
+	ClipEnd      float64
 	// ---- for a file: how to ask for it (the browser's cookies are kept apart, see cookieFile)
 	Src        FileSource
 	FileName   string // the name it gets (with its extension)
@@ -163,6 +165,9 @@ func (t *DownloadTask) toJSON(withThumb bool) map[string]any {
 	if t.List != "" {
 		m["list"] = t.List
 	}
+	if t.ClipEnd > 0 {
+		m["clip"] = HumanClock(t.ClipStart) + " – " + HumanClock(t.ClipEnd)
+	}
 	if t.isSep() {
 		m["srcPath"], m["srcName"], m["srcFolder"] = t.SrcPath, filepath.Base(t.SrcPath), filepath.Dir(t.SrcPath)
 		m["srcFolderLabel"] = folderLabel(filepath.Dir(t.SrcPath))
@@ -272,6 +277,8 @@ type storedTask struct {
 	NoMusic      bool         `json:"noMusic,omitempty"`
 	SrcPath      string       `json:"srcPath,omitempty"`
 	List         string       `json:"list,omitempty"`
+	ClipStart    float64      `json:"clipStart,omitempty"`
+	ClipEnd      float64      `json:"clipEnd,omitempty"`
 }
 
 type storedList struct {
@@ -286,7 +293,7 @@ func (t *DownloadTask) toStore() storedTask {
 		FetchedAt: t.FetchedAt, CreatedAt: t.CreatedAt, QueuedAt: t.QueuedAt, FinishedAt: t.FinishedAt, State: t.State,
 		Percent: t.Percent, Done: t.Done, Total: t.Total, PartsCount: t.PartsCount, PartIndex: t.PartIndex,
 		Category: t.Category, Page: t.Page, FileName: t.FileName, Resumable: t.Resumable, NoMusic: t.NoMusic, SrcPath: t.SrcPath,
-		List: t.List}
+		List: t.List, ClipStart: t.ClipStart, ClipEnd: t.ClipEnd}
 	if t.isFile() || t.Src.Referer != "" || t.Src.UserAgent != "" {
 		src := t.Src
 		src.Cookies = nil
@@ -312,7 +319,7 @@ func taskFromStore(s storedTask) *DownloadTask {
 		FetchedAt: s.FetchedAt, CreatedAt: s.CreatedAt, QueuedAt: s.QueuedAt, FinishedAt: s.FinishedAt, State: s.State,
 		Percent: s.Percent, Done: s.Done, Total: s.Total, PartsCount: s.PartsCount, PartIndex: s.PartIndex,
 		Path: s.Path, FileSize: s.FileSize, ETA: -1, Category: s.Category, Page: s.Page, FileName: s.FileName,
-		Resumable: s.Resumable, NoMusic: s.NoMusic, SrcPath: s.SrcPath, List: s.List}
+		Resumable: s.Resumable, NoMusic: s.NoMusic, SrcPath: s.SrcPath, List: s.List, ClipStart: s.ClipStart, ClipEnd: s.ClipEnd}
 	if s.Src != nil {
 		t.Src = *s.Src
 	}

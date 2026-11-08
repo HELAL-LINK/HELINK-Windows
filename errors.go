@@ -212,8 +212,12 @@ func NewUserError(code string) *UserError {
 	e := &UserError{Code: code, Retry: true, Need: -1, Free: -1}
 	switch code {
 	case "invalid_url", "unsupported_site", "playlist", "profile", "novideo", "private", "login", "age", "members",
-		"premium", "geo", "drm", "unavailable", "nothing_found", "channel", "list_empty":
+		"premium", "geo", "drm", "unavailable", "nothing_found", "channel", "list_empty", "product_none":
 		e.Retry, e.Action = false, "newLink"
+	case "product_blocked":
+		e.Retry, e.Action = false, "useBrowser"
+	case "clip_range":
+		e.Retry = false
 	case "update_none", "update_manual":
 		e.Retry = false
 	case "page_not_file":
@@ -327,6 +331,18 @@ var errTexts = map[string][4]string{
 		"هذا الرابط لصفحة أو لحساب كامل. افتح الفيديو نفسه وانسخ رابطه.",
 		"This is a profile, not a video",
 		"This link is for a page or a whole account. Open the video itself and copy its link."},
+	"clip_range": {"الجزء قصير جدًا",
+		"اجعل الجزء ثانية واحدة على الأقل: حرّك بدايته أو نهايته على شريط الوقت.",
+		"The part is too short",
+		"Make the part at least one second long: move its start or end on the timeline."},
+	"product_blocked": {"لم يسمح الموقع لـ HELINK بقراءة صفحة المنتج",
+		"افتح صفحة المنتج في المتصفح، ثم اضغط زر HELINK في شريط الأدوات واختر «صور وفيديوهات المنتج». أو اضغط بالزر الأيمن على الصفحة واختر «تنزيل صور المنتج بـ HELINK».",
+		"The site didn't let HELINK read the product page",
+		"Open the product page in your browser, then click the HELINK button in the toolbar and choose \"Product photos and videos\". Or right-click the page and choose \"Download the product's photos with HELINK\"."},
+	"product_none": {"لم يجد HELINK صورًا لهذا المنتج",
+		"تأكد أن الرابط لصفحة منتج واحد، وليس لنتائج بحث أو لصفحة متجر. ويمكنك فتح المنتج في المتصفح واستخدام زر HELINK هناك.",
+		"HELINK found no photos for this product",
+		"Make sure the link is to one product's page, not search results or a store page. You can also open the product in your browser and use the HELINK button there."},
 	"novideo": {"لا يحتوي هذا المنشور على فيديو",
 		"هذا الرابط لمنشور يضم صورًا أو نصًا فقط. إذا كان المنشور يحتوي على فيديو، فافتح الفيديو نفسه وانسخ رابطه.",
 		"This post has no video",

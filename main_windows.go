@@ -425,7 +425,7 @@ func (h *winHost) openWindow() {
 // ("task"), the small window of downloads near the clock.
 func (h *winHost) showFor(reason string) {
 	switch reason {
-	case "file", "video":
+	case "file", "video", "product":
 		if windowVisible(h.hwnd) && !h.compact {
 			bringToFront(h.hwnd, false)
 			return
@@ -484,8 +484,11 @@ func (h *winHost) enterCompact(reason string) {
 	}
 	h.compactOf = reason
 	w, ht := int(560*h.scale), int(500*h.scale)
-	if reason == "video" {
+	switch reason {
+	case "video":
 		ht = int(640 * h.scale)
+	case "product": // a grid of the product's pictures
+		w, ht = int(760*h.scale), int(660*h.scale)
 	}
 	wa := workArea()
 	if aw, ah := int(wa.Right-wa.Left), int(wa.Bottom-wa.Top); aw > 0 && ah > 0 {
@@ -742,6 +745,13 @@ func (h *winHost) bind(paths Paths) {
 	w.Bind("nz_cancelFile", func(pid string) { app.CancelFile(pid) })
 	w.Bind("nz_pendingFiles", func() []map[string]any { return app.PendingFiles() })
 	w.Bind("nz_useMedia", func(seq, index int) map[string]any { return app.UseMedia(seq, index) })
+	w.Bind("nz_clipPreview", func(item int) map[string]any { return app.ClipPreview(item) })
+	w.Bind("nz_clipClosed", func() { app.ClipClosed() })
+	w.Bind("nz_clipDownload", func(item int, key string, start, end float64, noMusic bool) map[string]any {
+		return app.ClipDownload(item, key, start, end, noMusic)
+	})
+	w.Bind("nz_readProduct", func(link string) map[string]any { return app.ReadProductLink(link) })
+	w.Bind("nz_productDownload", func(id int, picks []int) map[string]any { return app.ProductDownload(id, picks) })
 	w.Bind("nz_settings", func() SettingsView { return app.GetSettings() })
 	w.Bind("nz_setSettings", func(ch map[string]any) SettingsView { return app.ChangeSettings(ch) })
 	w.Bind("nz_dialogDone", func() { h.dialogDone() })

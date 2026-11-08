@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -18,7 +19,7 @@ import (
 )
 
 // appVersion is this HELINK's version (a variable only so the update tests can play an older or newer one).
-var appVersion = "2.3.1"
+var appVersion = "2.4.0"
 
 const (
 	// Finished downloads kept in the list (the files themselves stay in their folder).
@@ -118,6 +119,8 @@ type App struct {
 	justUpdated    string        // the version HELINK was just updated to (said once)
 	updateDidFail  bool          // an update was tried, but this is still the old version
 	curList        *fetchedList  // the playlist on screen (playlist.go)
+	products       productStore  // products read for their pictures (product.go)
+	previews       previewServer // plays the videos in the clip window (clip.go)
 
 	wg           sync.WaitGroup // background work
 	saves        sync.WaitGroup // list writes started from the UI thread
@@ -431,6 +434,7 @@ func panicError(what string, r any) *UserError {
 func (a *App) Shutdown() { a.shutdownOnce.Do(a.shutdown) }
 
 func (a *App) shutdown() {
+	a.previews.stop()
 	a.cancel()
 	var stop []context.CancelFunc
 	a.mu.Lock()
@@ -1142,6 +1146,23 @@ func (a *App) DownloadWith(item int, key string, noMusic bool) map[string]any {
 // downloadFrom is DownloadWith for the post f (the one on screen, or one read for the
 // browser's menu).
 func (a *App) downloadFrom(f *fetched, item int, key string, noMusic bool) map[string]any {
+	return a.downloadTo(f, item, key, noMusic, dlTarget{})
+}
+
+// downloadInto downloads a video into a folder of its own, under a name of its own (a
+// product's video: product.go).
+func (a *App) downloadInto(f *fetched, item int, key, dir, name string) map[string]any {
+	return a.downloadTo(f, item, key, false, dlTarget{dir: dir, name: name})
+}
+
+// dlTarget is where a download goes when not where its kind goes (zero: as usual), and
+// the part of the video to keep (clipEnd > 0: only from clipStart to clipEnd seconds).
+type dlTarget struct {
+	dir, name          string
+	clipStart, clipEnd float64
+}
+
+func (a *App) downloadTo(f *fetched, item int, key string, noMusic bool, tg dlTarget) map[string]any {
 	a.mu.Lock()
 	var opt *QualityOption
 	var it *fetchedItem
@@ -1158,7 +1179,8 @@ func (a *App) downloadFrom(f *fetched, item int, key string, noMusic bool) map[s
 	existingState := ""
 	if opt != nil {
 		for _, x := range a.tasks {
-			if !x.finished() && x.URL == f.url && x.Index == it.Index && x.Key == key && x.NoMusic == noMusic {
+			if !x.finished() && x.URL == f.url && x.Index == it.Index && x.Key == key && x.NoMusic == noMusic &&
+				x.ClipStart == tg.clipStart && x.ClipEnd == tg.clipEnd && (tg.dir == "" || x.SaveDir == tg.dir) {
 				existing, existingState = x, x.State
 			}
 		}
@@ -1185,9 +1207,15 @@ func (a *App) downloadFrom(f *fetched, item int, key string, noMusic bool) map[s
 		cat = catMusic
 	}
 	saveDir := a.saveDirFor(cat)
+	if tg.dir != "" {
+		saveDir = tg.dir
+	}
 	title := meta.Title
 	if len(f.items) > 1 {
 		title += fmt.Sprintf(" - %d", item+1) // several videos in one post
+	}
+	if tg.clipEnd > 0 {
+		title += " - " + clipNamePart(tg.clipStart, tg.clipEnd)
 	}
 	base := SafeFileBase(title, fileBaseRoom(saveDir))
 	if opt.Kind == "video" {
@@ -1196,13 +1224,28 @@ func (a *App) downloadFrom(f *fetched, item int, key string, noMusic bool) map[s
 	if noMusic {
 		base += noMusicSuffix()
 	}
+	if tg.name != "" {
+		base = SafeFileBase(tg.name, fileBaseRoom(saveDir))
+	}
 	now := time.Now().UnixMilli()
 	t := &DownloadTask{URL: f.url, Site: f.site, Index: it.Index, Title: meta.Title, Channel: meta.Channel,
 		DurationText: meta.DurationText, Key: opt.Key, Kind: opt.Kind, Label: opt.Label, SizeBytes: opt.SizeBytes,
 		FormatSpec: opt.FormatSpec, SortSpec: opt.SortSpec, AudioQuality: opt.AudioQuality,
 		Parts: append([]dlPart(nil), opt.Parts...), Base: base, SaveDir: saveDir, FetchedAt: f.at.UnixMilli(),
 		CreatedAt: now, QueuedAt: now, State: stateQueued, ETA: -1, thumb: meta.Thumbnail, adding: true,
-		Category: cat, Page: f.page, Src: FileSource{Referer: f.opts.referer, UserAgent: f.opts.userAgent}, NoMusic: noMusic}
+		Category: cat, Page: f.page, Src: FileSource{Referer: f.opts.referer, UserAgent: f.opts.userAgent}, NoMusic: noMusic,
+		ClipStart: tg.clipStart, ClipEnd: tg.clipEnd}
+	if tg.clipEnd > 0 {
+		// The part only: its length, and its share of the sizes.
+		share := (tg.clipEnd - tg.clipStart) / math.Max(meta.Duration, tg.clipEnd)
+		if share > 0 && share < 1 {
+			t.SizeBytes = int64(float64(t.SizeBytes) * share)
+			for i := range t.Parts {
+				t.Parts[i].Bytes = int64(float64(t.Parts[i].Bytes) * share)
+			}
+		}
+		t.DurationText = clockText(tg.clipEnd - tg.clipStart)
+	}
 	info := it.infoPath
 	a.mu.Lock()
 	t.ID = a.newID()
@@ -1899,6 +1942,7 @@ func (a *App) ytdlpDownload(ctx context.Context, t *DownloadTask, info, out, tmp
 	a.mu.Lock()
 	kind, base, formatSpec, sortSpec, audioQuality, url, index := t.Kind, t.Base, t.FormatSpec, t.SortSpec, t.AudioQuality, t.URL, t.Index
 	id, site, src, noMusic := t.ID, t.Site, t.Src, t.NoMusic
+	clipStart, clipEnd := t.ClipStart, t.ClipEnd
 	a.mu.Unlock()
 	args := a.tools.YtdlpArgs(a.paths.Cache)
 	args = append(args,
@@ -1916,6 +1960,14 @@ func (a *App) ytdlpDownload(ctx context.Context, t *DownloadTask, info, out, tmp
 	)
 	if sortSpec != "" {
 		args = append(args, "-S", sortSpec)
+	}
+	if clipEnd > 0 {
+		// A part only: ffmpeg cuts it from the site's files as it downloads, at exact times
+		// (the cut is encoded again around it, quickly).
+		args = append(args, "--download-sections", fmt.Sprintf("*%.3f-%.3f", clipStart, clipEnd), "--force-keyframes-at-cuts")
+		if kind == "video" {
+			args = append(args, "--downloader-args", "ffmpeg_o:-preset veryfast -crf 21")
+		}
 	}
 	// A video found in the browser: its cookies (never YouTube's) and its page as Referer.
 	if c := a.cookiesOf(id); len(c) > 0 && site != siteYouTube {
@@ -1985,6 +2037,14 @@ func (a *App) ytdlpDownload(ctx context.Context, t *DownloadTask, info, out, tmp
 			mu.Lock()
 			finalPath = p
 			mu.Unlock()
+			return
+		}
+		if clipEnd > 0 {
+			// ffmpeg cutting the part: how far it is, in the part's time.
+			if sec, ok := parseFfmpegTime(line); ok {
+				pct := math.Min(99, 100*sec/math.Max(0.5, clipEnd-clipStart))
+				send(Overall{Stage: "clip", Percent: pct, ETA: -1}, false)
+			}
 		}
 	})
 	mu.Lock()

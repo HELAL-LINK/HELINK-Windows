@@ -1,7 +1,7 @@
 ; HELINK's installer: for the user only (no administrator), in %LOCALAPPDATA%\Programs\HELINK,
 ; with Start menu and desktop shortcuts and an entry in "Installed apps". HELINK itself puts
 ; its helper for the browsers and the extension in place when it starts (integrate_windows.go).
-; Build: makensis -DVERSION=2.3.1 -DEXE=../build/HELINK.exe -DOUT=../release/HELINK-2.3.1-Setup.exe helink.nsi
+; Build: makensis -DVERSION=2.4.0 -DEXE=../build/HELINK.exe -DOUT=../release/HELINK-2.4.0-Setup.exe helink.nsi
 ;
 ; HELINK updates itself with this installer (update.go): "Setup.exe /S /RELAUNCH" installs quietly
 ; over the running copy (which it asks to close, and waits for) and opens the new HELINK.
@@ -13,7 +13,7 @@ SetCompressor /SOLID lzma
 RequestExecutionLevel user
 
 !ifndef VERSION
-  !define VERSION "2.3.1"
+  !define VERSION "2.4.0"
 !endif
 !ifndef EXE
   !define EXE "..\build\HELINK.exe"

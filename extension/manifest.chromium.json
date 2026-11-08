@@ -14,7 +14,7 @@
   },
   "options_ui": { "page": "options.html", "open_in_tab": true },
   "background": { "service_worker": "background.js" },
-  "permissions": ["downloads", "nativeMessaging", "cookies", "storage", "contextMenus", "webRequest", "scripting"],
+  "permissions": ["downloads", "downloads.ui", "nativeMessaging", "cookies", "storage", "contextMenus", "webRequest", "scripting"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     { "matches": ["http://*/*", "https://*/*"], "js": ["content.js"], "all_frames": true, "run_at": "document_idle" }

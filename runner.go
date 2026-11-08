@@ -76,7 +76,13 @@ func runTool(ctx context.Context, exe string, args []string, env []string, captu
 		defer wg.Done()
 		br := bufio.NewReaderSize(rd, 64*1024)
 		for {
-			line, err := br.ReadString('\n')
+			var line string
+			var err error
+			if captureStdout && !isErr {
+				line, err = br.ReadString('\n')
+			} else {
+				line, err = readLineCR(br) // ffmpeg writes its progress with "\r"
+			}
 			if len(line) > 0 {
 				if captureStdout && !isErr {
 					captured.WriteString(line)
@@ -168,4 +174,19 @@ func quickRun(exe string, timeout time.Duration, args ...string) (string, error)
 		return out.String(), context.DeadlineExceeded
 	}
 	return strings.TrimSpace(out.String()), err
+}
+
+// readLineCR reads up to the next "\n" or "\r" (included), like ReadString('\n') for both.
+func readLineCR(br *bufio.Reader) (string, error) {
+	var b []byte
+	for {
+		c, err := br.ReadByte()
+		if err != nil {
+			return string(b), err
+		}
+		b = append(b, c)
+		if c == '\n' || c == '\r' || len(b) >= 1<<20 {
+			return string(b), nil
+		}
+	}
 }

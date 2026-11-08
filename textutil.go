@@ -158,6 +158,27 @@ func HumanDuration(sec float64) string {
 	return fmt.Sprintf("%d:%02d", m, ss)
 }
 
+// HumanClock is a moment of a video: "0:05", "1:20", "1:02:03" (always with minutes).
+func HumanClock(sec float64) string {
+	if sec < 0 || math.IsNaN(sec) {
+		sec = 0
+	}
+	s := int64(math.Floor(sec + 0.0001))
+	h, m, ss := s/3600, (s%3600)/60, s%60
+	if h > 0 {
+		return fmt.Sprintf("%d:%02d:%02d", h, m, ss)
+	}
+	return fmt.Sprintf("%d:%02d", m, ss)
+}
+
+// clipNamePart is a part's times in a file name ("مقطع 1.20-2.05": no ":" in Windows names).
+func clipNamePart(start, end float64) string {
+	return tr("مقطع ", "part ") + strings.ReplaceAll(HumanClock(start), ":", ".") + "-" + strings.ReplaceAll(HumanClock(end), ":", ".")
+}
+
+// clockText is a part's length: "0:03", "1:20".
+func clockText(sec float64) string { return HumanClock(math.Round(sec)) }
+
 // Minutes after "نحو": دقيقة، دقيقتين، 3 دقائق، 15 دقيقة.
 func minutesAr(n int) string {
 	switch {

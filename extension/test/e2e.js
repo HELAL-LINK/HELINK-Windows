@@ -69,6 +69,15 @@ const server = http.createServer((req, res) => {
 <video id="v" src="/media/test.webm" width="640" height="360" controls muted></video>
 </body></html>`);
   }
+  if (u.pathname.startsWith('/dp/')) { // a product's page, as Amazon writes it
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(`<!doctype html><html><head><title>Amazon.eg: Test Charger 65W</title></head><body>
+<span id="productTitle">  Test Charger 65W  </span>
+<script>var data = {'colorImages': { 'initial': [{"hiRes":"https://m.media-amazon.com/images/I/61aaaaaaaaL._AC_SL1500_.jpg"},{"hiRes":"https://m.media-amazon.com/images/I/61bbbbbbbbL._AC_SL1500_.jpg"},
+{"hiRes":null,"large":"https://m.media-amazon.com/images/I/41ccccccccL._AC_.jpg"}]},
+'videos': [{"url":"https://m.media-amazon.com/images/S/vse-vms-transcoding-artifact-eu-west-1-prod/x/default.jobtemplate.mp4.480.mp4"}]};</script>
+</body></html>`);
+  }
   if (u.pathname.startsWith('/files/')) {
     const name = u.pathname.slice(7);
     const buf = files[name];
@@ -132,7 +141,8 @@ async function main() {
   });
   const ctx = await chromium.launchPersistentContext(profile, {
     channel: 'chromium', headless: true, env, acceptDownloads: true,
-    args: ['--disable-extensions-except=' + EXT, '--load-extension=' + EXT, '--lang=en-US'], viewport: { width: 1100, height: 800 }
+    args: ['--disable-extensions-except=' + EXT, '--load-extension=' + EXT, '--lang=en-US', '--host-resolver-rules=MAP www.amazon.test 127.0.0.1'],
+    viewport: { width: 1100, height: 800 }
   });
   const results = [];
   const ok = (name) => { results.push('PASS ' + name); console.log('PASS', name); };
@@ -165,6 +175,15 @@ async function main() {
 
     // 2) A download the browser starts goes to HELINK (with the page's cookie and referrer).
     await page.click('#zip');
+    // The page says that HELINK has it (a card of HELINK's), and the browser's own download
+    // bubble, hidden while HELINK was asked, is back afterwards.
+    const card = page.locator('helink-taken .c');
+    await card.waitFor({ timeout: 60000 });
+    const cardText = await card.innerText();
+    assert(/HELINK is downloading this file/.test(cardText) && /setup\.zip/.test(cardText), 'card: ' + cardText);
+    if (shots) await page.screenshot({ path: path.join(shots, 'ext-taken-en.png') });
+    await until('the browser\'s download bubble back', async () => !(await sw.evaluate(() => helinkTest.uiHidden())), 5000);
+    ok('the page shows "HELINK is downloading this file"; the browser\'s bubble is back after');
     const got = inSave('Compressed', 'setup.zip');
     await until('setup.zip saved by HELINK', () => fs.existsSync(got) && fs.statSync(got).size === files['setup.zip'].length, 60000);
     assert(Buffer.compare(fs.readFileSync(got), files['setup.zip']) === 0, 'setup.zip content');
@@ -296,6 +315,24 @@ async function main() {
       await opt.screenshot({ path: path.join(shots, 'ext-options-ar.png'), fullPage: true });
     }
     ok('settings page in Arabic, right to left');
+
+    // 8b) A product's page (Amazon, by its name): the page as the browser shows it goes to
+    // HELINK, which finds the product's photos and video for its product window.
+    const prodPage = await ctx.newPage();
+    await prodPage.goto('http://www.amazon.test:' + server.address().port + '/dp/B0TEST1234');
+    const evP = appEvents().length;
+    const pr = await sw.evaluate(async () => {
+      const [t] = await chrome.tabs.query({ url: '*://www.amazon.test/*' });
+      return helinkTest.sendProduct(t);
+    });
+    assert(pr.ok && pr.found === 4, 'product sent: ' + JSON.stringify(pr));
+    const pev = await until('the product window', () => appEvents().slice(evP).find((e) => e.event === 'product' && e.data.status === 'ready'), 15000);
+    assert(pev.data.items.length === 4 && pev.data.title === 'Test Charger 65W' && pev.data.items[0].kind === 'video' &&
+      pev.data.items[1].url === 'https://m.media-amazon.com/images/I/61aaaaaaaaL.jpg', 'product: ' + JSON.stringify(pev.data));
+    const notProduct = await sw.evaluate(async (u) => { const [t] = await chrome.tabs.query({ url: u + '/page.html' }); return helinkTest.sendProduct(t); }, base);
+    assert(notProduct.ok === false && notProduct.error === 'not_product', JSON.stringify(notProduct));
+    await prodPage.close();
+    ok('product page → HELINK found its 3 photos (full size) and its video');
 
     // 9) Small files (under the minimum) and catching switched off stay with the browser.
     await opt.fill('#minKB', '0');

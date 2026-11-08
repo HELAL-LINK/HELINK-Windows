@@ -1025,6 +1025,83 @@
     timers.push(setInterval(() => { if (document.documentElement) deepScan(document.documentElement, { left: 30000 }); }, 6000));
   }
 
+  // ---------------------------------------------------------------------------
+  // A download the browser started was taken by HELINK (background.js): a card of HELINK's
+  // says so for a few seconds, in the page itself (top frame only).
+  // ---------------------------------------------------------------------------
+  const TAKEN = {
+    ar: { title: 'HELINK يُنزّل هذا الملف', dialog: 'اختر مكان الحفظ في نافذة HELINK', started: 'بدأ التنزيل في برنامج HELINK، وليس في المتصفح', close: 'إغلاق' },
+    en: { title: 'HELINK is downloading this file', dialog: 'Choose where to save it in the HELINK window', started: 'Downloading in the HELINK app, not in the browser', close: 'Close' }
+  };
+  const TAKEN_CSS = `
+    :host { all: initial; }
+    .c { position: fixed; bottom: 22px; inset-inline-end: 22px; z-index: 2147483647; display: flex; align-items: center; gap: 12px;
+      max-width: min(420px, calc(100vw - 32px)); padding: 12px 14px; border-radius: 12px; background: rgba(17,17,17,.96); color: #fff;
+      box-shadow: 0 8px 28px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.12); font: 400 13px/1.45 system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+      opacity: 0; transform: translateY(8px); transition: opacity .18s ease, transform .18s ease; }
+    .c.on { opacity: 1; transform: none; }
+    .i { flex: none; width: 34px; height: 34px; border-radius: 9px; background: #fff; color: #111; display: grid; place-items: center; }
+    .i svg { width: 22px; height: 22px; }
+    .w { min-width: 0; flex: 1; }
+    .h { font-weight: 700; font-size: 14px; }
+    .n { opacity: .92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: ltr; unicode-bidi: plaintext; }
+    .s { opacity: .7; font-size: 12px; }
+    .x { flex: none; all: unset; cursor: pointer; width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; color: #bbb; font-size: 14px; }
+    .x:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 0 0 12px 12px; background: #F27221; transform-origin: left; animation: t 5s linear forwards; }
+    @keyframes t { to { transform: scaleX(0); } }
+    @media (prefers-reduced-motion: reduce) { .c { transition: none; } .bar { animation: none; } }`;
+  let takenCard = null;
+  function sizeWords(n, w) {
+    if (!(n > 0)) return '';
+    const u = [[1 << 30, w.gb], [1 << 20, w.mb], [1 << 10, w.kb]].find((x) => n >= x[0]) || [1 << 10, w.kb];
+    return (n / u[0]).toFixed(n >= 100 * u[0] ? 0 : 1) + ' ' + u[1];
+  }
+  function showTaken(m) {
+    const l = m.lang === 'ar' || m.lang === 'en' ? m.lang : lang;
+    const t = TAKEN[l] || TAKEN.en;
+    const w = WORDS[l] || WORDS.en;
+    if (takenCard) takenCard.remove();
+    const host = document.createElement('helink-taken');
+    host.style.cssText = 'all:initial;position:fixed;left:0;top:0;width:0;height:0;z-index:2147483647;';
+    const root = host.attachShadow({ mode: 'open' });
+    const st = document.createElement('style');
+    st.textContent = TAKEN_CSS;
+    const c = el('div', 'c');
+    c.dir = l === 'ar' ? 'rtl' : 'ltr';
+    c.setAttribute('role', 'status');
+    const ic = el('div', 'i');
+    ic.append(icon());
+    const box = el('div', 'w');
+    const size = sizeWords(m.size, w);
+    box.append(el('div', 'h', t.title), el('div', 'n', m.name + (size ? '  ·  ' + size : '')), el('div', 's', m.dialog ? t.dialog : t.started));
+    const x = el('button', 'x', '✕');
+    x.type = 'button';
+    x.title = t.close;
+    x.setAttribute('aria-label', t.close);
+    c.append(ic, box, x, el('div', 'bar'));
+    root.append(st, c);
+    (document.body || document.documentElement).appendChild(host);
+    takenCard = host;
+    requestAnimationFrame(() => c.classList.add('on'));
+    let gone = false;
+    const close = () => {
+      if (gone) return;
+      gone = true;
+      c.classList.remove('on');
+      setTimeout(() => { host.remove(); if (takenCard === host) takenCard = null; }, 220);
+    };
+    x.addEventListener('click', close);
+    setTimeout(close, 5000);
+  }
+  if (window === window.top) {
+    try {
+      B.runtime.onMessage.addListener((m) => {
+        if (m && m.type === 'helinkTaken' && alive() && typeof m.name === 'string') showTaken(m);
+      });
+    } catch (e) { /* cut off from the extension */ }
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 })();

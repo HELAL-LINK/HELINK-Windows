@@ -8,6 +8,11 @@ var HELINK_STRINGS = {
     menuMedia: 'تنزيل هذا الفيديو بـ HELINK',
     menuPage: 'تنزيل فيديو هذه الصفحة بـ HELINK',
     menuAudio: 'تنزيل هذا الصوت بـ HELINK',
+    menuProduct: 'تنزيل صور المنتج بـ HELINK',
+    productBtn: 'صور وفيديوهات المنتج',
+    productReading: 'جارٍ إرسال صفحة المنتج إلى HELINK…',
+    productSent: 'وجد HELINK {n} صورة وفيديو، واختر منها في نافذته',
+    productNone: 'لم يجد HELINK صورًا في هذه الصفحة',
 
     statusRunning: 'HELINK يعمل',
     statusClosed: 'HELINK مغلق الآن، وسيبدأ وحده عند الحاجة',
@@ -77,6 +82,11 @@ var HELINK_STRINGS = {
     menuMedia: 'Download this video with HELINK',
     menuPage: "Download this page's video with HELINK",
     menuAudio: 'Download this audio with HELINK',
+    menuProduct: "Download the product's photos with HELINK",
+    productBtn: 'Product photos and videos',
+    productReading: 'Sending the product page to HELINK…',
+    productSent: 'HELINK found {n} photos and videos: choose in its window',
+    productNone: 'HELINK found no photos on this page',
 
     statusRunning: 'HELINK is running',
     statusClosed: 'HELINK is closed now; it starts by itself when needed',
@@ -164,9 +174,23 @@ function helinkT(lang, key, vars) {
   return t;
 }
 
+/* The product sites (HELINK downloads a product's photos and videos from them). */
+var HELINK_PRODUCT_HOSTS = ['amazon', 'aliexpress', 'alibaba', 'noon', 'temu'];
+var HELINK_PRODUCT_PATTERNS = ['amazon.com', 'amazon.eg', 'amazon.ae', 'amazon.sa', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it',
+  'amazon.es', 'amazon.in', 'amazon.com.tr', 'amazon.ca', 'amazon.co.jp', 'amazon.com.au', 'amazon.nl', 'amazon.pl', 'amazon.se',
+  'alibaba.com', 'aliexpress.com', 'aliexpress.us', 'aliexpress.ru', 'noon.com', 'temu.com'].map(function (h) { return '*://*.' + h + '/*'; });
+function helinkProductSite(u) {
+  var h = '';
+  try { h = new URL(u).hostname.toLowerCase(); } catch (e) { return ''; }
+  var parts = h.split('.');
+  for (var i = 0; i < HELINK_PRODUCT_HOSTS.length; i++) if (parts.indexOf(HELINK_PRODUCT_HOSTS[i]) >= 0) return HELINK_PRODUCT_HOSTS[i];
+  return '';
+}
+
 /* IDM's list of files taken from the browser, as HELINK has it. */
 var HELINK_DEFAULT_TYPES = ['3gp', '7z', 'aac', 'ace', 'aif', 'apk', 'arj', 'asf', 'avi', 'bin', 'bz2', 'dmg', 'exe',
   'flac', 'flv', 'gz', 'gzip', 'img', 'iso', 'lzh', 'm4a', 'm4v', 'mkv', 'mov', 'mp3', 'mp4', 'mpeg', 'mpg', 'msi',
   'msu', 'ogg', 'ogv', 'opus', 'pdf', 'qt', 'rar', 'rm', 'rmvb', 'sit', 'sitx', 'tar', 'tgz', 'torrent', 'ts', 'wav',
   'webm', 'wma', 'wmv', 'xz', 'z', 'zip', 'zst', 'docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt', 'epub', 'deb', 'rpm',
-  'appx', 'msix', 'cab', 'jar', 'vob', 'mts', 'm2ts'];
+  'appx', 'msix', 'cab', 'jar', 'vob', 'mts', 'm2ts',
+  'xapk', 'apks', 'apkm', 'ipa', 'vhd', 'vhdx', 'ova', 'esd', 'wim', 'm4b', 'mka', 'aiff', 'ape', 'ac3', 'lz', 'lzma', 'txz', 'tbz2', 'pkg'];

@@ -237,6 +237,17 @@ function postedRecently(u) {
   return !!t && Date.now() - t < 5 * 60 * 1000;
 }
 
+/* The kinds of file a server names (Content-Type), for a download whose name says nothing. */
+const MIME_EXT = {
+  'application/zip': 'zip', 'application/x-zip-compressed': 'zip', 'application/x-rar-compressed': 'rar', 'application/vnd.rar': 'rar',
+  'application/x-7z-compressed': '7z', 'application/x-msdownload': 'exe', 'application/x-msdos-program': 'exe',
+  'application/x-msi': 'msi', 'application/x-ms-installer': 'msi', 'application/vnd.android.package-archive': 'apk',
+  'application/pdf': 'pdf', 'application/x-iso9660-image': 'iso', 'application/gzip': 'gz', 'application/x-tar': 'tar',
+  'video/mp4': 'mp4', 'video/x-matroska': 'mkv', 'video/webm': 'webm', 'video/quicktime': 'mov', 'video/x-msvideo': 'avi',
+  'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/wav': 'wav', 'audio/flac': 'flac', 'audio/ogg': 'ogg',
+  'application/epub+zip': 'epub'
+};
+
 /* Downloads HELINK refused once go to the browser when asked again right after. */
 const refused = new Map();
 
@@ -253,7 +264,9 @@ async function wanted(item) {
   const s = st.settings || DEFAULT_SETTINGS;
   if (st.installed === false || !s.catch) return null;
   const name = baseName(item.filename) || nameFromUrl(url);
-  if (!(s.catchTypes || []).includes(extOf(name))) return null;
+  const types = s.catchTypes || [];
+  // A name without a known ending ("download.php", "get?id=7"): the kind the server said.
+  if (!types.includes(extOf(name)) && !types.includes(MIME_EXT[String(item.mime || '').toLowerCase()] || '')) return null;
   const size = item.totalBytes > 0 ? item.totalBytes : item.fileSize > 0 ? item.fileSize : -1;
   if (s.catchMinKB > 0 && size >= 0 && size < s.catchMinKB * 1024) return null;
   if (listed(s.skipSites, item.referrer) || listed(s.skipSites, url)) return null;
@@ -261,7 +274,10 @@ async function wanted(item) {
 }
 
 /* takeDownload asks HELINK about a download the browser started; true when HELINK took it
-   (the browser's own is then cancelled and removed from its list). */
+   (the browser's own is then cancelled and removed from its list, and the page says that
+   HELINK has it). The answer can take a while when HELINK has to start first (the helper
+   starts it and waits up to 20 s, then HELINK checks the file, up to 20 s): the browser
+   waits for it, so that the file is never downloaded twice. */
 async function takeDownload(item, w) {
   try {
     w = w || await wanted(item);
@@ -272,9 +288,9 @@ async function takeDownload(item, w) {
       type: 'download', url: item.url, finalUrl: item.finalUrl && item.finalUrl !== item.url ? item.finalUrl : '',
       referrer: item.referrer || '', filename: name, mime: item.mime || '', size, cookies, userAgent: UA,
       pageUrl: item.referrer || ''
-    }, 25000);
+    }, 70000);
     if (!resp.ok) {
-      if (resp.error) console.info('HELINK: the browser keeps', url, resp.error || resp.reason);
+      if (resp.error || resp.reason) console.info('HELINK: the browser keeps', url, resp.error || resp.reason);
       refused.set(item.url, Date.now());
       return false;
     }
@@ -286,6 +302,7 @@ async function takeDownload(item, w) {
     try {
       await B.downloads.erase({ id: item.id });
     } catch (e) { /* stays in the list as cancelled */ }
+    sayTaken(resp.name || name, size, resp.dialog);
     return true;
   } catch (e) {
     console.warn('HELINK:', e);
@@ -293,10 +310,75 @@ async function takeDownload(item, w) {
   }
 }
 
+/* The browser's own download bubble (Chromium) stays hidden while HELINK is asked: a file
+   HELINK takes never shows there as if the browser were downloading it. One count for the
+   downloads being decided; the bubble comes back when none is left. */
+const CAN_HIDE_UI = !FIREFOX && !!(B.downloads && B.downloads.setUiOptions);
+let deciding = 0;
+let uiTimer = 0;
+function setUi(enabled) {
+  if (!CAN_HIDE_UI) return;
+  try {
+    const p = B.downloads.setUiOptions({ enabled });
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  } catch (e) { /* no "downloads.ui" permission */ }
+}
+function hideUi() {
+  deciding++;
+  clearTimeout(uiTimer);
+  setUi(false);
+}
+function showUi(delayMs) {
+  deciding = Math.max(0, deciding - 1);
+  if (deciding) return;
+  clearTimeout(uiTimer);
+  uiTimer = setTimeout(() => { if (!deciding) setUi(true); }, delayMs || 0);
+}
+// A worker that starts fresh has nothing being decided (one stopped mid-way left it hidden).
+setUi(true);
+
+/* likelyWanted is a quick look, before anything is asked, at whether HELINK may take a
+   download: then the bubble is hidden from the first moment. */
+function likelyWanted(item) {
+  if (!isWeb(item.url) || (item.byExtensionId && item.byExtensionId !== B.runtime.id)) return false;
+  const s = (cached && cached.settings) || DEFAULT_SETTINGS;
+  if (cached && (cached.installed === false || s.catch === false)) return false;
+  const name = baseName(item.filename) || nameFromUrl(item.finalUrl || item.url);
+  const types = s.catchTypes || HELINK_DEFAULT_TYPES;
+  return types.includes(extOf(name)) || types.includes(MIME_EXT[String(item.mime || '').toLowerCase()] || '');
+}
+let cached = null;
+stored('helink', null).then((st) => { cached = st; });
+B.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.helink) cached = changes.helink.newValue || null;
+});
+
+/* sayTaken shows, in the page the user is on, that HELINK is downloading the file (a small
+   card of HELINK's, for a few seconds), and marks HELINK's button in the toolbar. */
+async function sayTaken(name, size, dialog) {
+  try {
+    const tabs = await B.tabs.query({ active: true, lastFocusedWindow: true });
+    const tab = tabs && tabs[0];
+    if (tab && tab.id >= 0 && isWeb(tab.url)) {
+      const msg = { type: 'helinkTaken', name: String(name || ''), size: size > 0 ? size : 0, dialog: !!dialog, lang: await lang() };
+      try {
+        await B.tabs.sendMessage(tab.id, msg, { frameId: 0 });
+      } catch (e) { /* a page without HELINK's script (the store, a PDF…) */ }
+    }
+  } catch (e) { /* no window */ }
+  try {
+    await ACTION.setBadgeText({ text: '↓' });
+    setTimeout(() => { try { ACTION.setBadgeText({ text: '' }); } catch (e) { /* gone */ } }, 4000);
+  } catch (e) { /* older browsers */ }
+}
+
 if (!FIREFOX && B.downloads.onDeterminingFilename) {
   // Chromium: the browser waits for the name, which gives time to ask HELINK.
   B.downloads.onDeterminingFilename.addListener((item, suggest) => {
+    const hide = likelyWanted(item);
+    if (hide) hideUi();
     takeDownload(item).then((taken) => {
+      if (hide) showUi(taken ? 1500 : 0);
       if (!taken) {
         try {
           suggest();
@@ -481,6 +563,33 @@ async function qualities(v, tab) {
   }, 115000);
 }
 
+/* sendProduct sends a product's page as the user sees it (Amazon, Alibaba, AliExpress,
+   Noon, Temu): HELINK finds its photos and videos in it and shows them in its window. The
+   page's text holds the product's data (the pictures at full size); the browser's own copy is
+   used because these sites answer programs with a check page. */
+async function sendProduct(tab) {
+  if (!tab || !isWeb(tab.url) || !helinkProductSite(tab.url)) return { ok: false, error: 'not_product' };
+  const grab = () => {
+    const html = document.documentElement ? document.documentElement.outerHTML : '';
+    return { html: html.length > 24e6 ? html.slice(0, 24e6) : html, title: document.title || '', url: location.href };
+  };
+  let page = null;
+  try {
+    if (FIREFOX) {
+      const r = await browser.tabs.executeScript(tab.id, { code: '(' + grab.toString() + ')()' });
+      page = r && r[0];
+    } else {
+      const r = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: grab });
+      page = r && r[0] && r[0].result;
+    }
+  } catch (e) {
+    return { ok: false, error: 'no_page' };
+  }
+  if (!page || !page.html) return { ok: false, error: 'no_page' };
+  const cookies = await cookiesFor([page.url || tab.url], { incognito: tab.incognito, storeId: tab.cookieStoreId });
+  return native({ type: 'product', pageUrl: page.url || tab.url, title: page.title || tab.title || '', html: page.html, cookies, userAgent: UA }, 60000);
+}
+
 async function sendLink(url, pageUrl, tab) {
   const cookies = await cookiesFor([url], { incognito: tab && tab.incognito, storeId: tab && tab.cookieStoreId });
   return native({ type: 'link', url, referrer: pageUrl || '', pageUrl: pageUrl || '', cookies, userAgent: UA }, 60000);
@@ -508,6 +617,7 @@ async function makeMenus() {
   add({ id: 'helink-media', title: t('menuMedia'), contexts: ['video'] });
   add({ id: 'helink-audio', title: t('menuAudio'), contexts: ['audio'] });
   add({ id: 'helink-page', title: t('menuPage'), contexts: ['page', 'frame'] });
+  add({ id: 'helink-product', title: t('menuProduct'), contexts: ['page', 'image'], documentUrlPatterns: HELINK_PRODUCT_PATTERNS });
 }
 
 async function onMenu(info, tab) {
@@ -521,6 +631,8 @@ async function onMenu(info, tab) {
       return sendVideo({ src: isWeb(info.srcUrl) ? info.srcUrl : '', frameUrl: info.frameUrl, pageUrl: page }, tab);
     case 'helink-page':
       return sendVideo({ frameUrl: info.frameUrl, pageUrl: page }, tab);
+    case 'helink-product':
+      return sendProduct(tab);
   }
   return null;
 }
@@ -619,6 +731,10 @@ async function handle(msg, sender) {
       if (m.kind === 'hls' || m.kind === 'dash') return sendVideo({ postUrl: m.url, pageUrl: tab.url }, tab);
       return sendLink(m.url, tab.url, tab);
     }
+    case 'product': { // the toolbar window's "Product photos and videos"
+      const tab = await B.tabs.get(msg.tabId).catch(() => null);
+      return sendProduct(tab);
+    }
     case 'list': { // a YouTube list (a course) from the button's menu: HELINK shows all its videos
       const url = String(msg.url || '');
       if (!/^https:\/\/www\.youtube\.com\/playlist\?list=[A-Za-z0-9_-]{2,80}$/.test(url)) return { ok: false, error: 'bad_message' };
@@ -653,4 +769,5 @@ B.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 // For the tests (the menus cannot be clicked by a program).
 globalThis.helinkTest = { onMenu, takeDownload, wanted, state, native, injectIntoOpenTabs, reloadIfUpdated, newerVersion,
+  uiHidden: () => deciding > 0, likelyWanted, sendProduct,
   resetReloadCheck: () => { reloadChecked = 0; } };

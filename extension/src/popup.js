@@ -117,6 +117,9 @@ async function load(force) {
   showStatus(r.state);
   const web = r.tab && /^https?:/i.test(r.tab.url);
   $('pageVideo').disabled = !web || r.state.installed === false;
+  // A product's page on Amazon, Alibaba, AliExpress, Noon or Temu: its photos and videos.
+  $('product').hidden = !(web && helinkProductSite(r.tab.url));
+  $('product').disabled = r.state.installed === false;
   showMedia(r.media || []);
 }
 
@@ -137,6 +140,18 @@ $('pageVideo').addEventListener('click', async () => {
     toast(t('sent'));
     setTimeout(() => window.close(), 900);
   } else toast(r.error === 'not_web' ? t('notWeb') : t('failed'), true);
+});
+
+$('product').addEventListener('click', async () => {
+  $('product').disabled = true;
+  toast(t('productReading'));
+  const r = await send({ type: 'product', tabId });
+  $('product').disabled = false;
+  if (r.ok && r.found > 0) {
+    toast(t('productSent', { n: r.found }));
+    setTimeout(() => window.close(), 1100);
+  } else if (r.ok) toast(t('productNone'), true);
+  else toast(t('failed'), true);
 });
 
 $('open').addEventListener('click', async () => {

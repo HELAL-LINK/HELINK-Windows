@@ -7,7 +7,7 @@
 # usage: ./release.sh [--no-tests]
 set -e
 cd "$(dirname "$0")"
-VERSION=2.3.1
+VERSION=2.4.0
 ./build.sh "$@"
 rm -rf release
 mkdir -p release
@@ -42,7 +42,7 @@ rm -rf "$E"
 # the extension's ID; nothing is signed with the private one).
 S=release/src/helink-windows
 mkdir -p "$S"
-tar --exclude=./build --exclude=./release --exclude=./embed --exclude=./extension/dist \
+tar --exclude=./build --exclude=./release --exclude=./nazzelha --exclude=./embed --exclude=./extension/dist \
     --exclude='./extension/keys/*.pem' -cf - . | (cd "$S" && tar -xf -)
 mkdir -p "$S/third_party"
 cp -r ../deps/jchv_go-webview2 "$S/third_party/go-webview2"

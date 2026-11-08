@@ -454,22 +454,24 @@ func TestUpdateCheckFailures(t *testing.T) {
 func TestUpdateLoop(t *testing.T) {
 	priv := testKey(t)
 	srv := newUpdServer(t)
-	srv.set(sign(priv, updateManifest{App: updateAppID, Version: "2.4.0", Portable: fileOf([]byte("z"), srv.URL+"/p.zip")}), nil)
+	srv.set(sign(priv, updateManifest{App: updateAppID, Version: "2.98.0", Portable: fileOf([]byte("z"), srv.URL+"/p.zip")}), nil)
 	atomic.StoreInt32(&srv.fail, 2)
 	saved := []time.Duration{updateFirstDelay, updateTick, updateRetryOffline, updateRetryLater}
 	updateFirstDelay, updateTick, updateRetryOffline, updateRetryLater = 30*time.Millisecond, 20*time.Millisecond, 60*time.Millisecond, 60*time.Millisecond
-	defer func() { updateFirstDelay, updateTick, updateRetryOffline, updateRetryLater = saved[0], saved[1], saved[2], saved[3] }()
+	defer func() {
+		updateFirstDelay, updateTick, updateRetryOffline, updateRetryLater = saved[0], saved[1], saved[2], saved[3]
+	}()
 	app, em, _, _ := updateApp(t, srv, "portable")
 	app.StartUpdates()
 	app.StartUpdates() // once is enough
 	ev := waitUpdate(t, em, "available")
-	if ev["version"] != "2.4.0" || ev["prompt"] != true {
+	if ev["version"] != "2.98.0" || ev["prompt"] != true {
 		t.Errorf("offered: %v", ev)
 	}
 	if n := atomic.LoadInt32(&srv.hits); n != 3 {
 		t.Errorf("asked %d times, want 3 (two busy answers, then the file)", n)
 	}
-	if st := app.store.Get(); st.UpdateSeen != "2.4.0" || time.Since(st.UpdateChecked) > time.Minute {
+	if st := app.store.Get(); st.UpdateSeen != "2.98.0" || time.Since(st.UpdateChecked) > time.Minute {
 		t.Errorf("remembered %+v", st)
 	}
 	app.Shutdown()

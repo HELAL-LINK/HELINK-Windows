@@ -1,6 +1,6 @@
 > To build offline, take `HELINK-<version>-source.zip` from the Releases page: it also holds `third_party/` (the Go dependencies this `go.mod` points at). The page itself (README.md), `latest.json` and `assets/` are what HELINK reads and shows.
 
-# HELINK 2.3 for Windows
+# HELINK 2.4 for Windows
 
 A complete download manager for Windows 11 and 10 (64-bit): files in parts over many connections
 with resume, downloads taken from the browsers through the HELINK extension, and videos from
@@ -123,6 +123,26 @@ browser ── HELINK extension (extension/src) ── native messaging ── h
   The Chromium ID is fixed by the public key in
   `extension/keys/key.txt`. Publishing: `extension/SIGNING.md`.
 
+- **A part of a video** (2.4, `clip.go`): the clip window plays the video through a small server of
+  HELINK's on 127.0.0.1 (`previewServer`: random tokens, the site's headers and cookies, ranges
+  passed on), choosing from yt-dlp's info JSON one light file with picture and sound (H.264
+  360–720p, nearest to 480p), else a picture file and a sound file played together, else the
+  sound (`pickPreview`). The part is downloaded with `--download-sections *a-b
+  --force-keyframes-at-cuts` (`dlTarget` in `app.go`), ffmpeg's `time=` lines giving the stage
+  "clip" its progress (`runner.go` reads lines ended by `\r` too).
+- **Product photos and videos** (2.4, `product.go`): Amazon, Alibaba, AliExpress, Noon and Temu.
+  The page comes from the extension (the page open in the browser: `sendProduct` in
+  `background.js`, message "product") or from HELINK itself for a pasted link (a browser's
+  headers; some sites answer a check page: `product_blocked` says to use the browser's button).
+  Each site's data gives the product's own pictures at their original size (Amazon `hiRes`,
+  AliExpress `imagePathList`, Noon `image_keys`, Temu's `gallery`, Alibaba's media list; JSON-LD
+  and `og:image` otherwise), and its videos. The choice is downloaded as file tasks into
+  `Pictures\<product>` (`01.jpg`…, `video 1.mp4`; an HLS video through yt-dlp, `downloadInto`).
+- **The extension and the browser's own downloads** (2.4): while HELINK is asked about a download,
+  the browser's download bubble is hidden (`downloads.setUiOptions`, permission `downloads.ui`),
+  and a download HELINK takes is announced in the page by a card of HELINK's (`helinkTaken`,
+  `content.js`). A name without a known ending is judged by its Content-Type (`MIME_EXT`).
+
 ## Build (Linux, macOS or Windows; Go 1.24, Python 3)
 
     ./build.sh               # extension, helper, resources, HELINK.exe, Windows test binaries, Linux tests
@@ -143,13 +163,18 @@ background colour and cursor.
    take it from there), and write what is new, one line each, in
    `docs/release-notes/<VERSION>.ar.txt` and `.en.txt` (the update's window shows these).
 2. `./release.sh`
-3. `devtools/publish_update.sh <clone of github.com/HELAL-LINK/HELINK-Windows> [key]` commits
-   the installer and the portable zip at the root of the repository, then `latest.json` (signed by
-   `devtools/updsign` with the update key, checked against the public key in `update.go`) naming
-   them at that first commit (`raw.githubusercontent.com/…/<commit>/<file>`: an address that never
-   changes, with no tag needed), with the download page (`README.md` from
-   `devtools/download-page.md`, the pictures from `docs/screenshots`), and pushes main once. Every
-   HELINK from 2.3 on then offers the update.
+3. Since 2.3.1 the files are assets of a GitHub release (the repository is the source and the
+   download page): on github.com/HELAL-LINK/HELINK-Windows, *Releases → Draft a new release*, tag
+   `v<VERSION>` (created on publish), the installer, the portable zip and the source zip attached,
+   *Publish release*. Then `go run ./devtools/updsign -key <key> -version <VERSION> -setup
+   release/HELINK-<VERSION>-Setup.exe -portable release/HELINK-<VERSION>-portable.zip -notes
+   docs/release-notes/<VERSION> -release -out latest.json` (`-release`: the files' addresses are
+   the release's, `github.com/…/releases/download/v<VERSION>/<file>`), and the download page made
+   from `devtools/download-page.md` with those addresses; commit both and push (GitHub Desktop).
+   Release first, then `latest.json`: HELINK never reads a `latest.json` whose files are not there.
+   Every HELINK from 2.3.1 on then offers the update (2.3.0 and older read the first page,
+   github.com/helink-updates, and are updated by hand once).
+   (`devtools/publish_update.sh` does the older way: the files committed in the repository.)
 4. `HELINK_LIVE_UPDATE=1 go test -count=1 -run TestLiveUpdate -v .` checks what was published, as
    HELINK will read it.
 

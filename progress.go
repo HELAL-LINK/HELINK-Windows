@@ -241,3 +241,26 @@ func (t *ProgressTracker) snapshot() Overall {
 	}
 	return o
 }
+
+// parseFfmpegTime reads how far ffmpeg is ("... time=00:01:02.50 bitrate=..."), in seconds.
+func parseFfmpegTime(line string) (float64, bool) {
+	i := strings.Index(line, "time=")
+	if i < 0 {
+		return 0, false
+	}
+	f := line[i+5:]
+	if j := strings.IndexAny(f, " \t"); j >= 0 {
+		f = f[:j]
+	}
+	parts := strings.Split(f, ":")
+	if len(parts) != 3 {
+		return 0, false
+	}
+	h, e1 := strconv.ParseFloat(parts[0], 64)
+	m, e2 := strconv.ParseFloat(parts[1], 64)
+	sec, e3 := strconv.ParseFloat(parts[2], 64)
+	if e1 != nil || e2 != nil || e3 != nil || h < 0 || m < 0 || sec < 0 {
+		return 0, false
+	}
+	return h*3600 + m*60 + sec, true
+}

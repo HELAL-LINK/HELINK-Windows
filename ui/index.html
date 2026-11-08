@@ -390,6 +390,61 @@ html[dir="rtl"] .where { padding: 7px 12px 7px 8px; }
 .alt .k { font-size: 11px; font-weight: 800; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 2px 7px; }
 .alt .w { flex: 1; min-width: 0; font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* product photos and videos (2.4) */
+#c-edit:not([hidden]), #p-ready:not([hidden]) { display: grid; gap: 12px; }
+.pcard { display: flex; gap: 10px; align-items: center; }
+.pcard .pt { font-weight: 700; font-size: 15px; line-height: 1.45; flex: 1; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.phead { display: flex; align-items: center; gap: 12px; }
+.phead label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+.phead .grow { flex: 1; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.ptile { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--surface-2); border: 1.5px solid var(--line); padding: 0; cursor: pointer; }
+.ptile img, .ptile video { width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; }
+.ptile video { background: #000; }
+:root[data-theme="dark"] .ptile img { background: #2a2a2a; }
+.ptile .ck { position: absolute; top: 7px; inset-inline-start: 7px; width: 22px; height: 22px; border-radius: 7px; border: 2px solid #fff; background: rgba(0, 0, 0, .35); box-shadow: 0 1px 3px rgba(0, 0, 0, .4); display: grid; place-items: center; }
+.ptile[aria-checked="true"] { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand); }
+.ptile[aria-checked="true"] .ck { background: var(--brand); border-color: var(--brand); }
+.ptile[aria-checked="true"] .ck::after { content: ""; width: 10px; height: 5px; border: solid #000; border-width: 0 0 2.5px 2.5px; transform: translateY(-1px) rotate(-45deg); }
+.ptile[aria-checked="false"] img, .ptile[aria-checked="false"] video { opacity: .55; }
+.ptile .vk { position: absolute; bottom: 7px; inset-inline-end: 7px; display: inline-flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, .8); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px; }
+.ptile .n { position: absolute; bottom: 7px; inset-inline-start: 7px; background: rgba(0, 0, 0, .7); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 6px; }
+.ptile .noimg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--faint); }
+
+/* a part of a video (2.4) */
+.cplayer { position: relative; display: grid; place-items: center; background: #000; border-radius: 12px; overflow: hidden; height: clamp(170px, 32vh, 320px); grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
+.cplayer video, .cplayer .poster { grid-area: 1 / 1; width: 100%; height: 100%; min-height: 0; object-fit: contain; display: block; }
+.cplayer .poster { opacity: .85; }
+.cplayer .pbig { grid-area: 1 / 1; width: 64px; height: 64px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, .55); color: #fff; display: grid; place-items: center; cursor: pointer; transition: opacity .15s; }
+.cplayer .pbig:hover { background: rgba(0, 0, 0, .7); }
+.cplayer.playing .pbig { opacity: 0; }
+.cplayer.playing:hover .pbig { opacity: 1; }
+.cplayer .pwait { grid-area: 1 / 1; }
+.cplayer .pnote { position: absolute; inset-inline: 12px; bottom: 10px; margin: 0; color: #fff; background: rgba(0, 0, 0, .7); border-radius: 8px; padding: 6px 10px; font-size: 12.5px; text-align: center; }
+.tl { position: relative; height: 52px; margin: 2px 12px 0; touch-action: none; cursor: pointer; }
+.tl-track { position: absolute; left: 0; right: 0; top: 13px; height: 26px; border-radius: 8px; background: var(--line); }
+.tl-sel { position: absolute; top: 0; bottom: 0; background: var(--brand-tint); border-block: 3px solid var(--brand); }
+.tl-head { position: absolute; top: -7px; bottom: -7px; width: 3px; margin-left: -1.5px; background: var(--ink); border-radius: 2px; pointer-events: none; }
+.tl-h { position: absolute; top: 7px; width: 26px; height: 38px; margin-left: -13px; border: 0; padding: 0; background: transparent; cursor: ew-resize; touch-action: none; }
+.tl-h::before { content: ""; position: absolute; left: 7px; right: 7px; top: 0; bottom: 0; border-radius: 6px; background: var(--brand); box-shadow: 0 1px 4px rgba(0, 0, 0, .35); }
+.tl-h::after { content: ""; position: absolute; left: 12px; width: 2px; top: 12px; bottom: 12px; border-radius: 1px; background: rgba(0, 0, 0, .5); }
+.tl-h.drag::before, .tl-h:focus-visible::before { background: var(--brand-press); }
+.tl-times { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin: -4px 12px 0; font-variant-numeric: tabular-nums; }
+.tl-times .now { color: var(--ink); font-weight: 700; }
+.cut-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; }
+.cut-t { display: grid; gap: 5px; }
+.cut-t .lab { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.cut-t .line { display: flex; gap: 6px; align-items: center; }
+.cstep { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+.cstep button { width: 34px; height: 34px; border: 0; background: var(--surface-2); font-size: 18px; font-weight: 700; color: var(--ink); }
+.cstep button:disabled { opacity: .35; }
+.cstep output { min-width: 66px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-weight: 700; display: inline-flex; gap: 6px; align-items: baseline; }
+.chip small { color: var(--muted); font-weight: 600; font-size: 11.5px; }
+.chip[aria-checked="true"] { border-color: var(--brand); background: var(--brand-tint); color: var(--accent-text); }
+.ctitle { font-weight: 700; font-size: 14px; line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
+
 /* settings */
 .stabs { display: flex; gap: 4px; padding: 4px 18px 0; border-bottom: 1px solid var(--line); }
 .stabs button { border: 0; background: none; padding: 9px 12px 11px; font-weight: 700; color: var(--muted); position: relative; }
@@ -558,7 +613,7 @@ body.mini-mode .mini { display: block; width: 100%; flex: 0 1 auto; min-height: 
   .tool .lbl { display: none; }
   .search { width: 170px; }
 }
-@media (max-width: 1099px) {
+@media (max-width: 1439px) {
   .add-btn.alt .lbl { display: none; }
   .add-btn.alt { padding: 0 10px; }
 }
@@ -594,6 +649,8 @@ body.mini-mode .mini { display: block; width: 100%; flex: 0 1 auto; min-height: 
   <div class="brand"><svg class="logo" viewBox="220 745 1603 335" role="img" aria-label="HELINK"><path fill="currentColor" d="M222 747V1078L284.5 1032.5V950.5H402.5V1030.5L461 1078V858L402.5 896.5H284.5V793ZM539 784V1047H743V998.5H599.5V936.5H722V890.5H599.5V832.5H738V784ZM822 784V1047H1016V998.5H882.5V784ZM1080 784V1047H1141V784ZM1234 784V1047H1294V887.5L1425 1047H1476V784H1416V943L1284.5 784ZM1569 784V1047H1629.5V980.5L1665 944L1749 1047H1820L1704.5 901L1813.5 784H1746L1629.5 906V784Z"/><path fill="#F27221" d="M466 758L408 804L403 878L460 840.5Z"/></svg></div>
   <button class="add-btn" id="add-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-t="tb.add"></span></button>
   <button class="add-btn alt" id="sep-btn" type="button" data-ta="title:tb.sepTitle;aria-label:tb.sepTitle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/></svg><span class="lbl" data-t="tb.sep"></span></button>
+  <button class="add-btn alt" id="clip-btn" type="button" data-ta="title:tb.clipTitle;aria-label:tb.clipTitle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6.5" r="2.8"/><circle cx="6" cy="17.5" r="2.8"/><path d="M8.3 8.2L20 17M8.3 15.8L20 7"/></svg><span class="lbl" data-t="tb.clip"></span></button>
+  <button class="add-btn alt" id="prod-btn" type="button" data-ta="title:tb.prodTitle;aria-label:tb.prodTitle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8.5l7-4 7 4v7.2l-7 4-7-4z"/><path d="M5 8.5l7 4 7-4M12 12.5v7.2"/></svg><span class="lbl" data-t="tb.prod"></span></button>
   <div class="tools" role="toolbar" data-ta="aria-label:tb.aria">
     <button class="tool" id="tb-resume" type="button" data-ta="title:tb.resume"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg><span class="lbl" data-t="tb.resume"></span></button>
     <button class="tool" id="tb-pause" type="button" data-ta="title:tb.pause"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor"/><rect x="13.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor"/></svg><span class="lbl" data-t="tb.pause"></span></button>
@@ -759,7 +816,78 @@ body.mini-mode .mini { display: block; width: 100%; flex: 0 1 auto; min-height: 
         <div id="v-alts" hidden><p class="hint" data-t="v.altText"></p><div class="alt-list" id="v-alt-list"></div></div>
       </div>
     </div>
-    <div class="dlg-foot"><button class="btn" id="video-cancel" type="button" data-t="btn.cancel"></button><span class="grow"></span><button class="btn" id="video-retry" type="button" data-t="btn.retry" hidden></button><button class="btn primary" id="video-go" type="button"></button></div>
+    <div class="dlg-foot"><button class="btn" id="video-cancel" type="button" data-t="btn.cancel"></button><span class="grow"></span><button class="btn" id="video-retry" type="button" data-t="btn.retry" hidden></button><button class="btn" id="video-clip" type="button" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6.5" r="2.8"/><circle cx="6" cy="17.5" r="2.8"/><path d="M8.3 8.2L20 17M8.3 15.8L20 7"/></svg><span data-t="v.clip"></span></button><button class="btn primary" id="video-go" type="button"></button></div>
+  </div>
+
+  <!-- a product's photos and videos (2.4) -->
+  <div class="dlg wide" id="dlg-product" role="dialog" aria-modal="true" aria-labelledby="prod-title">
+    <div class="dlg-head"><h2 id="prod-title" data-t="prod.title"></h2><button class="xbtn" type="button" id="prod-x" data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body">
+      <div id="p-ask">
+        <div class="field">
+          <label for="p-input" data-t="prod.label"></label>
+          <div class="inline"><input id="p-input" type="text" dir="ltr" spellcheck="false" autocomplete="off" placeholder="https://"><button class="btn" id="p-paste" type="button" data-t="add.paste"></button></div>
+          <small data-t="prod.hint"></small>
+        </div>
+      </div>
+      <div id="p-loading" hidden><div class="busy-line"><span class="spinner"></span><span id="p-loading-txt"></span></div></div>
+      <div id="p-error" hidden><div class="err-box" id="p-err"></div></div>
+      <div id="p-ready" hidden>
+        <div class="pcard"><span class="site-pill" id="p-site"></span><span class="pt" id="p-name"></span></div>
+        <div class="phead"><label><input type="checkbox" id="p-all"><span data-t="prod.all"></span></label><span class="grow"></span><span class="hint" id="p-count"></span></div>
+        <div class="pgrid" id="p-grid" role="group"></div>
+        <div class="hint" id="p-where"></div>
+      </div>
+    </div>
+    <div class="dlg-foot"><button class="btn" id="prod-cancel" type="button" data-t="btn.cancel"></button><span class="grow"></span><button class="btn primary" id="prod-go" type="button"></button></div>
+  </div>
+
+  <!-- a part of a video (2.4) -->
+  <div class="dlg wide" id="dlg-clip" role="dialog" aria-modal="true" aria-labelledby="clip-title">
+    <div class="dlg-head"><h2 id="clip-title" data-t="clip.title"></h2><button class="xbtn" type="button" id="clip-x" data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body">
+      <div id="c-ask">
+        <div class="field">
+          <label for="c-input" data-t="clip.label"></label>
+          <div class="inline"><input id="c-input" type="text" dir="ltr" spellcheck="false" autocomplete="off" placeholder="https://"><button class="btn" id="c-paste" type="button" data-t="add.paste"></button></div>
+          <small data-t="clip.hint"></small>
+        </div>
+      </div>
+      <div id="c-loading" hidden><div class="busy-line"><span class="spinner"></span><span id="c-loading-txt"></span></div></div>
+      <div id="c-error" hidden><div class="err-box" id="c-err"></div></div>
+      <div id="c-edit" hidden>
+        <div class="cplayer" id="c-player">
+          <video id="c-video" preload="metadata" playsinline></video>
+          <audio id="c-audio" preload="metadata"></audio>
+          <img class="poster" id="c-poster" alt="" referrerpolicy="no-referrer" hidden>
+          <span class="pwait" id="c-wait" hidden><span class="spinner"></span></span>
+          <button class="pbig" id="c-big" type="button" data-ta="aria-label:clip.play"></button>
+          <p class="pnote" id="c-pnote" hidden></p>
+        </div>
+        <p class="ctitle" id="c-title"></p>
+        <div class="tl" id="c-tl" dir="ltr">
+          <div class="tl-track" id="c-track"><div class="tl-sel" id="c-sel"></div><div class="tl-head" id="c-head"></div></div>
+          <button class="tl-h" id="c-hs" type="button" data-ta="aria-label:clip.start"></button>
+          <button class="tl-h" id="c-he" type="button" data-ta="aria-label:clip.end"></button>
+        </div>
+        <div class="tl-times" dir="ltr"><span>0:00</span><span class="now" id="c-now"></span><span id="c-dur"></span></div>
+        <div class="cut-row" id="c-cut">
+          <div class="cut-t"><span class="lab" data-t="clip.start"></span><div class="line"><div class="cstep" dir="ltr"><button type="button" class="st-b" data-cstep="s,-1" data-ta="aria-label:clip.less">−</button><output id="c-st"></output><button type="button" class="st-b" data-cstep="s,1" data-ta="aria-label:clip.more">+</button></div><button class="btn small" id="c-st-here" type="button" data-t="clip.startHere"></button></div></div>
+          <div class="cut-t"><span class="lab" data-t="clip.end"></span><div class="line"><div class="cstep" dir="ltr"><button type="button" class="st-b" data-cstep="e,-1" data-ta="aria-label:clip.less">−</button><output id="c-en"></output><button type="button" class="st-b" data-cstep="e,1" data-ta="aria-label:clip.more">+</button></div><button class="btn small" id="c-en-here" type="button" data-t="clip.endHere"></button></div></div>
+          <button class="btn primary" id="c-playpart" type="button"></button>
+        </div>
+        <div class="kindrow">
+          <div class="kind" id="c-kind" role="radiogroup" data-ta="aria-label:kind.aria">
+            <button type="button" role="radio" data-kind="video" aria-checked="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.5 9.3v5.4l4.3-2.7z" fill="currentColor"/></svg><span data-t="kind.video"></span></button>
+            <button type="button" role="radio" data-kind="audio" aria-checked="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg><span data-t="kind.audio"></span></button>
+          </div>
+          <button type="button" class="nmswitch" id="c-nomusic" role="switch" aria-checked="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/></svg><span data-t="v.noMusic"></span><span class="track" aria-hidden="true"></span></button>
+        </div>
+        <div class="chips" id="c-q" role="radiogroup" data-ta="aria-label:v.quality"></div>
+        <div class="hint" id="c-where"></div>
+      </div>
+    </div>
+    <div class="dlg-foot"><button class="btn" id="clip-cancel" type="button" data-t="btn.cancel"></button><span class="grow"></span><button class="btn primary" id="clip-go" type="button"></button></div>
   </div>
 
   <!-- settings -->
@@ -846,6 +974,8 @@ body.mini-mode .mini { display: block; width: 100%; flex: 0 1 auto; min-height: 
           <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f4"></span></li>
           <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f6"></span></li>
           <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f7"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f8"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f9"></span></li>
           <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f5"></span></li>
         </ul>
       </div>
@@ -1023,6 +1153,30 @@ const L = {
     'about.f5': 'بالعربية والإنجليزية، بدون إعلانات، وبدون حسابات أو تسجيل دخول.',
     'about.f6': 'إزالة الموسيقى من الفيديوهات والصوتيات مع إبقاء الكلام والغناء: عند التنزيل، أو لملفات على الكمبيوتر.',
     'about.f7': 'تنزيل كورس أو قائمة تشغيل كاملة من يوتيوب مرة واحدة، مرقّمة بترتيبها في مجلد واحد.',
+    'about.f8': 'تنزيل جزء فقط من أي فيديو: تشغّله، وتحدد بدايته ونهايته، ثم تنزّله فيديو أو MP3.',
+    'about.f9': 'تنزيل صور وفيديوهات المنتجات من أمازون وعلي بابا وعلي إكسبريس ونون وتيمو بحجمها الأصلي، في مجلد باسم المنتج.',
+    'tb.clip': 'جزء من فيديو', 'tb.clipTitle': 'تنزيل جزء فقط من فيديو أو من صوته',
+    'tb.prod': 'صور منتج', 'tb.prodTitle': 'تنزيل صور وفيديوهات منتج من أمازون وعلي بابا وعلي إكسبريس ونون وتيمو',
+    'v.clip': 'جزء فقط',
+    'clip.title': 'تنزيل جزء من فيديو', 'clip.label': 'رابط الفيديو', 'clip.hint': 'من يوتيوب أو فيسبوك أو إنستجرام أو تيك توك أو إكس، أو أي موقع فيه فيديو.',
+    'clip.read': 'متابعة', 'clip.loading': 'جارٍ قراءة الفيديو…', 'clip.loadingSite': 'جارٍ قراءة الفيديو من {site}…',
+    'clip.play': 'تشغيل', 'clip.pause': 'إيقاف مؤقت', 'clip.start': 'البداية', 'clip.end': 'النهاية', 'clip.less': 'ثانية أقل', 'clip.more': 'ثانية أكثر',
+    'clip.startHere': 'البداية هنا', 'clip.endHere': 'النهاية هنا', 'clip.playPart': 'تشغيل الجزء', 'clip.stopPart': 'إيقاف',
+    'clip.go': 'تنزيل الجزء ({len})', 'clip.goAudio': 'تنزيل صوت الجزء ({len})',
+    'clip.where': 'يُحفظ في: {folder} • الحجم تقريبي',
+    'clip.noPreview': 'لا يمكن عرض هذا الفيديو هنا، لكن يمكنك تحديد البداية والنهاية بالأزرار.',
+    'clip.previewFailed': 'تعذّر تشغيل الفيديو هنا، لكن يمكنك تحديد البداية والنهاية بالأزرار، وسيُنزَّل الجزء كما هو.',
+    'clip.noDuration': 'لا يُعرف طول هذا الفيديو، لذلك لا يمكن اختيار جزء منه.',
+    'clip.list': 'هذا الرابط لقائمة تشغيل. افتح الفيديو الذي تريد جزءًا منه وانسخ رابطه.',
+    'clip.added': 'بدأ تنزيل الجزء',
+    'st.clip': 'جارٍ قص الجزء…', 'det.clip': 'الجزء',
+    'prod.title': 'صور وفيديوهات منتج', 'prod.label': 'رابط المنتج',
+    'prod.hint': 'من أمازون أو علي بابا أو علي إكسبريس أو نون أو تيمو. إن لم يسمح الموقع، فافتح المنتج في المتصفح واضغط زر HELINK هناك.',
+    'prod.read': 'متابعة', 'prod.loading': 'جارٍ قراءة صفحة المنتج من {site}…', 'prod.all': 'تحديد الكل',
+    'prod.count': '{n} محدد من {total}', 'prod.go': 'تنزيل المحدد ({n})', 'prod.none': 'اختر صورة أو فيديو واحدًا على الأقل',
+    'prod.where': 'تُحفظ في: {folder} • الصور بحجمها الأصلي', 'prod.video': 'فيديو', 'prod.stream': 'فيديو (بث)',
+    'prod.added': 'بدأ تنزيل {n} في مجلد المنتج', 'prod.open': 'فتح المجلد', 'prod.untitled': 'منتج',
+    'prod.useBrowser': 'كيف أستخدم زر المتصفح؟',
     'about.ownerTitle': 'عن المالك', 'about.photoAlt': 'صورة علي حسام', 'about.ownerName': 'علي حسام',
     'about.ownerRole': 'صانع البرنامج ومالك العلامة التجارية <bdi dir="ltr">HELINK</bdi>', 'about.coName': 'مالك شركة <b>هلال تكنولوجي</b> (Helal Technology)',
     'about.coWhat': 'لبيع إكسسوارات الهاتف المحمول والكمبيوتر', 'about.contactTitle': 'للتواصل',
@@ -1147,6 +1301,30 @@ const L = {
     'about.f5': 'In Arabic and English, no ads, no accounts, no sign-in.',
     'about.f6': 'Removes the music from videos and audio, keeping speech and singing: while downloading, or for files on your computer.',
     'about.f7': 'Downloads a whole YouTube course or playlist at once, numbered in order in one folder.',
+    'about.f8': 'Downloads just a part of any video: play it, set where it starts and ends, then save it as video or MP3.',
+    'about.f9': 'Downloads the photos and videos of products on Amazon, Alibaba, AliExpress, Noon and Temu at full size, in a folder named after the product.',
+    'tb.clip': 'Part of a video', 'tb.clipTitle': 'Download only a part of a video, or of its sound',
+    'tb.prod': 'Product photos', 'tb.prodTitle': 'Download the photos and videos of a product on Amazon, Alibaba, AliExpress, Noon or Temu',
+    'v.clip': 'A part only',
+    'clip.title': 'Download a part of a video', 'clip.label': 'The video\'s link', 'clip.hint': 'From YouTube, Facebook, Instagram, TikTok, X, or any site with a video.',
+    'clip.read': 'Continue', 'clip.loading': 'Reading the video…', 'clip.loadingSite': 'Reading the video from {site}…',
+    'clip.play': 'Play', 'clip.pause': 'Pause', 'clip.start': 'Start', 'clip.end': 'End', 'clip.less': 'One second less', 'clip.more': 'One second more',
+    'clip.startHere': 'Start here', 'clip.endHere': 'End here', 'clip.playPart': 'Play the part', 'clip.stopPart': 'Stop',
+    'clip.go': 'Download the part ({len})', 'clip.goAudio': 'Download the part\'s sound ({len})',
+    'clip.where': 'Saved in: {folder} • sizes are approximate',
+    'clip.noPreview': "This video can't be shown here, but you can set its start and end with the buttons.",
+    'clip.previewFailed': "The video couldn't play here, but you can set the start and end with the buttons, and the part is downloaded all the same.",
+    'clip.noDuration': "This video's length isn't known, so a part of it can't be chosen.",
+    'clip.list': 'This link is a playlist. Open the video you want a part of and copy its link.',
+    'clip.added': 'Downloading the part',
+    'st.clip': 'Cutting the part…', 'det.clip': 'Part',
+    'prod.title': 'A product\'s photos and videos', 'prod.label': 'The product\'s link',
+    'prod.hint': 'From Amazon, Alibaba, AliExpress, Noon or Temu. If the site won\'t allow it, open the product in your browser and use the HELINK button there.',
+    'prod.read': 'Continue', 'prod.loading': 'Reading the product page from {site}…', 'prod.all': 'Select all',
+    'prod.count': '{n} of {total} selected', 'prod.go': 'Download selected ({n})', 'prod.none': 'Choose at least one photo or video',
+    'prod.where': 'Saved in: {folder} • photos at full size', 'prod.video': 'Video', 'prod.stream': 'Video (stream)',
+    'prod.added': 'Downloading {n} into the product\'s folder', 'prod.open': 'Open the folder', 'prod.untitled': 'Product',
+    'prod.useBrowser': 'How do I use the browser button?',
     'about.ownerTitle': 'About the owner', 'about.photoAlt': 'Photo of Ali Hossam', 'about.ownerName': 'Ali Hossam',
     'about.ownerRole': 'Creator of the app and owner of the <bdi>HELINK</bdi> trademark', 'about.coName': 'Owner of <b>Helal Technology</b> (هلال تكنولوجي)',
     'about.coWhat': 'Mobile phone and computer accessories', 'about.contactTitle': 'Contact',
@@ -1182,7 +1360,8 @@ const API = ['init', 'ready', 'setup', 'setLang', 'paste', 'fetch', 'cancelFetch
   'deleteTask', 'remove', 'clearFinished', 'tasks', 'addLink', 'confirmFile', 'cancelFile', 'pendingFiles', 'useMedia', 'settings',
   'setSettings', 'dialogDone', 'expand', 'hide', 'exit', 'copyText', 'openFile', 'showInFolder', 'openPage', 'openFolder', 'pickFolder',
   'pickDir', 'contact', 'browsers', 'openBrowser', 'openExtFolder', 'confirmClose', 'log', 'removeMusic', 'pickSepFiles',
-  'showMini', 'miniFit', 'pong', 'downloadList', 'update', 'checkUpdate', 'updateNow', 'updateLater', 'cancelUpdate'];
+  'showMini', 'miniFit', 'pong', 'downloadList', 'update', 'checkUpdate', 'updateNow', 'updateLater', 'cancelUpdate',
+  'clipPreview', 'clipClosed', 'clipDownload', 'readProduct', 'productDownload'];
 let api;
 if (real) {
   api = {};
@@ -1310,6 +1489,7 @@ const S = {
   pending: [], filePid: '', fileFolder: null, fileCat: '', answered: new Set(),
   video: null, infos: new Map(), compact: false, dialogs: [], setup: null, setupSize: '', missing: [], extSeen: -1,
   sepReady: false, sepSize: '', noMusic: false,
+  products: new Map(), // the "product" events, by id (product.go)
   mini: [], miniMode: false, miniRows: new Map(), // the downloads started from the browser's menu
 };
 
@@ -1363,6 +1543,7 @@ function statusText(t) {
     case 'convert': return T('st.convert');
     case 'finish': return T('st.finish');
     case 'save': return T('st.save');
+    case 'clip': return T('st.clip');
     case 'sepwait': return T('st.sepwait');
     case 'sepmodel': return T('st.sepmodel');
     case 'separate': return T('st.separate');
@@ -1412,6 +1593,7 @@ function fillRow(r, t) {
   r.name.title = nameOf(t);
   const sub = [];
   const label = t.label && (t.type !== 'file' || t.label.length <= 5) ? t.label : '';
+  if (t.clip) sub.push('✂ ' + t.clip);
   if (t.type === 'sep') sub.push(t.state === 'done' && t.result ? t.result.folderLabel : t.srcFolderLabel);
   else if (t.siteName) sub.push(t.siteName);
   if (t.type === 'file' && t.state !== 'done' && t.resumable === false && t.state !== 'running' && t.done > 0) sub.push(T('st.noResume'));
@@ -1638,6 +1820,7 @@ function detailValues(t) {
   const running = t.state === 'running';
   return {
     'det.size': (t.result && t.result.sizeText) || t.totalText || t.sizeText || '',
+    'det.clip': t.clip || '',
     'det.done': t.state !== 'done' && t.doneText ? t.doneText + (t.percent > 0 ? ' (' + Math.floor(t.percent) + '%)' : '') : '',
     'det.speed': running ? t.speedText || '—' : '',
     'det.eta': running ? t.etaText || '—' : '',
@@ -1852,6 +2035,8 @@ function dismissTop() {
   if (!id) return;
   if (id === 'dlg-file') cancelFile();
   else if (id === 'dlg-video') cancelVideo();
+  else if (id === 'dlg-clip') closeClip();
+  else if (id === 'dlg-product') closeProduct();
   else if (id === 'dlg-update') { if (S.upd.state === 'downloading') closeDialog(id); else updateLater(); }
   else if (id === 'dlg-close') closeDialog(id);
   else closeDialog(id);
@@ -1890,6 +2075,7 @@ async function submitAdd() {
   try { r = (await api.addLink(text)) || {}; } catch (_) {}
   if (r.error) { addFailed(r.error); return; }
   if (r.kind === 'media') { openVideo(r.seq, text); closeDialog('dlg-add'); return; }
+  if (r.kind === 'product') { openProduct(r.id); closeDialog('dlg-add'); return; }
   if (r.kind === 'file' && !dropped.has(r.pid) && !S.answered.has(r.pid)) addPid = r.pid;
 }
 function addFailed(e) {
@@ -2051,6 +2237,7 @@ function videoView() {
   $('v-error').hidden = v.status !== 'error';
   $('video-retry').hidden = !(v.status === 'error' && v.error && v.error.retry !== false && v.lastLink);
   $('video-go').hidden = v.status !== 'done' && v.status !== 'list';
+  $('video-clip').hidden = v.status !== 'done';
   if (v.status !== 'list') $('video-go').disabled = false;
   $('video-title').textContent = T(v.status === 'list' || (v.status === 'loading' && v.isList) ? 'l.title' : 'video.title');
   $('v-inlist').hidden = !(v.status === 'done' && v.info && v.info.listUrl);
@@ -2092,6 +2279,7 @@ function keepInfo(d) {
   while (S.infos.size > 4) S.infos.delete(S.infos.keys().next().value);
 }
 function onInfo(d) {
+  if (C && d.seq === C.seq) { onClipInfo(d); return; }
   const v = S.video;
   if (!v || d.seq !== v.seq) return;
   if (d.siteName) v.siteName = d.siteName;
@@ -2714,7 +2902,7 @@ handlers.browserTask = (d) => {
   else if (!S.compact) requestAnimationFrame(() => flashRow(d.id)); // the full window shows it in the list
 };
 
-const smallDialogs = ['dlg-add', 'dlg-file', 'dlg-video'];
+const smallDialogs = ['dlg-add', 'dlg-file', 'dlg-video', 'dlg-product'];
 function onMode(d) {
   const wasMini = S.miniMode;
   S.compact = !!d.compact;
@@ -2835,10 +3023,561 @@ addEventListener('drop', (e) => {
   else if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) toast(T('toast.dropFiles'));
 });
 
+// ------------------------------------------------------------ a part of a video (2.4)
+// The video plays here (through HELINK's small server); the part is set on its timeline
+// (handles, -/+ a second, "start/end here"), played, then downloaded as video or MP3.
+let C = null;
+const cv = $('c-video'), ca = $('c-audio');
+const MIN_PART = 1;
+function clockText(t, tenths) {
+  t = Math.max(0, t || 0);
+  const whole = Math.floor(t + 1e-4);
+  const h = Math.floor(whole / 3600), m = Math.floor((whole % 3600) / 60), sec = whole % 60;
+  let out = (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(sec).padStart(2, '0');
+  if (tenths) out += '.' + Math.floor((t - whole) * 10 + 1e-4);
+  return out;
+}
+function openClip(fromVideo) {
+  if (C) closeClip(true);
+  C = { seq: 0, status: 'ask', info: null, item: 0, kind: S.lastKind === 'audio' ? 'audio' : 'video', sel: {}, start: 0, end: 0, dur: 0, now: 0,
+    mode: '', part: false, failed: false, siteName: '', error: null, link: '' };
+  $('c-err').hidden = true;
+  if (fromVideo && S.video && S.video.info) {
+    const v = S.video;
+    Object.assign(C, { seq: v.seq, siteName: v.siteName, item: v.item, kind: v.kind, sel: Object.assign({}, v.sel), link: v.lastLink });
+    clearTimeout(slowTimer);
+    S.video = null;
+    openDialog('dlg-clip'); // before the video window closes (the small window would close in between)
+    closeDialog('dlg-video');
+    clipReady(v.info);
+    return;
+  }
+  $('c-input').value = '';
+  clipView();
+  openDialog('dlg-clip');
+}
+function clipView() {
+  if (!C) return;
+  const st = C.status;
+  $('c-ask').hidden = !(st === 'ask' || st === 'error');
+  $('c-loading').hidden = st !== 'loading';
+  $('c-error').hidden = st !== 'error';
+  $('c-edit').hidden = st !== 'edit';
+  $('c-input').readOnly = st === 'loading';
+  const go = $('clip-go');
+  go.hidden = st === 'loading';
+  go.disabled = false;
+  if (st === 'edit') {
+    const len = clockText(C.end - C.start);
+    go.textContent = T(C.kind === 'audio' ? 'clip.goAudio' : 'clip.go', { len });
+    go.disabled = !(C.dur > 0) || !clipOption();
+  } else go.textContent = T('clip.read');
+  if (st === 'loading') $('c-loading-txt').textContent = C.siteName ? T('clip.loadingSite', { site: C.siteName }) : T('clip.loading');
+  if (st === 'error') {
+    const box = errorBox(C.error || {}, null, 'err-box');
+    box.id = 'c-err';
+    $('c-err').replaceWith(box);
+  }
+}
+async function submitClip() {
+  if (!C) return;
+  if (C.status === 'edit') { downloadClip(); return; }
+  const text = $('c-input').value.trim();
+  if (!text || C.status === 'loading') return;
+  C.status = 'loading';
+  C.link = text;
+  C.siteName = '';
+  clipView();
+  let seq = 0;
+  try { seq = await api.fetch(text); } catch (_) {}
+  if (!C || C.link !== text) return;
+  C.seq = seq;
+  for (const ev of S.infos.get(seq) || []) onClipInfo(ev);
+}
+function onClipInfo(d) {
+  if (!C || d.seq !== C.seq) return;
+  if (d.siteName) C.siteName = d.siteName;
+  if (d.status === 'loading' || d.status === 'updating') { if (C.status !== 'edit') { C.status = 'loading'; clipView(); } return; }
+  if (d.status === 'error') { C.status = 'error'; C.error = d.error; clipView(); return; }
+  if (d.status === 'list') { C.status = 'error'; C.error = { title: T('clip.list'), retry: false }; clipView(); return; }
+  if (d.status === 'done') clipReady(d);
+}
+function clipCur() { return C && C.info && C.info.items[C.item]; }
+async function clipReady(info) {
+  C.info = info;
+  if (!info.items[C.item]) C.item = 0;
+  const it = clipCur();
+  for (const k of ['video', 'audio']) if (!C.sel[k] || !it.options.some((o) => o.key === C.sel[k])) C.sel[k] = recommended(it, k);
+  if (!hasKind(it, C.kind)) C.kind = hasKind(it, 'video') ? 'video' : 'audio';
+  C.status = 'edit';
+  C.dur = it.meta.duration || 0;
+  C.start = 0;
+  C.end = C.dur ? Math.min(C.dur, 30) : 0;
+  C.now = 0;
+  C.part = false;
+  C.failed = false;
+  $('c-title').textContent = it.meta.title || T('v.untitled');
+  $('c-title').title = it.meta.title || '';
+  stopClipMedia();
+  C.mode = '';
+  showPoster(it.meta.thumbnail);
+  $('c-pnote').hidden = true;
+  renderClipKind();
+  renderClipQ();
+  renderTimeline();
+  clipView();
+  const mine = C;
+  let r = {};
+  try { r = (await api.clipPreview(C.item)) || {}; } catch (_) {}
+  if (C !== mine) return;
+  if (r.duration && !C.dur) { C.dur = r.duration; C.end = Math.min(C.dur, 30); }
+  loadClipMedia(r);
+  renderTimeline();
+  clipView();
+}
+function showPoster(src) {
+  const p = $('c-poster');
+  if (src) { p.src = src; p.hidden = false; } else { p.removeAttribute('src'); p.hidden = true; }
+}
+function loadClipMedia(r) {
+  C.mode = r.kind === 'av' || r.kind === 'split' || r.kind === 'audio' ? r.kind : '';
+  cv.hidden = !(C.mode === 'av' || C.mode === 'split');
+  if (C.mode === 'av' || C.mode === 'split') { cv.src = r.video; $('c-poster').hidden = true; }
+  if (C.mode === 'split' || C.mode === 'audio') ca.src = r.audio;
+  if (!C.mode) { $('c-pnote').textContent = T('clip.noPreview'); $('c-pnote').hidden = false; }
+  $('c-big').hidden = !C.mode;
+  renderPlay();
+}
+function stopClipMedia() {
+  for (const m of [cv, ca]) {
+    try { m.pause(); } catch (_) {}
+    m.removeAttribute('src');
+    try { m.load(); } catch (_) {}
+  }
+  $('c-wait').hidden = true;
+  $('c-player').classList.remove('playing');
+}
+function closeClip(keep) {
+  if (!C) { closeDialog('dlg-clip'); return; }
+  stopClipMedia();
+  api.clipClosed();
+  if (C.status === 'loading' && !keep) api.cancelFetch(false);
+  C = null;
+  closeDialog('dlg-clip');
+}
+function lead() { return C && C.mode === 'audio' ? ca : cv; }
+function playing() { return !!(C && C.mode && !lead().paused); }
+function stopPreview() {
+  if (C) C.part = false;
+  try { cv.pause(); } catch (_) {}
+  try { ca.pause(); } catch (_) {}
+  renderPlay();
+}
+async function playPreview() {
+  if (!C || !C.mode || C.failed) return;
+  const m = lead();
+  try {
+    if (C.mode === 'split') { ca.currentTime = cv.currentTime; ca.play().catch(() => {}); }
+    await m.play();
+  } catch (_) { /* stopped, or not playable */ }
+  renderPlay();
+}
+function seekTo(t) {
+  if (!C) return;
+  if (!C.mode || C.failed) { C.now = t; renderHead(); return; }
+  try {
+    lead().currentTime = t;
+    if (C.mode === 'split') ca.currentTime = t;
+  } catch (_) {}
+  renderHead();
+}
+function nowAt() { return C && C.mode && !C.failed ? lead().currentTime || 0 : (C && C.now) || 0; }
+function togglePlay() {
+  if (playing()) { stopPreview(); return; }
+  C.part = false;
+  playPreview();
+}
+function playPart() {
+  if (C.part && playing()) { stopPreview(); return; }
+  seekTo(C.start);
+  C.part = true;
+  playPreview();
+}
+const PLAY_SVG = '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>';
+const PAUSE_SVG = '<rect x="6.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor" stroke="none"/>';
+function renderPlay() {
+  if (!C) return;
+  const on = playing();
+  $('c-player').classList.toggle('playing', on);
+  $('c-big').replaceChildren(svg(on ? PAUSE_SVG : PLAY_SVG, 30));
+  $('c-big').setAttribute('aria-label', T(on ? 'clip.pause' : 'clip.play'));
+  const pp = $('c-playpart');
+  pp.hidden = !C.mode || C.failed || !(C.dur > 0);
+  pp.replaceChildren(svg(on && C.part ? PAUSE_SVG : PLAY_SVG, 16), el('span', null, ' ' + T(on && C.part ? 'clip.stopPart' : 'clip.playPart')));
+}
+function previewFailed() {
+  if (!C || !C.mode || C.failed) return;
+  C.failed = true;
+  $('c-wait').hidden = true;
+  $('c-big').hidden = true;
+  cv.hidden = true;
+  showPoster((clipCur() || { meta: {} }).meta.thumbnail);
+  $('c-pnote').textContent = T('clip.previewFailed');
+  $('c-pnote').hidden = false;
+  renderPlay();
+}
+for (const m of [cv, ca]) {
+  m.addEventListener('play', renderPlay);
+  m.addEventListener('pause', () => { if (C && C.mode === 'split' && m === cv) ca.pause(); renderPlay(); });
+  m.addEventListener('waiting', () => { if (C && m === lead()) $('c-wait').hidden = false; });
+  m.addEventListener('playing', () => { $('c-wait').hidden = true; });
+  m.addEventListener('seeked', () => { $('c-wait').hidden = true; renderHead(); });
+  m.addEventListener('error', () => { if (C && m.getAttribute('src') && (m === lead() || C.mode === 'split')) previewFailed(); });
+  m.addEventListener('timeupdate', () => {
+    if (!C || m !== lead()) return;
+    if (C.part && m.currentTime >= C.end - 0.03) { stopPreview(); seekTo(C.end); }
+    if (C.mode === 'split' && !cv.paused && Math.abs(ca.currentTime - cv.currentTime) > 0.3) ca.currentTime = cv.currentTime;
+    renderHead();
+  });
+}
+cv.addEventListener('loadedmetadata', () => {
+  if (C && !C.dur && isFinite(cv.duration) && cv.duration > 0) { C.dur = cv.duration; C.end = Math.min(C.dur, 30); renderTimeline(); clipView(); }
+});
+ca.addEventListener('loadedmetadata', () => {
+  if (C && !C.dur && isFinite(ca.duration) && ca.duration > 0) { C.dur = ca.duration; C.end = Math.min(C.dur, 30); renderTimeline(); clipView(); }
+});
+// The part's end, to the frame: checked often while it plays.
+(function watchEnd() {
+  if (C && C.part && playing() && lead().currentTime >= C.end - 0.03) { stopPreview(); seekTo(C.end); }
+  requestAnimationFrame(watchEnd);
+})();
+$('c-big').addEventListener('click', togglePlay);
+$('c-playpart').addEventListener('click', playPart);
+
+function pctOf(t) { return C && C.dur ? Math.max(0, Math.min(100, t / C.dur * 100)) : 0; }
+function renderHead() {
+  if (!C) return;
+  $('c-head').style.left = pctOf(nowAt()) + '%';
+  $('c-now').textContent = C.dur ? clockText(nowAt()) : '';
+}
+function renderTimeline() {
+  if (!C) return;
+  const ok = C.dur > 0;
+  $('c-tl').hidden = !ok;
+  $('c-cut').hidden = !ok;
+  document.querySelector('#dlg-clip .tl-times').hidden = !ok;
+  if (!ok) { $('c-pnote').textContent = T('clip.noDuration'); $('c-pnote').hidden = false; renderPlay(); return; }
+  $('c-sel').style.left = pctOf(C.start) + '%';
+  $('c-sel').style.width = (pctOf(C.end) - pctOf(C.start)) + '%';
+  $('c-hs').style.left = pctOf(C.start) + '%';
+  $('c-he').style.left = pctOf(C.end) + '%';
+  $('c-st').textContent = clockText(C.start, true);
+  $('c-en').textContent = clockText(C.end, true);
+  $('c-dur').textContent = clockText(C.dur);
+  for (const st of document.querySelectorAll('#dlg-clip .st-b')) {
+    const [w, d] = st.dataset.cstep.split(',');
+    const v = w === 's' ? C.start : C.end;
+    st.disabled = d < 0 ? (w === 's' ? v <= 0 : v - 1 < C.start + MIN_PART) : (w === 's' ? v + 1 > C.end - MIN_PART : v >= C.dur);
+  }
+  renderHead();
+  renderPlay();
+  renderClipQ();
+}
+function setStart(t) { C.start = Math.max(0, Math.min(t, C.end - MIN_PART)); C.part = false; renderTimeline(); clipView(); }
+function setEnd(t) { C.end = Math.min(C.dur, Math.max(t, C.start + MIN_PART)); C.part = false; renderTimeline(); clipView(); }
+function timeAtX(x) {
+  const r = $('c-track').getBoundingClientRect();
+  return Math.max(0, Math.min(1, (x - r.left) / r.width)) * C.dur;
+}
+let seekTimer = 0;
+function previewFrame(t) {
+  // While a handle moves, the picture follows it (not too often).
+  if (seekTimer) return;
+  seekTimer = setTimeout(() => { seekTimer = 0; }, 120);
+  if (playing()) stopPreview();
+  seekTo(t);
+}
+for (const [id, isStart] of [['c-hs', true], ['c-he', false]]) {
+  const h = $(id);
+  h.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    h.setPointerCapture(e.pointerId);
+    h.classList.add('drag');
+  });
+  h.addEventListener('pointermove', (e) => {
+    if (!C || !h.hasPointerCapture(e.pointerId)) return;
+    const t = Math.round(timeAtX(e.clientX) * 10) / 10;
+    if (isStart) setStart(t); else setEnd(t);
+    previewFrame(isStart ? C.start : C.end);
+  });
+  const up = (e) => {
+    if (!h.hasPointerCapture(e.pointerId)) return;
+    h.releasePointerCapture(e.pointerId);
+    h.classList.remove('drag');
+    clearTimeout(seekTimer);
+    seekTimer = 0;
+    if (C) seekTo(isStart ? C.start : C.end);
+  };
+  h.addEventListener('pointerup', up);
+  h.addEventListener('pointercancel', up);
+  h.addEventListener('keydown', (e) => {
+    const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!step || !C) return;
+    e.preventDefault();
+    if (isStart) { setStart(C.start + step); seekTo(C.start); } else { setEnd(C.end + step); seekTo(C.end); }
+  });
+}
+$('c-tl').addEventListener('pointerdown', (e) => {
+  if (!C || e.target.classList.contains('tl-h')) return;
+  seekTo(timeAtX(e.clientX));
+});
+// The -/+ buttons: a second each; held down, they keep going.
+for (const b of document.querySelectorAll('#dlg-clip .st-b')) {
+  let rep = 0, wait = 0;
+  const once = () => {
+    if (!C) return;
+    const [w, d] = b.dataset.cstep.split(',');
+    if (w === 's') { setStart(Math.round(C.start) + Number(d)); seekTo(C.start); } else { setEnd(Math.round(C.end) + Number(d)); seekTo(C.end); }
+  };
+  const stop = () => { clearTimeout(wait); clearInterval(rep); wait = rep = 0; };
+  b.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; e.preventDefault(); once(); wait = setTimeout(() => { rep = setInterval(once, 110); }, 450); });
+  b.addEventListener('pointerup', stop);
+  b.addEventListener('pointerleave', stop);
+  b.addEventListener('pointercancel', stop);
+  b.addEventListener('click', (e) => { if (e.detail === 0) once(); }); // the keyboard
+}
+$('c-st-here').addEventListener('click', () => { if (C) setStart(Math.round(nowAt() * 10) / 10); });
+$('c-en-here').addEventListener('click', () => { if (C) setEnd(Math.round(nowAt() * 10) / 10); });
+
+function renderClipKind() {
+  const it = clipCur();
+  for (const b of $('c-kind').children) { b.hidden = !hasKind(it, b.dataset.kind); b.setAttribute('aria-checked', String(b.dataset.kind === C.kind)); }
+}
+for (const b of $('c-kind').children) b.addEventListener('click', () => { if (C && C.kind !== b.dataset.kind) { C.kind = b.dataset.kind; renderClipKind(); renderClipQ(); clipView(); } });
+function clipShare() { return C && C.dur ? Math.max(0, (C.end - C.start) / C.dur) : 0; }
+function clipOption() { const it = clipCur(); return it && it.options.find((o) => o.key === C.sel[C.kind]); }
+function renderClipQ() {
+  const it = clipCur();
+  if (!it) return;
+  const share = clipShare();
+  $('c-q').replaceChildren(...it.options.filter((o) => o.kind === C.kind).map((o) => {
+    const size = o.sizeBytes > 0 && share ? '≈ ' + humanSize(o.sizeBytes * share) : '';
+    const b = el('button', { class: 'chip', type: 'button', role: 'radio', 'aria-checked': String(o.key === C.sel[C.kind]) },
+      el('span', { dir: 'ltr' }, o.label), size ? el('small', null, size) : null);
+    b.addEventListener('click', () => { C.sel[C.kind] = o.key; renderClipQ(); clipView(); });
+    return b;
+  }));
+  const folders = S.settings && S.settings.categoryDirs;
+  $('c-where').textContent = T('clip.where', { folder: S.saveDirLabel + (folders ? (LANG === 'en' ? ' › ' : ' ← ') + (C.kind === 'audio' ? 'Music' : 'Video') : '') });
+  const on = !!S.noMusic;
+  $('c-nomusic').setAttribute('aria-checked', String(on));
+}
+$('c-nomusic').addEventListener('click', () => { S.noMusic = !S.noMusic; if (C) renderClipQ(); });
+async function downloadClip() {
+  const o = clipOption();
+  if (!C || !o || !(C.dur > 0)) return;
+  stopPreview();
+  const go = $('clip-go');
+  go.disabled = true;
+  S.lastKind = C.kind;
+  let r = {};
+  try { r = (await api.clipDownload(C.item, o.key, C.start, C.end, !!S.noMusic)) || {}; } catch (_) {}
+  if (!C) return;
+  go.disabled = false;
+  if (r.error) { toast(r.error.title || ''); return; }
+  if (!r.id) return;
+  closeClip(true);
+  toast(r.existing ? T('toast.exists') : T('clip.added'));
+  setTimeout(() => flashRow(r.id), 120);
+}
+$('clip-btn').addEventListener('click', () => openClip(false));
+$('clip-go').addEventListener('click', submitClip);
+$('clip-cancel').addEventListener('click', () => closeClip(false));
+$('clip-x').addEventListener('click', () => closeClip(false));
+$('c-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitClip(); });
+$('c-paste').addEventListener('click', async () => {
+  let t = '';
+  try { t = ((await api.paste()) || '').trim(); } catch (_) {}
+  if (!t) { toast(T('add.nothing')); return; }
+  $('c-input').value = t;
+  if (C && C.status !== 'loading') { C.status = 'ask'; submitClip(); }
+});
+$('video-clip').addEventListener('click', () => openClip(true));
+
+// ------------------------------------------------------------ a product's photos and videos (2.4)
+// From a pasted link (HELINK reads the page) or from the browser (the extension sends the
+// page open there). All are chosen at first; a click on one leaves it out.
+let P = null;
+function openProduct(id, from) {
+  if (!P || P.id !== id) P = { id: id || 0, status: id ? 'loading' : 'ask', items: [], picked: new Set(), title: '', siteName: '', site: '' };
+  $('p-input').value = $('p-input').value && !id ? $('p-input').value : '';
+  productView();
+  if (!S.dialogs.includes('dlg-product')) openDialog('dlg-product');
+  for (const ev of S.products.get(id) || []) onProduct(ev);
+}
+function productView() {
+  if (!P) return;
+  const st = P.status;
+  $('p-ask').hidden = !(st === 'ask' || st === 'error');
+  $('p-loading').hidden = st !== 'loading';
+  $('p-error').hidden = st !== 'error';
+  $('p-ready').hidden = st !== 'ready';
+  $('p-input').readOnly = st === 'loading';
+  const go = $('prod-go');
+  go.hidden = st === 'loading';
+  if (st === 'ready') {
+    go.textContent = T('prod.go', { n: P.picked.size });
+    go.disabled = P.picked.size === 0;
+  } else { go.textContent = T('prod.read'); go.disabled = false; }
+  if (st === 'loading') $('p-loading-txt').textContent = T('prod.loading', { site: P.siteName || (LANG === 'en' ? 'the site' : 'الموقع') });
+  if (st === 'error') {
+    const acts = [];
+    const box = errorBox(P.error || {}, acts, 'err-box');
+    box.id = 'p-err';
+    $('p-err').replaceWith(box);
+  }
+}
+const PROD_SITES = { amazon: ['أمازون', 'Amazon'], alibaba: ['علي بابا', 'Alibaba'], aliexpress: ['علي إكسبريس', 'AliExpress'], noon: ['نون', 'Noon'], temu: ['تيمو', 'Temu'] };
+function onProduct(d) {
+  if (!d) return;
+  // A product sent from the browser while nothing else is shown: its window opens.
+  if (!P || P.id !== d.id) {
+    if (d.status === 'loading') return;
+    if (P && P.status === 'loading' && P.id && P.id !== d.id) return;
+    P = { id: d.id, status: 'loading', items: [], picked: new Set(), title: '', siteName: '', site: '' };
+    if (!S.dialogs.includes('dlg-product')) openDialog('dlg-product');
+  }
+  if (d.site) { P.site = d.site; P.siteName = (PROD_SITES[d.site] || [])[LANG === 'en' ? 1 : 0] || ''; }
+  if (d.siteName) P.siteName = d.siteName;
+  if (d.status === 'loading') { P.status = 'loading'; productView(); return; }
+  if (d.status === 'error') { P.status = 'error'; P.error = d.error; productView(); return; }
+  if (d.status === 'ready') {
+    P.status = 'ready';
+    P.items = d.items || [];
+    P.title = d.title || '';
+    P.picked = new Set(P.items.map((x) => x.i));
+    renderProduct();
+    productView();
+  }
+}
+function prodThumb(it) {
+  const u = it.url;
+  // A small copy for the grid where the site makes one (the download is the full one).
+  if (/media-amazon\.com\/images\/I\//.test(u)) return u.replace(/\.(jpg|jpeg|png|webp|gif)$/i, '._AC_SX300_.$1');
+  if (/alicdn\.com\/.*\/kf\//.test(u) || /aliexpress-media\.com\/kf\//.test(u)) return u + '_300x300.jpg';
+  if (/nooncdn\.com\/p\//.test(u)) return u.replace(/width=original/, 'width=300');
+  if (/kwcdn\.com\//.test(u)) return u + '?imageView2/2/w/300/q/70/format/webp';
+  return u;
+}
+function renderProduct() {
+  $('p-site').textContent = P.siteName || '';
+  $('p-site').hidden = !P.siteName;
+  $('p-name').textContent = P.title || T('prod.untitled');
+  $('p-name').title = P.title || '';
+  let nImg = 0;
+  $('p-grid').replaceChildren(...P.items.map((it) => {
+    const b = el('button', { class: 'ptile', type: 'button', role: 'checkbox', 'aria-checked': String(P.picked.has(it.i)), title: it.url });
+    if (it.kind === 'video') {
+      if (it.stream) b.append(el('span', { class: 'noimg' }, svg('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.5 9.3v5.4l4.3-2.7z" fill="currentColor"/>', 34)));
+      else b.append(el('video', { src: it.url + '#t=0.5', preload: 'metadata', muted: '', playsinline: '' }));
+      b.append(el('span', { class: 'vk' }, svg('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>', 11), T(it.stream ? 'prod.stream' : 'prod.video')));
+    } else {
+      nImg++;
+      const img = el('img', { src: prodThumb(it), alt: '', referrerpolicy: 'no-referrer', loading: 'lazy' });
+      img.addEventListener('error', () => { if (img.src !== it.url) img.src = it.url; else img.replaceWith(el('span', { class: 'noimg' }, '?')); }, { once: false });
+      b.append(img, el('span', { class: 'n' }, String(nImg)));
+    }
+    b.append(el('span', { class: 'ck', 'aria-hidden': 'true' }));
+    b.addEventListener('click', () => {
+      if (P.picked.has(it.i)) P.picked.delete(it.i); else P.picked.add(it.i);
+      b.setAttribute('aria-checked', String(P.picked.has(it.i)));
+      productCounts();
+    });
+    return b;
+  }));
+  const folders = S.settings && S.settings.categoryDirs;
+  const sep = LANG === 'en' ? ' › ' : ' ← ';
+  $('p-where').textContent = T('prod.where', { folder: S.saveDirLabel + (folders ? sep + 'Pictures' : '') + sep + (P.title || T('prod.untitled')) });
+  productCounts();
+}
+function productCounts() {
+  $('p-count').textContent = T('prod.count', { n: P.picked.size, total: P.items.length });
+  $('p-all').checked = P.picked.size === P.items.length && P.items.length > 0;
+  $('p-all').indeterminate = P.picked.size > 0 && P.picked.size < P.items.length;
+  productView();
+}
+$('p-all').addEventListener('change', () => {
+  if (!P) return;
+  P.picked = $('p-all').checked ? new Set(P.items.map((x) => x.i)) : new Set();
+  for (const b of $('p-grid').children) b.setAttribute('aria-checked', String($('p-all').checked));
+  productCounts();
+});
+async function submitProduct() {
+  if (!P) return;
+  if (P.status === 'ready') { downloadProduct(); return; }
+  const text = $('p-input').value.trim();
+  if (!text || P.status === 'loading') return;
+  P.status = 'loading';
+  P.siteName = '';
+  productView();
+  let r = {};
+  try { r = (await api.addLink(text)) || {}; } catch (_) {}
+  if (!P) return;
+  if (r.kind === 'product') {
+    P.id = r.id;
+    for (const ev of S.products.get(r.id) || []) onProduct(ev);
+    return;
+  }
+  if (r.kind === 'media') { closeProduct(); openVideo(r.seq, text); return; }
+  if (r.kind === 'file') { closeProduct(); return; } // the "new download" window takes it
+  P.status = 'error';
+  P.error = r.error || { title: T('prod.none') };
+  productView();
+}
+async function downloadProduct() {
+  if (!P || !P.picked.size) { toast(T('prod.none')); return; }
+  const go = $('prod-go');
+  go.disabled = true;
+  let r = {};
+  try { r = (await api.productDownload(P.id, [...P.picked])) || {}; } catch (_) {}
+  go.disabled = false;
+  if (r.error) { toast(r.error.title || ''); return; }
+  const folder = r.folder;
+  closeProduct();
+  toast(T('prod.added', { n: filesText(r.added || 0) }));
+  if (folder) S.lastProductFolder = folder;
+}
+function closeProduct() {
+  P = null;
+  closeDialog('dlg-product');
+}
+$('prod-btn').addEventListener('click', () => { P = null; $('p-input').value = ''; openProduct(0); });
+$('prod-go').addEventListener('click', submitProduct);
+$('prod-cancel').addEventListener('click', closeProduct);
+$('prod-x').addEventListener('click', closeProduct);
+$('p-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitProduct(); });
+$('p-paste').addEventListener('click', async () => {
+  let t = '';
+  try { t = ((await api.paste()) || '').trim(); } catch (_) {}
+  if (!t) { toast(T('add.nothing')); return; }
+  $('p-input').value = t;
+  if (P && P.status !== 'loading') { P.status = 'ask'; submitProduct(); }
+});
+
 // ------------------------------------------------------------ events
 handlers.task = onTask;
 handlers.file = onFile;
 handlers.info = (d) => { keepInfo(d); onInfo(d); };
+// A product's photos (product.go): kept by id, for a window that asks a moment later.
+handlers.product = (d) => {
+  if (!d) return;
+  const list = S.products.get(d.id) || [];
+  list.push(d);
+  S.products.set(d.id, list);
+  while (S.products.size > 6) S.products.delete(S.products.keys().next().value);
+  onProduct(d);
+};
 handlers.thumb = (d) => {
   for (const ev of S.infos.get(d.seq) || []) {
     if (ev.status === 'done' && ev.items && ev.items[d.index]) ev.items[d.index].meta.thumbnail = d.src;
@@ -2861,6 +3600,8 @@ handlers.dialogClose = () => {
   const id = topDialog();
   if (id === 'dlg-file') cancelFile();
   else if (id === 'dlg-video') cancelVideo();
+  else if (id === 'dlg-clip') closeClip();
+  else if (id === 'dlg-product') closeProduct();
   else if (id) closeDialog(id);
   else api.dialogDone();
 };

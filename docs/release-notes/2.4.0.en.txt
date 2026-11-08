@@ -1,0 +1,4 @@
+# What's new in HELINK 2.4.0 (one line each)
+Download just a part of any video: play it in the window, set its start and end on the timeline, then save it as video or MP3.
+Download the photos and videos of products on Amazon, Alibaba, AliExpress, Noon and Temu at full size, in a folder named after the product.
+Browser downloads, more exactly: the browser's download bar no longer shows a file HELINK takes, and the page shows a "HELINK is downloading this file" card.

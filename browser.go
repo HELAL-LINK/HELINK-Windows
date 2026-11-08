@@ -136,7 +136,12 @@ func (a *App) ExtMessage(data []byte) map[string]any {
 			return map[string]any{"ok": false, "error": "bad_message"}
 		}
 		taken, reason := a.TakeBrowserDownload(a.ctx, b)
-		return map[string]any{"ok": taken, "reason": reason}
+		if !taken {
+			return map[string]any{"ok": false, "reason": reason}
+		}
+		// For the card the extension shows in the page: the file's name, and whether
+		// HELINK's "new download" window opened (else the download started right away).
+		return map[string]any{"ok": true, "name": reason, "dialog": !a.store.Get().NoDialog}
 	case "link":
 		var l struct {
 			URL       string   `json:"url"`
@@ -183,6 +188,24 @@ func (a *App) ExtMessage(data []byte) map[string]any {
 			return map[string]any{"ok": false, "error": "bad_message"}
 		}
 		return a.BrowserGet(g.ID, g.Item, g.Key, g.NoMusic)
+	case "product": // a product's page open in the browser: its pictures and videos (product.go)
+		var pr struct {
+			PageURL   string   `json:"pageUrl"`
+			Title     string   `json:"title"`
+			HTML      string   `json:"html"`
+			Cookies   []Cookie `json:"cookies"`
+			UserAgent string   `json:"userAgent"`
+		}
+		if json.Unmarshal(data, &pr) != nil || pr.PageURL == "" || pr.HTML == "" {
+			return map[string]any{"ok": false, "error": "bad_message"}
+		}
+		site := productSite(pr.PageURL)
+		if site == "" {
+			return map[string]any{"ok": false, "error": "not_product"}
+		}
+		r := a.readProductHTML(site, pr.PageURL, pr.Title, pr.HTML, FileSource{Referer: pr.PageURL, UserAgent: pr.UserAgent, Cookies: pr.Cookies})
+		a.show("product")
+		return r
 	case "show":
 		a.show("open")
 		return map[string]any{"ok": true}
@@ -207,7 +230,8 @@ func (a *App) ExtMessage(data []byte) map[string]any {
 // TakeBrowserDownload answers a browser that started a download: HELINK takes it when
 // the file answers here as well (the browser then cancels its own) and shows the "new
 // download" window, or starts it right away when the user chose not to be asked.
-// Otherwise the browser keeps it (taken false, and why, for the extension's log).
+// Otherwise the browser keeps it (taken false, and why, for the extension's log). When
+// taken, reason is the file's name.
 func (a *App) TakeBrowserDownload(ctx context.Context, b BrowserFile) (taken bool, reason string) {
 	if a.store.Get().NoCatch {
 		return false, "off"
@@ -237,11 +261,11 @@ func (a *App) TakeBrowserDownload(ctx context.Context, b BrowserFile) (taken boo
 		if r := a.ConfirmFile(p.id, FileChoice{Start: true}); r["error"] != nil {
 			return false, "folder"
 		}
-		return true, ""
+		return true, info.Name
 	}
 	a.emit.Emit("file", a.pendingEvent(p))
 	a.show("file")
-	return true, ""
+	return true, info.Name
 }
 
 // ReadBrowserVideo reads a video the user asked for in the browser: the post's own page

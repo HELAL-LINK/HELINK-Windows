@@ -1,4 +1,4 @@
-HELINK: a complete download manager for Windows 11 and 10 - version 2.3.1
+HELINK: a complete download manager for Windows 11 and 10 - version 2.4.0
 =========================================================================
 HELINK downloads files and videos on Windows:
 - Any file (programs, documents, archives, music, video) downloads faster: HELINK splits it into
@@ -12,8 +12,24 @@ HELINK downloads files and videos on Windows:
 - It removes the music from videos and audio and keeps speech and singing: while downloading, or
   for files on your computer.
 - It downloads a whole YouTube course or playlist at once, numbered in order in one folder.
+- It downloads just a part of any video: play it, set where it starts and ends, then save it as
+  video or MP3.
+- It downloads the photos and videos of products on Amazon, Alibaba, AliExpress, Noon and Temu at
+  full size.
 - It tells you by itself when a new version is out, and updates itself in one click when you say so.
 - In Arabic and English, no ads, no accounts, no sign-in.
+
+New in version 2.4:
+- A part of a video: click "Part of a video" at the top of the window and paste the link, or click
+  "A part only" in the "Download a video" window. The video plays in the window: set its start and
+  end on the timeline, play the part to check it, then download it as video or MP3. (Section 6)
+- Product photos and videos: paste a product's link from Amazon, Alibaba, AliExpress, Noon or Temu,
+  or click the HELINK button in your browser on the product's page. All its photos and videos
+  appear; pick the ones you want and they're saved at full size in a folder named after the
+  product. (Section 7)
+- Browser downloads, more exactly: the browser's download bar no longer shows a file HELINK takes,
+  and a "HELINK is downloading this file" card appears in the page, so it's clear HELINK has it.
+  HELINK also takes more kinds of files.
 
 New in version 2.3:
 - A whole course or playlist at once: paste the list's YouTube link and all its videos appear.
@@ -23,22 +39,22 @@ New in version 2.3:
 - Updates from inside HELINK: when you're online, HELINK looks for a new version and shows what's
   new in it. Click "Update now" and it updates itself in seconds, downloads continuing where they
   stopped; or "Not now" and it reminds you a day later. HELINK never updates itself without your
-  say-so. (Section 10)
+  say-so. (Section 12)
 
 
 1) Installing
 -------------
-Recommended: open HELINK-2.3.1-Setup.exe and click Next, then Install.
+Recommended: open HELINK-2.4.0-Setup.exe and click Next, then Install.
 - It needs no administrator rights, installs for your account only, and adds shortcuts on the
   desktop and in the Start menu.
 - If HELINK is running, the installer closes it first; its downloads continue when it opens again.
 - Updates: from version 2.3 on, HELINK tells you when a new version is out and updates itself
-  (section 10). From an older version: install this one over it; downloads and settings stay.
+  (section 12). From an older version: install this one over it; downloads and settings stay.
   Updating from 2.1 or older: close the browser and open it again once, so the new extension (the
   menu of qualities) runs. From 2.2 on, the extension in Chrome, Edge, Brave, Opera and Vivaldi
   updates itself after HELINK is updated.
 
-Or the portable copy: extract HELINK-2.3.1-portable.zip and open HELINK.exe from any folder.
+Or the portable copy: extract HELINK-2.4.0-portable.zip and open HELINK.exe from any folder.
 It updates itself too, when it is in a folder Windows lets it change (Downloads or Documents, say).
 
 If a blue screen says "Windows protected your PC", click "More info", then "Run anyway". Windows
@@ -174,7 +190,50 @@ name starting with its place in the list, so the lessons stay in order:
   and copy its link.
 
 
-6) Removing the music
+6) A part of a video
+--------------------
+HELINK downloads just the part you want of any video (a bit of a lecture, part of a song), as video
+or MP3:
+  1) Click "Part of a video" at the top of the window, paste the video's link and click Continue.
+     Or open the video as usual and click "A part only" in the "Download a video" window.
+  2) The video plays in the window. Set the part in any of these ways:
+     - Drag the two orange handles on the timeline: the first for the start, the second for the
+       end; the picture follows them.
+     - Or click − and + under "Start" and "End" to move each by a second (hold to keep going).
+     - Or play the video and click "Start here" at the moment you want, then "End here".
+  3) Click "Play the part" to watch it from its start; it stops by itself at its end.
+  4) Choose "Video" or "MP3 audio" and the quality (the part's approximate size is shown), and turn
+     on "Without music" if you like.
+  5) Click "Download the part". It appears in the downloads list with its times (like
+     ✂ 1:20 – 2:05) and is saved under the video's name with the part's times:
+     "Title - part 1.20-2.05 - 720p.mp4".
+- The part is cut exactly at the second you chose, and little more than the part is downloaded.
+- If the video doesn't play inside the window, you can still set the start and end with the
+  buttons, and the part is downloaded all the same.
+
+
+7) Product photos and videos (for traders)
+-----------------------------------------
+HELINK downloads a product's photos and videos at full size from Amazon (Egypt, the UAE, Saudi
+Arabia and the others), Alibaba, AliExpress, Noon and Temu, into one folder named after the
+product, to study the product or use its photos.
+From the browser (the surest, since it reads the page as you see it):
+  - Open the product's page, click the HELINK button in the browser's toolbar and choose
+    "Product photos and videos".
+  - Or right-click the page and choose "Download the product's photos with HELINK".
+By link: click "Product photos" at the top of HELINK's window and paste the product's link, or
+paste it in "Add link". Some sites (Temu especially, and sometimes Amazon and AliExpress) don't
+let programs read their pages; the window then tells you to use the HELINK button in the browser.
+The "A product's photos and videos" window shows the product's name and site, then all its videos
+and photos, all chosen. Click one to leave it out (or "Select all"), then click "Download
+selected". They're saved in:
+       Pictures\<the product's name>\01.jpg, 02.jpg, ... and "video 1.mp4"
+- The photos are at full size, not the small ones the page shows, including the photos of every
+  colour or model when there are some.
+- Amazon's videos are downloaded at the best quality there is.
+
+
+8) Removing the music
 ---------------------
 HELINK removes the music from a video or a recording and keeps the voices (speech and singing):
 useful for songs (only the singer's voice stays) and for lessons, lectures and programs with music
@@ -213,7 +272,7 @@ saved next to it.
   parts, and the sound may be slightly less clear than the original.
 
 
-7) The downloads list
+9) The downloads list
 ---------------------
 - Sections on the side: All downloads, Unfinished, Finished, then by kind (Video, Music, Pictures,
   Programs, Documents, Compressed, Other), then "Music removal" (everything without music, and a button to
@@ -236,7 +295,7 @@ saved next to it.
 - The computer doesn't sleep while downloading, and the progress shows on HELINK's taskbar button.
 
 
-8) Near the clock
+10) Near the clock
 -----------------
 Closing HELINK's window keeps it running near the clock: downloads go on and it still takes
 downloads from the browser. Click its icon to open the window; right-click it for a menu: Open
@@ -249,7 +308,7 @@ window near the clock instead, which leaves the keyboard to the browser (section
 A notification says when a download finishes or fails (can be turned off in Settings).
 
 
-9) Settings
+11) Settings
 -----------
 General: language, start HELINK with Windows, keep it near the clock when the window closes,
   notifications.
@@ -263,7 +322,7 @@ Browser: take downloads from the browser, show the "New download" window first, 
 Changes are saved right away.
 
 
-10) Updating HELINK
+12) Updating HELINK
 -------------------
 HELINK looks for a new version by itself: a little after it opens, then every 12 hours while it
 runs, and a few minutes after the internet comes back when it was down. It sends nothing about you
@@ -288,7 +347,7 @@ HELINK asks you to download the new version from its page and install it.
 HELINK's download page: https://github.com/HELAL-LINK/HELINK-Windows
 
 
-11) Keyboard shortcuts
+13) Keyboard shortcuts
 ----------------------
 Ctrl+N or Ctrl+L: add a link.          Ctrl+V: paste a link and check it.
 Ctrl+F: search.                        Ctrl+A: select all downloads.
@@ -297,7 +356,7 @@ Enter: open the finished file, or the download's details.      Arrows: move in t
 Esc: close the open window or the details.
 
 
-12) If something goes wrong
+14) If something goes wrong
 ---------------------------
 - "Try again" usually fixes it: HELINK updates its video tool by itself when a site changes, and
   continues downloads where they stopped.
@@ -328,7 +387,7 @@ Esc: close the open window or the details.
   is missing, HELINK shows a message that opens its download page at Microsoft.
 
 
-13) Removing HELINK
+15) Removing HELINK
 -------------------
 Windows Settings → Apps → Installed apps → HELINK → Uninstall. It asks whether to delete the
 settings, the downloads list and the video tools (with the music remover) too. The files you downloaded stay where they are.

@@ -488,6 +488,10 @@ func (a *App) addLink(input string, src FileSource, page, from string) map[strin
 	if u == "" {
 		return map[string]any{"error": NewUserError("invalid_url")}
 	}
+	if from == "link" && isProductPage(u) {
+		// A product on Amazon, Alibaba, AliExpress, Noon or Temu: its pictures and videos.
+		return a.ReadProductLink(u)
+	}
 	src.URL = u
 	p := a.addPending(src, page, from)
 	// The window says "checking the link…" until the answer (this event reaches the page

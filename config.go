@@ -36,7 +36,8 @@ type Settings struct {
 	CatchMinKB     int      `json:"catchMinKB,omitempty"`  // smaller files stay with the browser
 	SkipSites      []string `json:"skipSites,omitempty"`   // sites whose downloads stay with the browser
 	ButtonSkip     []string `json:"buttonSkip,omitempty"`  // sites without the button on videos
-	IntroShown     bool     `json:"introShown,omitempty"`  // "Add HELINK to your browser" was shown once, at the first start
+	IntroShown     bool     `json:"introShown,omitempty"`
+	ClipKind       string   `json:"clipKind,omitempty"` // the last kind chosen in the clip window (video, audio)  // "Add HELINK to your browser" was shown once, at the first start
 
 	// Updates (update.go).
 	UpdateChecked     time.Time `json:"updateChecked,omitempty"`     // when GitHub last answered
@@ -62,6 +63,8 @@ var defaultCatchTypes = []string{
 	"opus", "pdf", "qt", "rar", "rm", "rmvb", "sit", "sitx", "tar", "tgz", "torrent", "ts", "wav", "webm", "wma",
 	"wmv", "xz", "z", "zip", "zst", "docx", "xlsx", "pptx", "doc", "xls", "ppt", "epub", "deb", "rpm", "appx",
 	"msix", "cab", "jar", "vob", "mts", "m2ts",
+	// More of the same kinds (Android app bundles, disk images, sound).
+	"xapk", "apks", "apkm", "ipa", "vhd", "vhdx", "ova", "esd", "wim", "m4b", "mka", "aiff", "ape", "ac3", "lz", "lzma", "txz", "tbz2", "pkg",
 }
 
 func (s Settings) parallel() int {

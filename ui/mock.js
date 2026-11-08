@@ -92,6 +92,9 @@ window.__nzMock = function (emit) {
       "Setup didn't finish", 'The internet probably dropped while the tools were downloading. Check your connection, then click Try again.', true, ''],
     invalid_url: ['هذا الرابط غير صالح', 'هذا ليس رابط فيديو أو ملف. افتح الفيديو أو الملف وانسخ رابطه من شريط العنوان أو من زر «مشاركة»، ثم الصقه هنا.',
       "This link doesn't work", "This isn't a link to a video or a file. Open it, copy its link from the address bar or the Share button, and paste it here.", false, 'newLink'],
+    product_blocked: ['لم يسمح الموقع لـ HELINK بقراءة صفحة المنتج', 'افتح صفحة المنتج في المتصفح، ثم اضغط زر HELINK في شريط الأدوات واختر «صور وفيديوهات المنتج». أو اضغط بالزر الأيمن على الصفحة واختر «تنزيل صور المنتج بـ HELINK».',
+      "The site didn't let HELINK read the product page", 'Open the product page in your browser, then click the HELINK button in the toolbar and choose "Product photos and videos". Or right-click the page and choose "Download the product\'s photos with HELINK".', false, 'useBrowser'],
+    clip_range: ['الجزء قصير جدًا', 'اجعل الجزء ثانية واحدة على الأقل: حرّك بدايته أو نهايته على شريط الوقت.', 'The part is too short', 'Make the part at least one second long: move its start or end on the timeline.', false, ''],
     sep_no_audio: ['لا يوجد صوت في هذا الملف', 'هذا الملف بلا صوت، لذلك لا توجد فيه موسيقى لإزالتها.', 'This file has no sound', "This file has no sound, so there's no music to remove.", false, ''],
     file_missing: ['الملف غير موجود', 'لم يعد الملف الأصلي في مكانه؛ ربما نُقل أو حُذف، أو فُصلت ذاكرة USB التي عليها. أعده إلى مكانه ثم حاول مرة أخرى، أو أضفه من مكانه الجديد.',
       'File not found', "The original file is no longer where it was: it may have been moved or deleted, or it's on a USB drive that was removed. Put it back and try again, or add it from its new place.", true, ''],
@@ -127,6 +130,7 @@ window.__nzMock = function (emit) {
       folderLabel: folderLabel(t.saveDir), size: total, done, total, noMusic: !!t.noMusic,
     };
     if (t.list) c.list = t.list;
+    if (t.clip) c.clip = t.clip;
     if (isSep) {
       c.srcPath = t.srcDir + '\\' + t.srcName;
       c.srcName = t.srcName;
@@ -430,9 +434,9 @@ window.__nzMock = function (emit) {
   if (demo === 'update-dl') { upd.state = 'downloading'; upd.done = 1.9 * MB; }
   if (demo === 'update-error') { upd.state = 'error'; upd.failedIn = 'install'; }
   function updView(prompt) {
-    const v = { state: upd.state, current: '2.3.1', page: 'https://github.com/HELAL-LINK/HELINK-Windows', prompt: !!prompt, checkedAt: Date.now() };
+    const v = { state: upd.state, current: '2.4.0', page: 'https://github.com/HELAL-LINK/HELINK-Windows', prompt: !!prompt, checkedAt: Date.now() };
     if (upd.state !== 'latest' && upd.state !== '' && upd.state !== 'checking') {
-      Object.assign(v, { version: '2.3.2', notes: updNotes(), sizeText: size(3.9 * MB), snoozed: upd.snoozed });
+      Object.assign(v, { version: '2.4.1', notes: updNotes(), sizeText: size(3.9 * MB), snoozed: upd.snoozed });
     }
     if (upd.state === 'downloading') Object.assign(v, { done: upd.done, total: 3.9 * MB, doneText: size(upd.done), totalText: size(3.9 * MB), percent: upd.done / (3.9 * MB) * 100 });
     if (upd.state === 'error') { v.error = err('network', 'github.com', 'Get "https://raw.githubusercontent.com/...": dial tcp: lookup raw.githubusercontent.com: no such host'); v.failedIn = upd.failedIn || 'check'; }
@@ -509,6 +513,7 @@ window.__nzMock = function (emit) {
     if (!m) return { error: err('invalid_url') };
     const url = m[0];
     if (known[siteOf(url)]) return { kind: 'media', seq: fetch(url, opts) };
+    if (from === 'link' && productSiteOf(url) && /\/dp\/|\/item\/|product-detail|\/p\/|-g-\d+/.test(url)) return readProduct(url);
     const p = newPending(url, from || 'link', opts && opts.pending);
     p.waiting = true;
     emit('file', { pid: p.pid, status: 'checking', url, from: p.from });
@@ -526,6 +531,40 @@ window.__nzMock = function (emit) {
     });
     return { kind: 'file', pid: p.pid };
   }
+  // ---------------------------------------------------------------- products (2.4)
+  const prodSites = { amazon: ['أمازون', 'Amazon'], alibaba: ['علي بابا', 'Alibaba'], aliexpress: ['علي إكسبريس', 'AliExpress'], noon: ['نون', 'Noon'], temu: ['تيمو', 'Temu'] };
+  const productSiteOf = (u) => (/amazon\./.test(u) ? 'amazon' : /aliexpress/.test(u) ? 'aliexpress' : /alibaba/.test(u) ? 'alibaba' : /noon\.com/.test(u) ? 'noon' : /temu\.com/.test(u) ? 'temu' : '');
+  const products = new Map();
+  let prodSeq = 0;
+  function productEvent(id) {
+    const p = products.get(id);
+    return { id, status: 'ready', site: p.site, siteName: t2(prodSites[p.site][0], prodSites[p.site][1]), title: p.title, page: p.page,
+      items: p.media.map((m, i) => ({ i, kind: m.kind, url: m.url, stream: !!m.stream })) };
+  }
+  function sampleProduct(site, page) {
+    const media = [{ kind: 'video', url: 'mock-clip.webm' }];
+    for (let i = 1; i <= 9; i++) media.push({ kind: 'image', url: 'prod-' + i + '.jpg' });
+    if (site === 'amazon') media.splice(1, 0, { kind: 'video', url: 'https://m.media-amazon.com/images/S/vse-vms-transcoding-artifact/1/default.jobtemplate.hls.m3u8', stream: true });
+    return { site, page, title: t2('شاحن أنكر 735 نانو II بقوة 65 واط مع كابل USB-C', 'Anker 735 Charger (Nano II 65W) with USB-C cable'), media };
+  }
+  function readProduct(url) {
+    const id = ++prodSeq;
+    const site = productSiteOf(url);
+    emit('product', { id, status: 'loading', site, page: url });
+    later(freeze ? 10 : 900, () => {
+      if (/blocked|temu/.test(url)) { emit('product', { id, status: 'error', site, page: url, error: err('product_blocked') }); return; }
+      products.set(id, sampleProduct(site, url));
+      emit('product', productEvent(id));
+    });
+    return { kind: 'product', id };
+  }
+  function productFromBrowser(site) {
+    const id = ++prodSeq;
+    products.set(id, sampleProduct(site, 'https://www.' + site + '.com/item'));
+    emit('product', productEvent(id));
+    return id;
+  }
+
   function confirm(pid, c) {
     const p = pending.get(pid);
     if (!p || p.waiting) return { error: err('network') };
@@ -548,10 +587,10 @@ window.__nzMock = function (emit) {
     init: async () => {
       const setup = demo.startsWith('setup');
       return {
-        screen: setup ? 'setup' : 'ready', platform: 'windows', saveDir, saveDirLabel: folderLabel(saveDir), version: '2.3.1', lang,
+        screen: setup ? 'setup' : 'ready', platform: 'windows', saveDir, saveDirLabel: folderLabel(saveDir), version: '2.4.0', lang,
         setupSizeText: setup ? size(146 * MB) : '', missing: setup ? ['ytdlp', 'deno', 'ffmpeg'] : [], busy: '', lastKind: q.get('kind') === 'audio' ? 'audio' : 'video',
         parallel: settings.maxParallel, restore: { info: null }, tasks: list(), settings: view(), pending: [],
-        sepReady, sepSizeText: size(64 * MB), update: updView(false), updated: demo === 'updated' ? '2.3.1' : undefined,
+        sepReady, sepSizeText: size(64 * MB), update: updView(false), updated: demo === 'updated' ? '2.4.0' : undefined,
       };
     },
     update: async () => updView(false),
@@ -626,6 +665,46 @@ window.__nzMock = function (emit) {
       return addLink(m.url, 'browser', { pending: { name: m.name || nameFromURL(m.url), size: m.size || 0 } });
     },
     fetch: async (text) => fetch(text),
+    readProduct: async (u) => readProduct(u),
+    productDownload: async (id, picks) => {
+      window.__lastProduct = [id, picks];
+      const p = products.get(id);
+      if (!p) return { error: err('network') };
+      const dir = dirFor('pictures') + '\\' + p.title;
+      let img = 0, vid = 0;
+      for (const i of [...picks].sort((a, b) => a - b)) {
+        const m = p.media[i];
+        if (!m) continue;
+        const name = m.kind === 'video' ? t2('فيديو ', 'video ') + (++vid) + '.mp4' : String(++img).padStart(2, '0') + '.jpg';
+        const t = addFile(name, m.kind === 'video' ? 'video' : 'pictures', m.kind === 'video' ? 6 * MB : 420 * KB,
+          { state: 'queued', saveDir: dir, resumable: true, url: m.url, page: p.page, createdAt: Date.now() + i, queuedAt: Date.now() + i });
+        pub(t, 'add');
+      }
+      schedule();
+      return { added: picks.length, folder: dir };
+    },
+    clipPreview: async (i) => {
+      if (!current) return { kind: 'none' };
+      const it = current.items[i] || current.items[0];
+      if (q.get('nopreview') === '1') return { item: i, kind: 'none', duration: it.meta.duration, title: it.meta.title, thumbnail: it.meta.thumbnail };
+      return { item: i, kind: 'av', video: 'mock-clip.webm', duration: it.meta.duration, title: it.meta.title, thumbnail: it.meta.thumbnail };
+    },
+    clipClosed: async () => { window.__clipClosed = (window.__clipClosed || 0) + 1; },
+    clipDownload: async (i, key, start, end, noMusic) => {
+      window.__lastClip = [i, key, start, end, noMusic];
+      if (!current) return { error: err('network') };
+      if (end - start < 1) return { error: err('clip_range') };
+      const clk = (x) => { x = Math.floor(x); const m = Math.floor(x / 60), sec = x % 60; return m + ':' + String(sec).padStart(2, '0'); };
+      const it = current.items[i] || current.items[0];
+      const opt = it.options.find((o) => o.key === key) || it.options[0];
+      const share = it.meta.duration ? (end - start) / it.meta.duration : 0.1;
+      const t = addMedia(current, i, key, { createdAt: Date.now(), queuedAt: Date.now(), noMusic: !!noMusic, clip: clk(start) + ' – ' + clk(end),
+        title: (it.meta.title || '') + ' - ' + t2('مقطع ', 'part ') + clk(start).replace(':', '.') + '-' + clk(end).replace(':', '.'),
+        total: Math.max(200 * KB, Math.round((opt.sizeBytes || 80 * MB) * share)), durationText: clk(end - start) });
+      pub(t, 'add', true);
+      schedule();
+      return { id: t.id };
+    },
     cancelFetch: async () => { clearTimeout(fetchTimer); seq++; },
     download: async (i, key, noMusic) => {
       window.__lastDownload = [i, key, noMusic];
@@ -783,6 +862,22 @@ window.__nzMock = function (emit) {
         if (freeze) { clearTimeout(fetchTimer); const p = post(siteParam); current = Object.assign(clone(p), { seq: s }); emit('info', Object.assign({ seq: s, status: 'done' }, clone(p))); }
         break;
       }
+      case 'clip': case 'clip-nopreview': {
+        const s = fetch('https://youtu.be/dQw4w9WgXcQ');
+        emit('browserVideo', { seq: s, page: '' });
+        clearTimeout(fetchTimer);
+        const p = post('youtube');
+        current = Object.assign(clone(p), { seq: s });
+        emit('info', Object.assign({ seq: s, status: 'done' }, clone(p)));
+        later(150, () => click('#video-clip'));
+        break;
+      }
+      case 'clip-link': click('#clip-btn'); break;
+      case 'clip-loading': click('#clip-btn'); later(60, () => { $('c-input').value = 'https://youtu.be/dQw4w9WgXcQ'; click('#clip-go'); }); break;
+      case 'product': click('#prod-btn'); later(60, () => { $('p-input').value = 'https://www.amazon.eg/-/en/Anker-735-Charger/dp/B09W2PBRJR'; click('#prod-go'); }); break;
+      case 'product-ask': click('#prod-btn'); break;
+      case 'product-error': click('#prod-btn'); later(60, () => { $('p-input').value = 'https://www.temu.com/eg/charger-g-601099512345678.html'; click('#prod-go'); }); break;
+      case 'compact-product': emit('mode', { compact: true, reason: 'product' }); productFromBrowser('aliexpress'); break;
       case 'video-loading': {
         const s = ++seq;
         emit('browserVideo', { seq: s, page: '' });

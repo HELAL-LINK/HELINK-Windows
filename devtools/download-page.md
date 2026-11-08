@@ -27,9 +27,13 @@
 - يلتقط التنزيلات من المتصفح (كروم وإيدج وبريف وأوبرا وفيفالدي وفايرفوكس).
 - يُنزّل الفيديوهات من يوتيوب وفيسبوك وإنستجرام وتيك توك وإكس ومئات المواقع، بالجودة التي تختارها أو بصيغة MP3.
 - يُنزّل كورسًا أو قائمة تشغيل كاملة من يوتيوب مرة واحدة، مرقّمة بترتيبها في مجلد واحد.
+- يُنزّل جزءًا فقط من أي فيديو: تشغّله، وتحدد بدايته ونهايته، ثم تنزّله فيديو أو MP3.
+- يُنزّل صور وفيديوهات المنتجات من أمازون وعلي بابا وعلي إكسبريس ونون وتيمو بحجمها الأصلي، في مجلد باسم المنتج.
 - يُزيل الموسيقى من الفيديوهات والصوتيات ويُبقي الكلام والغناء.
 - الواجهة بالعربية والإنجليزية.
 
+<p align="center"><img src="assets/clip-ar.png" width="760" alt="تنزيل جزء من فيديو"></p>
+<p align="center"><img src="assets/product-ar.png" width="760" alt="صور وفيديوهات منتج"></p>
 <p align="center"><img src="assets/course-ar.png" width="760" alt="تنزيل كورس كامل"></p>
 
 ---
@@ -57,9 +61,13 @@
 - Takes the downloads you start in your browser (Chrome, Edge, Brave, Opera, Vivaldi and Firefox).
 - Downloads videos from YouTube, Facebook, Instagram, TikTok, X and hundreds of other sites, in the quality you choose or as MP3.
 - Downloads a whole YouTube course or playlist at once, numbered in order in one folder.
+- Downloads just a part of any video: play it, set where it starts and ends, then save it as video or MP3.
+- Downloads the photos and videos of products on Amazon, Alibaba, AliExpress, Noon and Temu at full size, in a folder named after the product.
 - Removes the music from videos and audio, keeping speech and singing.
 - In Arabic and English.
 
+<p align="center"><img src="assets/clip-en.png" width="760" alt="Downloading a part of a video"></p>
+<p align="center"><img src="assets/product-en.png" width="760" alt="A product's photos and videos"></p>
 <p align="center"><img src="assets/course-en.png" width="760" alt="Downloading a whole course"></p>
 
 ---
