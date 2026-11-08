@@ -1,0 +1,1 @@
+{"_type": "video", "id": "987654321", "title": "Facebook", "uploader": "Cairo News", "duration": 60, "extractor_key": "Facebook", "formats": [{"format_id": "sd", "url": "https://video.xx.fbcdn.net/sd.mp4", "quality": -3, "protocol": "https", "ext": "mp4"}, {"format_id": "hd", "url": "https://video.xx.fbcdn.net/hd.mp4", "quality": -2, "protocol": "https", "ext": "mp4"}]}

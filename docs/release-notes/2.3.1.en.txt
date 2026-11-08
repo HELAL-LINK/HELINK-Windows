@@ -1,0 +1,1 @@
+HELINK's download and update page is now github.com/HELAL-LINK/HELINK-Windows; future updates come from there.

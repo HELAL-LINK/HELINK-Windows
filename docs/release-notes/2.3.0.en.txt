@@ -1,0 +1,2 @@
+Download a whole YouTube course or playlist at once, numbered in order in one folder.
+HELINK tells you when a new version is out, and updates itself when you say so; it never forces an update.

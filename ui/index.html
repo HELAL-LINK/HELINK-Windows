@@ -1,0 +1,2932 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HELINK</title>
+<script>
+// Before anything is drawn: light or dark like Windows, and the language chosen.
+(function () {
+  var env = window.__nzEnv || {};
+  var q = new URLSearchParams(location.search);
+  var mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+  var dark = mq ? mq.matches : false;
+  if (q.get('theme')) dark = q.get('theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  if (mq && !q.get('theme') && mq.addEventListener) {
+    mq.addEventListener('change', function (e) { document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light'); });
+  }
+  var lang = env.lang || q.get('lang') || 'ar';
+  document.documentElement.lang = lang === 'en' ? 'en' : 'ar';
+  document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+})();
+</script>
+<style>
+/*@FONTS@*/
+:root {
+  /* HELINK: black and the logo's orange */
+  --brand: #F27221;
+  --brand-hover: #FF8A3D;
+  --brand-press: #D9600F;
+  --brand-tint: #FDEDE2;
+  --brand-line: #F5B58A;
+  --accent-text: #B84A06;
+  --on-brand: #000000;
+  --bg: #F3F3F3;
+  --surface: #FFFFFF;
+  --surface-2: #F8F8F8;
+  --ink: #111111;
+  --muted: #5E5E5E;
+  --faint: #8C8C8C;
+  --line: #E3E3E3;
+  --row-hover: #F6F6F6;
+  --sel: #FDEDE2;
+  --ok: #138A4A;
+  --ok-tint: #E3F5EA;
+  --bad: #B53A2E;
+  --bad-tint: #FBEDEA;
+  --wait: #8A6A00;
+  --wait-tint: #FFF4D1;
+  --focus: #111111;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px -12px rgba(0, 0, 0, .22);
+  --shadow-lg: 0 24px 60px -18px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .12);
+  --font: "Alexandria", "Segoe UI", Tahoma, sans-serif;
+  --cols: minmax(180px, 1fr) 84px 160px 104px 76px 80px;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --brand-tint: #3A2416;
+  --brand-line: #8A4A22;
+  --accent-text: #FF9550;
+  --bg: #111111;
+  --surface: #1B1B1B;
+  --surface-2: #222222;
+  --ink: #F2F2F2;
+  --muted: #A8A8A8;
+  --faint: #7A7A7A;
+  --line: #303030;
+  --row-hover: #232323;
+  --sel: #33241A;
+  --ok: #4CC983;
+  --ok-tint: #12301F;
+  --bad: #F08A7E;
+  --bad-tint: #3A1A1D;
+  --wait: #F2C14E;
+  --wait-tint: #3A3115;
+  --focus: #F27221;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px -14px rgba(0, 0, 0, .7);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--font); font-size: 14px; line-height: 1.55; color: var(--ink); background: var(--bg);
+  display: grid; grid-template-rows: auto auto 1fr auto; grid-template-columns: minmax(0, 1fr); overflow: hidden;
+  -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none;
+}
+body > .bar { grid-row: 1; }
+body > .banner { grid-row: 2; }
+body > .app { grid-row: 3; }
+body > .statusbar { grid-row: 4; }
+.grow { flex: 1; min-width: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+bdi { unicode-bidi: isolate; }
+svg { flex: none; }
+[hidden] { display: none !important; }
+p { margin: 0; }
+h1, h2, h3 { margin: 0; font-weight: 700; }
+input[type="text"], input[type="number"], select, textarea {
+  border: 1.5px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 11px; outline: none;
+  user-select: text; -webkit-user-select: text; min-height: 40px;
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--brand); }
+textarea { resize: vertical; direction: ltr; text-align: left; font-family: Consolas, ui-monospace, monospace; font-size: 13px; line-height: 1.5; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px;
+  border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 600; white-space: nowrap;
+}
+.btn:hover { border-color: var(--faint); }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: var(--on-brand); font-weight: 700; }
+.btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+.btn.primary:active { background: var(--brand-press); }
+.btn.danger { color: var(--bad); }
+.btn.danger.solid { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.small { min-height: 32px; padding: 0 11px; font-size: 13px; border-radius: 8px; }
+.linkbtn {
+  border: 0; background: none; padding: 4px 4px; margin: -4px 0; color: var(--accent-text); font-weight: 700;
+  border-radius: 6px; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;
+}
+
+/* ---------- header ---------- */
+.bar { background: #000; color: #fff; border-bottom: 3px solid var(--brand); display: flex; align-items: center; gap: 6px; padding: 7px 12px; min-height: 56px; min-width: 0; overflow: hidden; }
+.bar > * { flex-shrink: 0; }
+.brand { display: flex; align-items: center; direction: ltr; margin-inline-end: 8px; }
+.logo { display: block; width: 112px; height: 24px; color: #fff; }
+.add-btn {
+  display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px 0 12px; border: 0; border-radius: 10px;
+  background: var(--brand); color: #000; font-weight: 800; white-space: nowrap;
+}
+html[dir="rtl"] .add-btn { padding: 0 12px 0 14px; }
+.add-btn:hover { background: var(--brand-hover); }
+.add-btn.alt { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px #4A4A4A; font-weight: 700; }
+.add-btn.alt:hover { background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1.5px var(--brand); }
+.tools { display: flex; align-items: center; gap: 2px; margin-inline-start: 6px; }
+.tool {
+  display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 10px; border: 0; border-radius: 9px;
+  background: transparent; color: #fff; font-weight: 600; font-size: 13px; white-space: nowrap;
+}
+.tool:hover:not(:disabled) { background: rgba(255, 255, 255, .12); }
+.tool:disabled { color: #6E6E6E; cursor: default; }
+.tool svg { color: inherit; }
+.sep { width: 1px; height: 22px; background: #3A3A3A; margin: 0 4px; }
+.spacer { flex: 1; }
+.search {
+  display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border-radius: 9px; background: #1E1E1E;
+  border: 1.5px solid #333; min-width: 120px; width: 220px; color: #BDBDBD; flex-shrink: 1;
+}
+.search:focus-within { border-color: var(--brand); }
+.search input { all: unset; flex: 1; min-width: 0; width: 0; color: #fff; font-size: 13.5px; user-select: text; -webkit-user-select: text; }
+.search input::placeholder { color: #8F8F8F; }
+.ibtn { width: 38px; height: 38px; border-radius: 9px; border: 0; background: transparent; color: #fff; display: grid; place-items: center; }
+.ibtn:hover { background: rgba(255, 255, 255, .12); }
+.lang-btn { height: 34px; min-width: 44px; padding: 0 10px; border-radius: 999px; border: 1.5px solid #4A4A4A; background: transparent; color: #fff; font-weight: 700; font-size: 13px; }
+.lang-btn:hover { border-color: #7A7A7A; }
+.ext-dot { position: relative; }
+.ext-dot.off::after {
+  content: ""; position: absolute; top: 7px; inset-inline-end: 7px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--brand); box-shadow: 0 0 0 2px #000;
+}
+
+/* ---------- banner (video tools) ---------- */
+.banner { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: var(--brand-tint); border-bottom: 1px solid var(--brand-line); font-size: 13.5px; }
+.banner.bad { background: var(--bad-tint); border-color: transparent; }
+.banner .txt { flex: 1; min-width: 0; }
+.banner .mini { width: 160px; height: 6px; border-radius: 3px; background: rgba(0, 0, 0, .1); overflow: hidden; flex: none; }
+:root[data-theme="dark"] .banner .mini { background: rgba(255, 255, 255, .12); }
+.banner .mini i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .3s; }
+
+/* ---------- side bar ---------- */
+.app { display: grid; grid-template-columns: 206px minmax(0, 1fr); min-height: 0; }
+.side { background: var(--surface); border-inline-end: 1px solid var(--line); overflow: auto; padding: 10px 8px 14px; display: flex; flex-direction: column; gap: 2px; }
+.side h3 { font-size: 11.5px; color: var(--faint); font-weight: 700; margin: 12px 10px 4px; letter-spacing: .02em; }
+.cat {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 9px; border: 0; border-radius: 9px; background: none;
+  text-align: start; font-weight: 600; color: var(--muted); min-height: 38px;
+}
+.cat:hover { background: var(--row-hover); color: var(--ink); }
+.cat[aria-current="true"] { background: var(--brand-tint); color: var(--ink); }
+.cat[aria-current="true"] .ci { color: var(--accent-text); }
+.cat .ci { width: 20px; height: 20px; display: grid; place-items: center; color: var(--faint); flex: none; }
+.cat > span:nth-child(2) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat .n { margin-inline-start: auto; font-size: 12px; font-weight: 700; color: var(--faint); min-width: 18px; text-align: center; }
+.side-act {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 9px; min-height: 38px; margin-top: 2px; border: 1.5px dashed var(--brand-line);
+  border-radius: 9px; background: none; text-align: start; font-weight: 700; font-size: 13px; color: var(--accent-text);
+}
+.side-act:hover { background: var(--brand-tint); }
+.side-act svg { flex: none; }
+.side-card { margin-top: auto; border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--surface-2); display: grid; gap: 8px; }
+.side-card b { font-size: 13.5px; }
+.side-card p { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+/* ---------- the list ---------- */
+.content { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; min-width: 0; background: var(--surface); }
+.listwrap { overflow: auto; min-height: 0; position: relative; }
+.list { min-width: 0; }
+.row {
+  display: grid; grid-template-columns: var(--cols); align-items: center; gap: 12px; padding: 0 14px; min-height: 52px;
+  border-bottom: 1px solid var(--line); position: relative;
+}
+.head {
+  position: sticky; top: 0; z-index: 2; min-height: 36px; background: var(--surface-2); border-bottom: 1px solid var(--line);
+  font-size: 12px; font-weight: 700; color: var(--muted);
+}
+.head button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 2px 2px; }
+.head button:focus-visible { outline: 2px solid var(--focus); }
+.head button .arrow { opacity: 0; width: 10px; }
+.head button[data-dir] .arrow { opacity: 1; }
+.head button[data-dir="asc"] .arrow { transform: rotate(180deg); }
+.item { cursor: default; }
+.item:hover { background: var(--row-hover); }
+.item[aria-selected="true"] { background: var(--sel); }
+.item[aria-selected="true"]::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 3px; background: var(--brand); }
+.c-name { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.ficon { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; flex: none; position: relative; overflow: hidden; }
+.ficon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ficon.video { background: #FFE6D6; color: #C2510A; }
+.ficon.music { background: #E8E4FF; color: #5B47D6; }
+.ficon.pictures { background: #FFE3EE; color: #C2185B; }
+.ficon.programs { background: #DFF0FF; color: #1F6FB8; }
+.ficon.documents { background: #E3F5EA; color: #138A4A; }
+.ficon.compressed { background: #FFF1CC; color: #9A6B00; }
+.ficon.other { background: #EDEDED; color: #5E5E5E; }
+:root[data-theme="dark"] .ficon.video { background: #3B2416; color: #FF9550; }
+:root[data-theme="dark"] .ficon.music { background: #252047; color: #A99BFF; }
+:root[data-theme="dark"] .ficon.pictures { background: #3A1626; color: #FF8AB5; }
+:root[data-theme="dark"] .ficon.programs { background: #14283C; color: #6CB4F5; }
+:root[data-theme="dark"] .ficon.documents { background: #12301F; color: #4CC983; }
+:root[data-theme="dark"] .ficon.compressed { background: #352A0E; color: #F2C14E; }
+:root[data-theme="dark"] .ficon.other { background: #2A2A2A; color: #B0B0B0; }
+.ficon .site { position: absolute; bottom: 0; inset-inline-end: 0; background: rgba(0, 0, 0, .8); color: #fff; font-size: 8.5px; font-weight: 800; padding: 1px 3px; border-start-start-radius: 4px; line-height: 1.2; }
+.nm { min-width: 0; display: grid; }
+.nm .t { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; text-align: left; }
+html[dir="rtl"] .nm .t, html[dir="rtl"] .nm .s .tx { text-align: right; }
+.nm .s { font-size: 12px; color: var(--muted); display: flex; align-items: center; min-width: 0; white-space: nowrap; }
+.nm .s .tx { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; unicode-bidi: plaintext; text-align: left; }
+.nm .s .lab { flex: none; display: inline-block; font-weight: 700; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; margin-inline-end: 6px; font-size: 11px; line-height: 1.5; direction: ltr; }
+.nm .s .lab.nomusic { display: inline-flex; align-items: center; gap: 3px; direction: inherit; color: var(--accent-text); background: var(--brand-tint); border-color: var(--brand-line); }
+.c-size, .c-speed, .c-eta, .c-date { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-size { color: var(--ink); }
+.c-prog { display: grid; gap: 4px; min-width: 0; }
+.c-prog .st { font-size: 12px; font-weight: 600; white-space: nowrap; display: flex; gap: 6px; align-items: center; min-width: 0; }
+.c-prog .st .stx { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-prog .st .pct { flex: none; margin-inline-start: auto; color: var(--muted); font-weight: 600; direction: ltr; }
+.bar6 { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; position: relative; }
+.bar6 i { position: absolute; inset-block: 0; inset-inline-start: 0; width: 0; background: var(--brand); border-radius: 3px; transition: width .4s linear; }
+.bar6.busy i { width: 100% !important; background: repeating-linear-gradient(-45deg, var(--brand) 0 8px, var(--brand-hover) 8px 16px); background-size: 23px 23px; animation: stripes .9s linear infinite; }
+@keyframes stripes { to { background-position: 23px 0; } }
+.s-running .st { color: var(--ink); }
+.s-queued .st { color: var(--muted); }
+.s-paused .st { color: var(--wait); }
+.s-paused .bar6 i { background: var(--wait); }
+.s-error .st { color: var(--bad); }
+.s-error .bar6 i { background: var(--bad); }
+.s-done .st { color: var(--ok); }
+.s-done .bar6 { display: none; }
+.dotc { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.row-actions { position: absolute; inset-inline-end: 8px; top: 50%; transform: translateY(-50%); display: none; gap: 4px; background: var(--row-hover); padding-inline-start: 8px; box-shadow: 0 0 0 4px var(--row-hover); border-radius: 8px; }
+.item[aria-selected="true"] .row-actions { background: var(--sel); box-shadow: 0 0 0 4px var(--sel); }
+.item:hover .row-actions, .item:focus-within .row-actions { display: flex; }
+.ra { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--ink); }
+.ra:hover { border-color: var(--brand); color: var(--accent-text); }
+.flash { animation: flash 1.4s ease-out; }
+@keyframes flash { 0%, 30% { background: var(--brand-tint); } 100% { background: transparent; } }
+
+.empty { display: grid; place-items: center; text-align: center; padding: 40px 20px; min-height: 100%; }
+.empty .box { max-width: 460px; display: grid; justify-items: center; gap: 10px; }
+.empty .ic { width: 64px; height: 64px; border-radius: 18px; background: var(--brand-tint); color: var(--accent-text); display: grid; place-items: center; margin-bottom: 6px; }
+.empty h2 { font-size: 19px; }
+.empty p { color: var(--muted); }
+.empty .row2 { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.empty .tipline { margin-top: 14px; font-size: 12.5px; color: var(--faint); }
+.kbd { display: inline-block; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; font-size: 11.5px; color: var(--muted); direction: ltr; }
+
+/* ---------- details ---------- */
+.details { border-top: 1px solid var(--line); background: var(--surface-2); padding: 12px 16px 14px; display: grid; gap: 10px; max-height: 46vh; overflow: auto; }
+.det-head { display: flex; align-items: center; gap: 10px; }
+.det-head h2 { font-size: 15px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; text-align: start; }
+.det-grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 13px; margin: 0; }
+.det-grid.two { grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr); column-gap: 14px; }
+@media (max-width: 900px) { .det-grid.two { grid-template-columns: max-content minmax(0, 1fr); } }
+.det-grid dt { color: var(--muted); }
+.det-grid dd { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; gap: 8px; align-items: center; }
+.det-grid dd .v { overflow: hidden; text-overflow: ellipsis; unicode-bidi: plaintext; }
+.det-grid dd.url .v { direction: ltr; }
+.segs { height: 14px; border-radius: 4px; background: var(--line); position: relative; overflow: hidden; }
+.segs i { position: absolute; top: 0; bottom: 0; background: var(--brand); }
+.segs i.part { opacity: .55; }
+.det-err { border-radius: 10px; background: var(--bad-tint); padding: 10px 12px; display: grid; gap: 6px; }
+.det-err b { color: var(--bad); }
+.det-err .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.det-err details { font-size: 12px; color: var(--muted); }
+.det-err pre { white-space: pre-wrap; word-break: break-all; direction: ltr; text-align: left; max-height: 160px; overflow: auto; user-select: text; -webkit-user-select: text; }
+
+/* ---------- status bar ---------- */
+.statusbar { display: flex; align-items: center; gap: 18px; padding: 5px 14px; border-top: 1px solid var(--line); background: var(--surface-2); font-size: 12.5px; color: var(--muted); min-height: 30px; }
+.statusbar .grow { flex: 1; }
+.statusbar b { color: var(--ink); font-weight: 600; }
+#sb-folder { max-width: 40vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+
+/* ---------- dialogs ---------- */
+.overlay { position: fixed; inset: 0; z-index: 40; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, .46); padding: 16px; }
+.overlay.open { display: flex; }
+.cbar { display: none; }
+.dlg { display: none; width: min(560px, 100%); max-height: 100%; background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg); flex-direction: column; overflow: hidden; }
+.dlg.open { display: flex; }
+.dlg:focus { outline: none; }
+.dlg.wide { width: min(760px, 100%); }
+.dlg-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px 6px; }
+.dlg-head h2 { font-size: 17px; flex: 1; }
+.dlg-head .count { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.xbtn { width: 34px; height: 34px; border-radius: 9px; border: 0; background: none; display: grid; place-items: center; color: var(--muted); }
+.xbtn:hover { background: var(--row-hover); color: var(--ink); }
+.dlg-body { padding: 8px 18px 14px; overflow: auto; display: grid; gap: 14px; min-height: 0; align-content: start; }
+.dlg-foot { padding: 12px 18px 16px; display: flex; gap: 8px; align-items: center; border-top: 1px solid var(--line); background: var(--surface-2); }
+.dlg-foot .grow { flex: 1; }
+.field { display: grid; gap: 6px; }
+.field > label, .field > .lab { font-weight: 600; font-size: 13px; }
+.field small, .hint { color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+.inline { display: flex; gap: 8px; align-items: center; }
+.inline > input, .inline > select { flex: 1; min-width: 0; }
+.err-box { border-radius: 10px; background: var(--bad-tint); padding: 10px 12px; display: grid; gap: 4px; }
+.err-box b { color: var(--bad); }
+.err-box details { font-size: 12px; color: var(--muted); }
+.err-box pre { white-space: pre-wrap; word-break: break-all; direction: ltr; text-align: left; max-height: 140px; overflow: auto; margin: 6px 0 0; user-select: text; -webkit-user-select: text; }
+.busy-line { display: flex; gap: 10px; align-items: center; color: var(--muted); }
+.spinner { width: 18px; height: 18px; border-radius: 50%; flex: none; border: 3px solid var(--line); border-top-color: var(--brand); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* the new download window */
+.fhead { display: flex; gap: 14px; align-items: center; }
+.fhead .ficon { width: 52px; height: 52px; border-radius: 14px; }
+.fhead .ficon svg { width: 26px; height: 26px; }
+.fhead .meta { min-width: 0; display: grid; gap: 2px; }
+.fhead .meta .big { font-size: 20px; font-weight: 700; direction: ltr; text-align: start; unicode-bidi: plaintext; }
+.fhead .meta .from { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note { border-radius: 10px; padding: 9px 12px; font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
+.note.warn { background: var(--wait-tint); }
+.note.info { background: var(--brand-tint); }
+.note .acts { margin-inline-start: auto; }
+.where { display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--line); border-radius: 10px; padding: 7px 8px 7px 12px; }
+html[dir="rtl"] .where { padding: 7px 12px 7px 8px; }
+.where .wtxt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; unicode-bidi: plaintext; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* the video window (qualities) */
+.vcard { display: grid; grid-template-columns: 132px 1fr; gap: 12px; align-items: start; }
+.thumb { position: relative; width: 132px; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: var(--line); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb.tall img { object-fit: contain; background: #000; }
+.thumb .dur { position: absolute; bottom: 5px; inset-inline-end: 5px; background: rgba(0, 0, 0, .82); color: #fff; font-size: 11px; font-weight: 600; line-height: 1; padding: 4px 5px; border-radius: 6px; direction: ltr; }
+.thumb .noimg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
+#v-items { display: grid; gap: 6px; }
+.vcard .vt { font-weight: 700; font-size: 15px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+.vcard .vc { color: var(--muted); font-size: 12.5px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-pill { display: inline-block; background: var(--ink); color: var(--bg); font-size: 11px; font-weight: 700; line-height: 1; padding: 4px 7px; border-radius: 6px; margin-inline-end: 6px; }
+.tiles { display: flex; gap: 8px; overflow-x: auto; padding: 3px; }
+.tile { position: relative; flex: none; width: 64px; height: 64px; padding: 0; border: 0; border-radius: 10px; overflow: hidden; background: var(--line); outline: 3px solid transparent; }
+.tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tile .n { position: absolute; top: 4px; inset-inline-start: 4px; background: rgba(0, 0, 0, .78); color: #fff; font-size: 11px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 6px; }
+.tile[aria-checked="true"] { outline-color: var(--brand); }
+.kind { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; }
+.kind button { display: inline-flex; align-items: center; gap: 7px; border: 0; background: none; border-radius: 9px; padding: 6px 12px; min-height: 36px; font-weight: 700; color: var(--muted); }
+.kind button[aria-checked="true"] { background: var(--ink); color: var(--bg); }
+.kindrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.kindrow .hint { font-size: 12px; }
+.qlist { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.q { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; column-gap: 12px; row-gap: 1px; padding: 9px 12px; min-height: 52px; cursor: pointer; border-top: 1px solid var(--line); position: relative; }
+.q:first-child { border-top: 0; }
+.q input { position: absolute; opacity: 0; pointer-events: none; }
+.q:hover { background: var(--row-hover); }
+.q.sel { background: var(--brand-tint); }
+.q.sel::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 3px; background: var(--brand); }
+.q .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--brand-line); display: grid; place-items: center; }
+.q.sel .dot { border-color: var(--brand); }
+.q.sel .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+.q-name { display: flex; align-items: baseline; gap: 8px; line-height: 1.25; }
+.q-label { font-weight: 800; font-size: 15.5px; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+.q-tag { font-size: 11.5px; font-weight: 600; color: var(--muted); direction: ltr; unicode-bidi: isolate; }
+.q-desc { color: var(--muted); font-size: 12.5px; line-height: 1.45; grid-column: 2 / 4; grid-row: 2; }
+.q-size { font-weight: 600; font-size: 13px; white-space: nowrap; }
+.badge { display: inline-block; background: var(--brand); color: #000; font-size: 11px; font-weight: 700; line-height: 1; padding: 3px 7px 4px; border-radius: 999px; margin-inline-start: 6px; }
+.q-note { display: block; font-size: 11.5px; color: var(--muted); }
+.alt-list { display: grid; gap: 6px; }
+.alt { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; }
+.alt .k { font-size: 11px; font-weight: 800; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 2px 7px; }
+.alt .w { flex: 1; min-width: 0; font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* settings */
+.stabs { display: flex; gap: 4px; padding: 4px 18px 0; border-bottom: 1px solid var(--line); }
+.stabs button { border: 0; background: none; padding: 9px 12px 11px; font-weight: 700; color: var(--muted); position: relative; }
+.stabs button[aria-selected="true"] { color: var(--ink); }
+.stabs button[aria-selected="true"]::after { content: ""; position: absolute; inset-inline: 10px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--brand); }
+.spane { display: none; gap: 14px; }
+.spane.open { display: grid; }
+.sw-row { display: flex; align-items: center; gap: 14px; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+.sw-row b { display: block; font-weight: 600; }
+.sw-row small { display: block; color: var(--muted); font-size: 12.5px; }
+.switch { appearance: none; -webkit-appearance: none; flex: none; width: 40px; height: 22px; border-radius: 11px; background: #BDBDBD; position: relative; margin: 0; cursor: pointer; transition: background .15s; }
+.switch::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .3); transition: inset-inline-start .15s; }
+.switch:checked { background: var(--brand); }
+.switch:checked::after { inset-inline-start: 21px; }
+.nmswitch {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 12px;
+  background: var(--surface-2); font-weight: 700; color: var(--muted); white-space: nowrap; transition: background .15s, border-color .15s, color .15s;
+}
+.nmswitch:hover { border-color: var(--faint); color: var(--ink); }
+.nmswitch .track { width: 34px; height: 20px; border-radius: 10px; background: #BDBDBD; position: relative; flex: none; transition: background .15s; }
+.nmswitch .track::after {
+  content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3); transition: inset-inline-start .15s;
+}
+.nmswitch[aria-checked="true"] { background: var(--brand-tint); border-color: var(--brand-line); color: var(--accent-text); }
+.nmswitch[aria-checked="true"] .track { background: var(--brand); }
+.nmswitch[aria-checked="true"] .track::after { inset-inline-start: 17px; }
+.stepper { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+.stepper button { width: 36px; height: 36px; border: 0; background: var(--surface-2); font-size: 18px; font-weight: 700; }
+.stepper output { min-width: 44px; text-align: center; font-weight: 700; }
+.saved { color: var(--ok); font-weight: 600; font-size: 13px; }
+
+/* browsers */
+.brlist { display: grid; gap: 10px; }
+.br { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px; }
+.br-top { display: flex; align-items: center; gap: 10px; }
+.br-top b { flex: 1; }
+.br-top { flex-wrap: wrap; }
+.steps { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; color: var(--muted); }
+.steps b { color: var(--ink); }
+.pathbox { display: flex; gap: 8px; align-items: center; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; }
+.pathbox code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; text-align: left; font-family: Consolas, ui-monospace, monospace; font-size: 12.5px; user-select: text; -webkit-user-select: text; }
+.conn { display: flex; gap: 10px; align-items: center; border-radius: 10px; padding: 9px 12px; background: var(--surface-2); font-size: 13px; }
+.conn.ok { background: var(--ok-tint); }
+.conn .dotc { color: var(--faint); }
+.conn.ok .dotc { color: var(--ok); }
+
+/* HELINK's own update */
+.upd-btn {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--brand);
+  background: rgba(242, 114, 33, .12); color: #FFB27A; font-weight: 700; font-size: 12.5px; white-space: nowrap; margin-inline-end: 4px;
+}
+.upd-btn:hover { background: rgba(242, 114, 33, .24); color: #fff; }
+.upd-top { display: flex; gap: 14px; align-items: center; }
+.upd-ic { width: 52px; height: 52px; border-radius: 14px; background: var(--brand-tint); color: var(--accent-text); display: grid; place-items: center; flex: none; }
+.upd-ver { font-size: 19px; font-weight: 800; }
+.upd-news { display: grid; gap: 8px; }
+.upd-news h3 { font-size: 13.5px; }
+.upd-track { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.upd-track i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .25s; }
+.upd-prog { display: grid; gap: 6px; }
+.upd-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.upd-row .grow { flex: 1; min-width: 160px; }
+.upd-row .hint b { color: var(--ink); }
+.acard h3 .grow { flex: 1; }
+.acard h3 .hint { font-weight: 600; }
+
+/* a course or playlist: all of it at once */
+#v-list { display: grid; gap: 12px; }
+#v-choose { display: grid; gap: 12px; }
+#v-inlist { align-items: center; }
+.lcard { display: grid; grid-template-columns: 132px 1fr; gap: 12px; align-items: center; }
+.lthumb { position: relative; width: 132px; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: var(--line); box-shadow: 5px -5px 0 -1px var(--surface), 5px -5px 0 0 var(--faint); }
+html[dir="rtl"] .lthumb { box-shadow: -5px -5px 0 -1px var(--surface), -5px -5px 0 0 var(--faint); }
+.lthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lthumb .lcount { position: absolute; inset-block: 0; inset-inline-end: 0; width: 44%; background: rgba(0, 0, 0, .74); color: #fff; display: grid; place-items: center; align-content: center; gap: 2px; font-weight: 800; font-size: 15px; }
+.lthumb .lcount svg { width: 18px; height: 18px; }
+.lcard .vt { font-weight: 700; font-size: 15px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+.lcard .vc { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+.lq { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.lq button { display: grid; gap: 2px; align-content: start; text-align: start; border: 1.5px solid var(--line); background: var(--surface); border-radius: 12px; padding: 7px 12px; min-width: 0; color: var(--ink); }
+.lq button:hover { border-color: var(--faint); }
+.lq button[aria-checked="true"] { border-color: var(--brand); background: var(--brand-tint); }
+.lq .ql { font-weight: 800; font-size: 15px; text-align: start; }
+.lq .qd { font-size: 11.5px; color: var(--muted); }
+.lq .badge { margin-inline-start: 0; justify-self: start; }
+.lbox { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.lhead { display: flex; align-items: center; gap: 10px; padding: 7px 12px; background: var(--surface-2); border-bottom: 1px solid var(--line); font-size: 13px; }
+.lhead label { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; }
+.lhead .grow { flex: 1; }
+.lentries { max-height: 286px; overflow: auto; }
+.le { display: grid; grid-template-columns: 18px 30px 64px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 5px 12px; border-top: 1px solid var(--line); cursor: pointer; }
+.le:first-child { border-top: 0; }
+.le:hover { background: var(--row-hover); }
+.le .n { color: var(--muted); font-size: 12px; font-weight: 700; text-align: center; direction: ltr; }
+.le .lt { width: 64px; aspect-ratio: 16 / 9; border-radius: 6px; object-fit: cover; background: var(--line); display: block; }
+.le .t { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: 13px; font-weight: 600; }
+.le .tt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; }
+.le .hv { flex: none; font-size: 11px; font-weight: 700; color: var(--ok); background: var(--ok-tint); border-radius: 999px; padding: 1px 8px; }
+.le .d { color: var(--muted); font-size: 12px; direction: ltr; }
+.le.off { cursor: default; }
+.le.off .t, .le.off .lt { opacity: .45; }
+.le.off .d { font-size: 11.5px; direction: inherit; }
+.lbox input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); cursor: pointer; }
+
+/* about */
+.about-app { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 6px 0; }
+.about-logo { width: 190px; height: 40px; color: var(--ink); }
+.about-tag { color: var(--muted); }
+.acard { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.acard h3 { font-size: 14.5px; display: flex; align-items: center; gap: 8px; }
+.points { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.points li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; color: var(--muted); }
+.points svg { color: var(--ok); margin-top: 3px; }
+.owner { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; }
+.avatar { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--brand); }
+.owner .nm2 { font-weight: 700; font-size: 16px; }
+.owner .rl { color: var(--muted); font-size: 13px; }
+.phone { font-size: 20px; font-weight: 800; direction: ltr; letter-spacing: .02em; }
+.foot-note { text-align: center; color: var(--faint); font-size: 12px; display: grid; gap: 2px; }
+
+/* menu, toast */
+.menu { position: fixed; z-index: 60; min-width: 210px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 6px; display: none; }
+.menu.open { display: grid; }
+.menu button { border: 0; background: none; text-align: start; padding: 8px 12px; border-radius: 8px; display: flex; gap: 10px; align-items: center; font-weight: 500; }
+.menu button:hover, .menu button:focus-visible { background: var(--row-hover); outline: none; }
+.menu button.danger { color: var(--bad); }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 5px 4px; }
+.toast { position: fixed; bottom: 46px; left: 50%; transform: translate(-50%, 20px); z-index: 70; background: #111; color: #fff; padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 13.5px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: min(560px, calc(100vw - 32px)); box-shadow: var(--shadow-lg); }
+:root[data-theme="dark"] .toast { background: #F2F2F2; color: #111; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.drop { position: fixed; inset: 0; z-index: 80; display: none; place-items: center; background: rgba(242, 114, 33, .14); border: 3px dashed var(--brand); pointer-events: none; font-size: 18px; font-weight: 800; color: var(--accent-text); }
+.drop.show { display: grid; }
+
+/* ---------- the small window (from the browser) ---------- */
+body.compact { grid-template-rows: 1fr; }
+body.compact > .bar, body.compact > .banner, body.compact > .app, body.compact > .statusbar { display: none; }
+body.compact .overlay { background: var(--bg); padding: 0; justify-content: stretch; }
+body.compact .cbar { display: flex; align-items: center; gap: 10px; width: 100%; background: #000; color: #fff; border-bottom: 3px solid var(--brand); padding: 8px 14px; flex: none; }
+body.compact .cbar .logo { width: 96px; height: 20px; }
+body.compact .cbar .linkbtn { color: #FFB27A; margin-inline-start: auto; }
+body.compact .dlg { width: 100%; flex: 1; max-height: none; border-radius: 0; box-shadow: none; }
+body.compact .dlg .xbtn { display: none; }
+body.compact .dlg-body { flex: 1; align-content: start; }
+/* the downloads started from the browser's menu, near the clock */
+.mini { display: none; }
+body.mini-mode .dlg { display: none !important; }
+body.mini-mode .mini { display: block; width: 100%; flex: 0 1 auto; min-height: 0; overflow: auto; background: var(--surface); }
+.mrow { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; column-gap: 11px; row-gap: 3px; align-items: center; padding: 10px 12px 11px 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.mrow:last-child { border-bottom: 0; }
+.mrow:hover { background: var(--row-hover); }
+.mrow:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.mrow .ficon { grid-column: 1; grid-row: 1 / span 2; width: 36px; height: 36px; }
+.mrow .t { grid-column: 2; grid-row: 1; min-width: 0; font-weight: 700; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; text-align: start; }
+.mrow .st { grid-column: 2; grid-row: 2; min-width: 0; font-size: 12px; font-weight: 600; display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+.mrow .st .stx { flex: none; }
+.mrow .st .more { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-weight: 500; }
+.mrow .st .pct { flex: none; margin-inline-start: auto; color: var(--muted); direction: ltr; }
+.mrow .acts { grid-column: 3; grid-row: 1 / span 2; display: flex; gap: 4px; }
+.mrow .bar6 { grid-column: 2 / -1; grid-row: 3; margin-top: 5px; }
+.mrow .lab { flex: none; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); }
+
+/* ---------- narrow windows ---------- */
+/* the tools' names need a wide window; "remove music" keeps its name down to 1100 px */
+@media (max-width: 1439px) {
+  .tool .lbl { display: none; }
+  .search { width: 170px; }
+}
+@media (max-width: 1099px) {
+  .add-btn.alt .lbl { display: none; }
+  .add-btn.alt { padding: 0 10px; }
+}
+@media (max-width: 899px) {
+  #tb-pause-all, #tb-resume-all, .tools .sep { display: none; }
+  .search { min-width: 104px; }
+}
+@media (max-width: 900px) {
+  :root { --cols: minmax(160px, 1fr) 84px 150px 76px; }
+  .c-speed, .c-date { display: none !important; }
+  .list { min-width: 0; }
+}
+@media (max-width: 640px) {
+  .tools, .search { display: none; }
+  .logo { width: 92px; }
+  #sb-speed { display: none; }
+}
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .search { display: none; }
+  :root { --cols: minmax(150px, 1fr) 140px; }
+  .c-size, .c-eta { display: none !important; }
+  .grid2 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><svg class="logo" viewBox="220 745 1603 335" role="img" aria-label="HELINK"><path fill="currentColor" d="M222 747V1078L284.5 1032.5V950.5H402.5V1030.5L461 1078V858L402.5 896.5H284.5V793ZM539 784V1047H743V998.5H599.5V936.5H722V890.5H599.5V832.5H738V784ZM822 784V1047H1016V998.5H882.5V784ZM1080 784V1047H1141V784ZM1234 784V1047H1294V887.5L1425 1047H1476V784H1416V943L1284.5 784ZM1569 784V1047H1629.5V980.5L1665 944L1749 1047H1820L1704.5 901L1813.5 784H1746L1629.5 906V784Z"/><path fill="#F27221" d="M466 758L408 804L403 878L460 840.5Z"/></svg></div>
+  <button class="add-btn" id="add-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-t="tb.add"></span></button>
+  <button class="add-btn alt" id="sep-btn" type="button" data-ta="title:tb.sepTitle;aria-label:tb.sepTitle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/></svg><span class="lbl" data-t="tb.sep"></span></button>
+  <div class="tools" role="toolbar" data-ta="aria-label:tb.aria">
+    <button class="tool" id="tb-resume" type="button" data-ta="title:tb.resume"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg><span class="lbl" data-t="tb.resume"></span></button>
+    <button class="tool" id="tb-pause" type="button" data-ta="title:tb.pause"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor"/><rect x="13.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor"/></svg><span class="lbl" data-t="tb.pause"></span></button>
+    <button class="tool" id="tb-delete" type="button" data-ta="title:tb.delete"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9.5 7V4.8h5V7M6.5 7l.9 12.2a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5L17.5 7"/></svg><span class="lbl" data-t="tb.delete"></span></button>
+    <span class="sep"></span>
+    <button class="tool" id="tb-pause-all" type="button" data-ta="title:tb.pauseAll"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M10 9v6M14 9v6" stroke-linecap="round"/></svg><span class="lbl" data-t="tb.pauseAll"></span></button>
+    <button class="tool" id="tb-resume-all" type="button" data-ta="title:tb.resumeAll"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M10.2 8.6v6.8l5.4-3.4z" fill="currentColor" stroke="none"/></svg><span class="lbl" data-t="tb.resumeAll"></span></button>
+  </div>
+  <div class="spacer"></div>
+  <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="search" type="text" spellcheck="false" data-ta="placeholder:search.ph;aria-label:search.ph"></label>
+  <button class="upd-btn" id="upd-btn" type="button" hidden data-ta="title:upd.pillTitle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg><span data-t="upd.pill"></span></button>
+  <button class="ibtn ext-dot" id="br-btn" type="button" data-ta="title:tb.browsers;aria-label:tb.browsers"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5h3.2a2 2 0 0 1 4 0h1.3A1.5 1.5 0 0 1 19 6v3.3a2 2 0 0 1 0 4V18a1.5 1.5 0 0 1-1.5 1.5h-3.3a2 2 0 0 0-4 0H6.5A1.5 1.5 0 0 1 5 18v-3.2a2 2 0 0 0 0-4V6a1.5 1.5 0 0 1 1.5-1.5z"/></svg></button>
+  <button class="ibtn" id="set-btn" type="button" data-ta="title:tb.settings;aria-label:tb.settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  <button class="lang-btn" id="lang-btn" type="button" data-t="lang.other" data-ta="aria-label:lang.aria"></button>
+  <button class="ibtn" id="about-btn" type="button" data-ta="title:tb.about;aria-label:tb.about"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M12 11v5.5"/><circle cx="12" cy="7.6" r=".6" fill="currentColor"/></svg></button>
+</header>
+
+<div class="banner" id="banner" hidden>
+  <span class="spinner" id="banner-spin"></span>
+  <span class="txt" id="banner-txt"></span>
+  <span class="mini" id="banner-mini"><i id="banner-fill"></i></span>
+  <button class="btn small" id="banner-btn" type="button" hidden></button>
+</div>
+
+<div class="app">
+  <nav class="side" id="side" data-ta="aria-label:side.aria">
+    <button class="cat" type="button" data-filter="all"><span class="ci"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg></span><span data-t="side.all"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="unfinished"><span class="ci"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.5V12l3 2"/></svg></span><span data-t="side.unfinished"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="finished"><span class="ci"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><span data-t="side.finished"></span><span class="n"></span></button>
+    <h3 data-t="side.kinds"></h3>
+    <button class="cat" type="button" data-filter="video"><span class="ci" data-icon="video"></span><span data-t="cat.video"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="music"><span class="ci" data-icon="music"></span><span data-t="cat.music"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="pictures"><span class="ci" data-icon="pictures"></span><span data-t="cat.pictures"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="programs"><span class="ci" data-icon="programs"></span><span data-t="cat.programs"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="documents"><span class="ci" data-icon="documents"></span><span data-t="cat.documents"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="compressed"><span class="ci" data-icon="compressed"></span><span data-t="cat.compressed"></span><span class="n"></span></button>
+    <button class="cat" type="button" data-filter="other"><span class="ci" data-icon="other"></span><span data-t="cat.other"></span><span class="n"></span></button>
+    <h3 data-t="side.music"></h3>
+    <button class="cat" type="button" data-filter="nomusic"><span class="ci" data-icon="nomusic"></span><span data-t="side.noMusic"></span><span class="n"></span></button>
+    <button class="side-act" id="side-sep" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-t="side.sepPick"></span></button>
+    <div class="side-card" id="side-card">
+      <b data-t="card.title"></b>
+      <p data-t="card.text"></p>
+      <button class="btn small primary" id="card-btn" type="button" data-t="card.btn"></button>
+    </div>
+  </nav>
+  <section class="content">
+    <div class="listwrap" id="listwrap">
+      <div class="list" id="list" role="grid" aria-multiselectable="true" data-ta="aria-label:list.aria">
+        <div class="row head" role="row">
+          <span role="columnheader"><button type="button" data-sort="name"><span data-t="col.name"></span><svg class="arrow" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button></span>
+          <span role="columnheader" class="c-size"><button type="button" data-sort="size"><span data-t="col.size"></span><svg class="arrow" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button></span>
+          <span role="columnheader"><button type="button" data-sort="state"><span data-t="col.state"></span><svg class="arrow" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button></span>
+          <span role="columnheader" class="c-speed"><span data-t="col.speed"></span></span>
+          <span role="columnheader" class="c-eta"><span data-t="col.eta"></span></span>
+          <span role="columnheader" class="c-date"><button type="button" data-sort="date"><span data-t="col.date"></span><svg class="arrow" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button></span>
+        </div>
+        <div id="rows"></div>
+      </div>
+      <div class="empty" id="empty" hidden>
+        <div class="box">
+          <div class="ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg></div>
+          <h2 id="empty-title"></h2>
+          <p id="empty-text"></p>
+          <div class="row2" id="empty-btns">
+            <button class="btn primary" id="empty-add" type="button" data-t="tb.add"></button>
+            <button class="btn" id="empty-sep" type="button" data-t="empty.sep"></button>
+            <button class="btn" id="empty-br" type="button" data-t="card.btn"></button>
+          </div>
+          <p class="tipline" data-th="empty.tip"></p>
+        </div>
+      </div>
+    </div>
+    <aside class="details" id="details" hidden aria-live="polite"></aside>
+  </section>
+</div>
+
+<footer class="statusbar">
+  <span id="sb-active"></span>
+  <span id="sb-speed"></span>
+  <span class="grow"></span>
+  <span><span data-t="sb.folder"></span> <button class="linkbtn" id="sb-folder" type="button"></button></span>
+</footer>
+
+<!-- ======================================================= dialogs -->
+<div class="overlay" id="overlay">
+  <div class="cbar"><svg class="logo" viewBox="220 745 1603 335" role="img" aria-label="HELINK"><path fill="currentColor" d="M222 747V1078L284.5 1032.5V950.5H402.5V1030.5L461 1078V858L402.5 896.5H284.5V793ZM539 784V1047H743V998.5H599.5V936.5H722V890.5H599.5V832.5H738V784ZM822 784V1047H1016V998.5H882.5V784ZM1080 784V1047H1141V784ZM1234 784V1047H1294V887.5L1425 1047H1476V784H1416V943L1284.5 784ZM1569 784V1047H1629.5V980.5L1665 944L1749 1047H1820L1704.5 901L1813.5 784H1746L1629.5 906V784Z"/><path fill="#F27221" d="M466 758L408 804L403 878L460 840.5Z"/></svg><button class="linkbtn" id="expand" type="button" data-t="compact.open"></button></div>
+  <div class="mini" id="mini" role="list" data-ta="aria-label:mini.title"></div>
+
+  <!-- add a link -->
+  <div class="dlg" id="dlg-add" role="dialog" aria-modal="true" aria-labelledby="add-title">
+    <div class="dlg-head"><h2 id="add-title" data-t="add.title"></h2><button class="xbtn" type="button" data-close data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body">
+      <div class="field">
+        <label for="add-input" data-t="add.label"></label>
+        <div class="inline"><input id="add-input" type="text" dir="ltr" spellcheck="false" autocomplete="off" placeholder="https://"><button class="btn" id="add-paste" type="button" data-t="add.paste"></button></div>
+        <small data-t="add.hint"></small>
+      </div>
+      <div class="busy-line" id="add-busy" hidden><span class="spinner"></span><span data-t="add.checking"></span></div>
+      <div class="err-box" id="add-err" hidden></div>
+    </div>
+    <div class="dlg-foot"><span class="grow"></span><button class="btn" type="button" data-close data-t="btn.cancel"></button><button class="btn primary" id="add-go" type="button" data-t="add.go"></button></div>
+  </div>
+
+  <!-- a new download (a file) -->
+  <div class="dlg" id="dlg-file" role="dialog" aria-modal="true" aria-labelledby="file-title">
+    <div class="dlg-head"><h2 id="file-title" data-t="file.title"></h2><span class="count" id="file-count"></span><button class="xbtn" type="button" id="file-x" data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body">
+      <div class="fhead"><span class="ficon" id="file-icon"></span><div class="meta"><span class="big" id="file-size"></span><span class="from" id="file-from"></span></div></div>
+      <div class="note info" id="file-existing" hidden><span id="file-existing-txt"></span><span class="acts"><button class="btn small primary" id="file-continue" type="button" data-t="file.continue"></button></span></div>
+      <div class="field"><label for="file-name" data-t="file.name"></label><input id="file-name" type="text" spellcheck="false" autocomplete="off" dir="auto"></div>
+      <div class="grid2">
+        <div class="field"><label for="file-cat" data-t="file.kind"></label><select id="file-cat"></select></div>
+        <div class="field"><span class="lab" data-t="file.folder"></span><div class="where"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2 2.2h7.4A2.5 2.5 0 0 1 21 9.7v7.8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg><span class="wtxt" id="file-folder"></span><button class="btn small" id="file-change" type="button" data-t="file.change"></button></div></div>
+      </div>
+      <div class="note warn" id="file-noresume" hidden><span data-t="file.noResume"></span></div>
+      <div class="err-box" id="file-err" hidden></div>
+    </div>
+    <div class="dlg-foot"><button class="btn" id="file-cancel" type="button" data-t="btn.cancel"></button><span class="grow"></span><button class="btn" id="file-later" type="button" data-t="file.later"></button><button class="btn primary" id="file-start" type="button" data-t="file.start"></button></div>
+  </div>
+
+  <!-- a video: its qualities -->
+  <div class="dlg wide" id="dlg-video" role="dialog" aria-modal="true" aria-labelledby="video-title">
+    <div class="dlg-head"><h2 id="video-title" data-t="video.title"></h2><button class="xbtn" type="button" id="video-x" data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body" id="video-body">
+      <div class="note info" id="v-oldext" hidden><span data-t="v.oldExt"></span></div>
+      <div id="v-loading"><div class="busy-line"><span class="spinner"></span><span id="v-loading-txt"></span></div><p class="hint" id="v-slow" hidden></p></div>
+      <div id="v-choose" hidden>
+        <div class="vcard" id="v-card"></div>
+        <div class="note info" id="v-inlist" hidden><span data-t="v.inList"></span><span class="acts"><button class="btn small primary" id="v-inlist-btn" type="button" data-t="v.wholeList"></button></span></div>
+        <div id="v-items" hidden><p class="hint" id="v-items-title"></p><div class="tiles" id="v-tiles" role="radiogroup"></div></div>
+        <div class="kindrow">
+          <div class="kind" id="v-kind" role="radiogroup" data-ta="aria-label:kind.aria">
+            <button type="button" role="radio" data-kind="video" aria-checked="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.5 9.3v5.4l4.3-2.7z" fill="currentColor"/></svg><span data-t="kind.video"></span></button>
+            <button type="button" role="radio" data-kind="audio" aria-checked="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg><span data-t="kind.audio"></span></button>
+          </div>
+          <button type="button" class="nmswitch" id="v-nomusic" role="switch" aria-checked="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/></svg><span data-t="v.noMusic"></span><span class="track" aria-hidden="true"></span></button>
+        </div>
+        <div class="note info" id="v-nomusic-note" hidden><span id="v-nomusic-hint"></span></div>
+        <div class="qlist" id="v-qlist" role="radiogroup" data-ta="aria-label:v.quality"></div>
+        <div class="hint" id="v-where"></div>
+      </div>
+      <div id="v-list" hidden>
+        <div class="lcard" id="l-card"></div>
+        <div class="kindrow">
+          <div class="kind" id="l-kind" role="radiogroup" data-ta="aria-label:kind.aria">
+            <button type="button" role="radio" data-kind="video" aria-checked="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.5 9.3v5.4l4.3-2.7z" fill="currentColor"/></svg><span data-t="kind.video"></span></button>
+            <button type="button" role="radio" data-kind="audio" aria-checked="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg><span data-t="kind.audio"></span></button>
+          </div>
+          <button type="button" class="nmswitch" id="l-nomusic" role="switch" aria-checked="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/></svg><span data-t="v.noMusic"></span><span class="track" aria-hidden="true"></span></button>
+        </div>
+        <div class="note info" id="l-nomusic-note" hidden><span id="l-nomusic-hint"></span></div>
+        <div class="lq" id="l-q" role="radiogroup" data-ta="aria-label:l.quality"></div>
+        <div class="lbox">
+          <div class="lhead"><label><input type="checkbox" id="l-all"><span data-t="l.all"></span></label><span class="grow"></span><span class="hint" id="l-count"></span></div>
+          <div class="lentries" id="l-entries" role="list"></div>
+        </div>
+        <p class="hint" id="l-more" hidden></p>
+        <div class="hint" id="l-where"></div>
+      </div>
+      <div id="v-error" hidden>
+        <div class="err-box" id="v-err"></div>
+        <div id="v-alts" hidden><p class="hint" data-t="v.altText"></p><div class="alt-list" id="v-alt-list"></div></div>
+      </div>
+    </div>
+    <div class="dlg-foot"><button class="btn" id="video-cancel" type="button" data-t="btn.cancel"></button><span class="grow"></span><button class="btn" id="video-retry" type="button" data-t="btn.retry" hidden></button><button class="btn primary" id="video-go" type="button"></button></div>
+  </div>
+
+  <!-- settings -->
+  <div class="dlg wide" id="dlg-settings" role="dialog" aria-modal="true" aria-labelledby="set-title">
+    <div class="dlg-head"><h2 id="set-title" data-t="set.title"></h2><span class="saved" id="set-saved"></span><button class="xbtn" type="button" data-close data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="stabs" role="tablist">
+      <button type="button" role="tab" data-pane="general" aria-selected="true" data-t="set.general"></button>
+      <button type="button" role="tab" data-pane="downloads" aria-selected="false" data-t="set.downloads"></button>
+      <button type="button" role="tab" data-pane="browser" aria-selected="false" data-t="set.browser"></button>
+    </div>
+    <div class="dlg-body">
+      <div class="spane open" data-pane="general">
+        <div class="field"><label for="set-lang" data-t="set.lang"></label><select id="set-lang"><option value="ar">العربية</option><option value="en">English</option></select></div>
+        <label class="sw-row"><span><b data-t="set.autostart"></b><small data-t="set.autostartHint"></small></span><input class="switch" type="checkbox" data-set="autostart"></label>
+        <label class="sw-row"><span><b data-t="set.tray"></b><small data-t="set.trayHint"></small></span><input class="switch" type="checkbox" data-set="tray"></label>
+        <label class="sw-row"><span><b data-t="set.notify"></b></span><input class="switch" type="checkbox" data-set="notify"></label>
+      </div>
+      <div class="spane" data-pane="downloads">
+        <div class="field"><span class="lab" data-t="set.folder"></span><div class="where"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2 2.2h7.4A2.5 2.5 0 0 1 21 9.7v7.8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg><span class="wtxt" id="set-folder"></span><button class="btn small" id="set-folder-open" type="button" data-t="set.open"></button><button class="btn small" id="set-folder-change" type="button" data-t="file.change"></button></div></div>
+        <label class="sw-row"><span><b data-t="set.categoryDirs"></b><small data-t="set.categoryDirsHint"></small></span><input class="switch" type="checkbox" data-set="categoryDirs"></label>
+        <div class="sw-row" style="cursor:default"><span><b data-t="set.parallel"></b><small data-t="set.parallelHint"></small></span><span class="stepper" data-step="maxParallel" data-min="1" data-max="10"><button type="button" data-d="-1">−</button><output></output><button type="button" data-d="1">+</button></span></div>
+        <div class="sw-row" style="cursor:default"><span><b data-t="set.conns"></b><small data-t="set.connsHint"></small></span><span class="stepper" data-step="conns" data-min="1" data-max="16"><button type="button" data-d="-1">−</button><output></output><button type="button" data-d="1">+</button></span></div>
+      </div>
+      <div class="spane" data-pane="browser">
+        <label class="sw-row"><span><b data-t="set.catch"></b><small data-t="set.catchHint"></small></span><input class="switch" type="checkbox" data-set="catch"></label>
+        <label class="sw-row"><span><b data-t="set.dialog"></b><small data-t="set.dialogHint"></small></span><input class="switch" type="checkbox" data-set="dialog"></label>
+        <div class="field"><label for="set-types" data-t="set.types"></label><textarea id="set-types" rows="3" spellcheck="false"></textarea><div class="inline"><small class="grow" data-t="set.typesHint"></small><button class="btn small" id="set-types-reset" type="button" data-t="set.reset"></button></div></div>
+        <div class="grid2">
+          <div class="field"><label for="set-min" data-t="set.minKB"></label><input id="set-min" type="number" min="0" step="1" dir="ltr"><small data-t="set.minHint"></small></div>
+          <div class="field"><label for="set-skip" data-t="set.skip"></label><textarea id="set-skip" rows="3" spellcheck="false"></textarea><small data-t="set.sitesHint"></small></div>
+        </div>
+        <label class="sw-row"><span><b data-t="set.buttons"></b><small data-t="set.buttonsHint"></small></span><input class="switch" type="checkbox" data-set="buttons"></label>
+        <div class="field"><label for="set-bskip" data-t="set.buttonSkip"></label><textarea id="set-bskip" rows="2" spellcheck="false"></textarea><small data-t="set.sitesHint"></small></div>
+      </div>
+    </div>
+    <div class="dlg-foot"><span class="grow"></span><button class="btn primary" type="button" data-close data-t="btn.done"></button></div>
+  </div>
+
+  <!-- the browsers -->
+  <div class="dlg wide" id="dlg-browsers" role="dialog" aria-modal="true" aria-labelledby="br-title">
+    <div class="dlg-head"><h2 id="br-title" data-t="br.title"></h2><button class="xbtn" type="button" data-close data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body">
+      <p data-t="br.lead"></p>
+      <div class="conn" id="br-conn"><span class="dotc"></span><span id="br-conn-txt"></span></div>
+      <div class="br">
+        <div class="br-top"><b data-t="br.chromium"></b></div>
+        <ol class="steps">
+          <li data-th="br.c1"></li>
+          <li data-th="br.c2"></li>
+          <li data-th="br.c3"></li>
+        </ol>
+        <div class="pathbox"><code id="br-path"></code><button class="btn small" id="br-copy" type="button" data-t="br.copy"></button><button class="btn small" id="br-open" type="button" data-t="set.open"></button></div>
+        <div class="brlist" id="br-list"></div>
+      </div>
+      <div class="br" id="br-ff">
+        <div class="br-top"><b>Mozilla Firefox</b><button class="btn small primary" id="br-ff-install" type="button" data-t="br.ffInstall"></button><button class="btn small" id="br-ff-file" type="button" data-t="br.ffFile"></button></div>
+        <p class="hint" data-th="br.ff1"></p>
+        <p class="hint" data-th="br.ff2"></p>
+      </div>
+    </div>
+    <div class="dlg-foot"><span class="grow"></span><button class="btn primary" type="button" data-close data-t="btn.done"></button></div>
+  </div>
+
+  <!-- about -->
+  <div class="dlg wide" id="dlg-about" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <div class="dlg-head"><h2 id="about-title" data-t="tb.about"></h2><button class="xbtn" type="button" data-close data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body">
+      <div class="about-app">
+        <svg class="about-logo" viewBox="220 745 1603 335" role="img" aria-label="HELINK"><path fill="currentColor" d="M222 747V1078L284.5 1032.5V950.5H402.5V1030.5L461 1078V858L402.5 896.5H284.5V793ZM539 784V1047H743V998.5H599.5V936.5H722V890.5H599.5V832.5H738V784ZM822 784V1047H1016V998.5H882.5V784ZM1080 784V1047H1141V784ZM1234 784V1047H1294V887.5L1425 1047H1476V784H1416V943L1284.5 784ZM1569 784V1047H1629.5V980.5L1665 944L1749 1047H1820L1704.5 901L1813.5 784H1746L1629.5 906V784Z"/><path fill="#F27221" d="M466 758L408 804L403 878L460 840.5Z"/></svg>
+        <p class="about-tag" data-t="about.tagline"></p>
+      </div>
+      <div class="acard">
+        <h3><span data-t="upd.aboutTitle"></span><span class="grow"></span><span class="hint"><span data-t="about.version"></span> <bdi dir="ltr" id="about-version2"></bdi></span></h3>
+        <div class="upd-row"><p class="hint grow" id="ab-upd-txt"></p><button class="btn small" id="ab-upd-btn" type="button"></button></div>
+        <p class="hint" data-t="upd.aboutAuto"></p>
+      </div>
+      <div class="acard">
+        <h3 data-t="about.appTitle"></h3>
+        <p data-th="about.appText"></p>
+        <ul class="points">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f1"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f2"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f3"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f4"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f6"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f7"></span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-t="about.f5"></span></li>
+        </ul>
+      </div>
+      <div class="acard">
+        <h3 data-t="about.ownerTitle"></h3>
+        <div class="owner"><img class="avatar" src="@OWNER_PHOTO@" data-ta="alt:about.photoAlt" alt="" width="76" height="76"><div><p class="nm2" data-t="about.ownerName"></p><p class="rl" data-th="about.ownerRole"></p><p class="rl" data-th="about.coName"></p><p class="rl" data-t="about.coWhat"></p></div></div>
+      </div>
+      <div class="acard">
+        <h3 data-t="about.contactTitle"></h3>
+        <p class="phone">01500025887</p>
+        <p class="hint" data-t="about.contactNote"></p>
+        <div class="inline"><button class="btn primary small" id="copy-num" type="button" data-t="btn.copyNumber"></button><button class="btn small" id="wa" type="button" data-t="btn.whatsapp"></button></div>
+      </div>
+      <div class="foot-note"><p><bdi dir="ltr">HELINK</bdi> • <span data-t="about.version"></span> <bdi id="about-version"></bdi></p><p data-th="about.trademark"></p><p data-t="about.rights"></p></div>
+    </div>
+  </div>
+
+  <!-- a new version of HELINK -->
+  <div class="dlg" id="dlg-update" role="dialog" aria-modal="true" aria-labelledby="upd-title">
+    <div class="dlg-head"><h2 id="upd-title" data-t="upd.title"></h2><button class="xbtn" type="button" id="upd-x" data-ta="aria-label:btn.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-body">
+      <div class="upd-top"><span class="upd-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg></span><div><p class="upd-ver" id="upd-ver"></p><p class="hint" id="upd-sub"></p></div></div>
+      <div class="upd-news" id="upd-news"><h3 data-t="upd.news"></h3><ul class="points" id="upd-notes"></ul></div>
+      <div class="upd-prog" id="upd-prog" hidden><div class="upd-track"><i id="upd-fill"></i></div><p class="hint" id="upd-prog-txt"></p></div>
+      <div class="err-box" id="upd-err" hidden></div>
+      <p class="hint" id="upd-hint" data-t="upd.hint"></p>
+    </div>
+    <div class="dlg-foot"><button class="btn" id="upd-page" type="button" data-t="upd.page" hidden></button><span class="grow"></span><button class="btn" id="upd-later" type="button" data-t="upd.later"></button><button class="btn primary" id="upd-now" type="button" data-t="upd.now"></button></div>
+  </div>
+
+  <!-- delete -->
+  <div class="dlg" id="dlg-delete" role="alertdialog" aria-modal="true" aria-labelledby="del-title">
+    <div class="dlg-head"><h2 id="del-title"></h2></div>
+    <div class="dlg-body"><p id="del-text" class="hint"></p><label class="sw-row" id="del-files-row"><span><b data-t="del.files"></b></span><input class="switch" type="checkbox" id="del-files"></label></div>
+    <div class="dlg-foot"><span class="grow"></span><button class="btn" type="button" data-close data-t="btn.cancel"></button><button class="btn danger solid" id="del-ok" type="button" data-t="tb.delete"></button></div>
+  </div>
+
+  <!-- closing while downloading -->
+  <div class="dlg" id="dlg-close" role="alertdialog" aria-modal="true" aria-labelledby="close-title">
+    <div class="dlg-head"><h2 id="close-title"></h2></div>
+    <div class="dlg-body"><p id="close-msg"></p></div>
+    <div class="dlg-foot"><span class="grow"></span><button class="btn" id="close-keep" type="button" data-close></button><button class="btn danger solid" id="close-quit" type="button" data-t="close.quit"></button></div>
+  </div>
+</div>
+
+<div class="menu" id="menu" role="menu"></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="drop" id="drop" data-t="drop.text"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (id) => document.getElementById(id);
+const body = document.body;
+
+// ------------------------------------------------------------ the words
+// Modern Standard Arabic (the default) and English. What the engine writes (sizes,
+// qualities, errors, folders) arrives already in the language in use.
+const L = {
+  ar: {
+    'lang.other': 'EN', 'lang.aria': 'التبديل إلى الإنجليزية',
+    'tb.add': 'إضافة رابط', 'tb.aria': 'أوامر التنزيلات', 'tb.resume': 'استئناف', 'tb.pause': 'إيقاف مؤقت', 'tb.delete': 'حذف',
+    'tb.pauseAll': 'إيقاف الكل', 'tb.resumeAll': 'استئناف الكل', 'tb.browsers': 'إضافة HELINK للمتصفح', 'tb.settings': 'الإعدادات',
+    'tb.about': 'حول HELINK', 'search.ph': 'بحث في التنزيلات',
+    'tb.sep': 'إزالة الموسيقى', 'tb.sepTitle': 'إزالة الموسيقى من ملفات صوت أو فيديو على الكمبيوتر', 'empty.sep': 'إزالة الموسيقى من ملف',
+    'side.aria': 'الأقسام', 'side.all': 'كل التنزيلات', 'side.unfinished': 'غير مكتملة', 'side.finished': 'مكتملة', 'side.kinds': 'حسب النوع',
+    'side.music': 'إزالة الموسيقى', 'side.noMusic': 'بدون موسيقى', 'side.sepPick': 'اختيار ملفات من الكمبيوتر',
+    'cat.video': 'فيديو', 'cat.music': 'صوت', 'cat.pictures': 'صور', 'cat.programs': 'برامج', 'cat.documents': 'مستندات', 'cat.compressed': 'ملفات مضغوطة', 'cat.other': 'أخرى',
+    'card.title': 'أضف HELINK إلى متصفحك', 'card.text': 'ليلتقط تنزيلات المتصفح ويظهر زر «تنزيل» على الفيديوهات.', 'card.btn': 'إضافة للمتصفح',
+    'list.aria': 'التنزيلات', 'col.name': 'الاسم', 'col.size': 'الحجم', 'col.state': 'الحالة', 'col.speed': 'السرعة', 'col.eta': 'المتبقي', 'col.date': 'أُضيف',
+    'st.running': 'جارٍ التنزيل', 'st.queued': 'في الانتظار', 'st.paused': 'متوقف مؤقتًا', 'st.error': 'لم يكتمل', 'st.done': 'اكتمل',
+    'st.preparing': 'جارٍ التجهيز…', 'st.updating': 'جارٍ تحديث أداة الفيديو…', 'st.merge': 'جارٍ دمج الصوت مع الصورة…', 'st.convert': 'جارٍ التحويل إلى MP3…',
+    'st.finish': 'جارٍ إنهاء الملف…', 'st.save': 'جارٍ حفظ الملف…', 'st.pausing': 'جارٍ الإيقاف…', 'st.deleting': 'جارٍ الحذف…',
+    'st.partVideo': 'الصورة', 'st.partAudio': 'الصوت', 'st.noResume': 'يبدأ من جديد عند الاستئناف',
+    'st.sepwait': 'ينتظر دوره…', 'st.sepmodel': 'تجهيز الإزالة…', 'st.separate': 'إزالة الموسيقى…',
+    'tip.sepwait': 'ينتظر حتى تنتهي إزالة الموسيقى من ملف آخر', 'tip.sepmodel': 'يُنزِّل HELINK أداة إزالة الموسيقى، مرة واحدة فقط',
+    'tip.separate': 'تُزال الموسيقى ويبقى الكلام والغناء',
+    'lab.noMusic': 'بدون موسيقى',
+    'empty.title': 'لا توجد تنزيلات بعد', 'empty.text': 'أضف رابط ملف أو فيديو، أو نزّل من المتصفح وسيلتقط HELINK التنزيل ويُسرّعه.',
+    'empty.tip': 'يمكنك أيضًا لصق الرابط بـ <span class="kbd">Ctrl+V</span> أو سحبه من المتصفح إلى هنا.',
+    'empty.none': 'لا شيء هنا', 'empty.noneText': 'لا توجد تنزيلات في هذا القسم.', 'empty.noMatch': 'لا توجد نتائج', 'empty.noMatchText': 'لا يوجد تنزيل يطابق «{q}».',
+    'sb.active': 'قيد التنزيل: {n}', 'sb.waiting': 'في الانتظار: {n}', 'sb.none': 'لا توجد تنزيلات جارية', 'sb.speed': 'السرعة الكلية: {s}', 'sb.folder': 'الحفظ في:',
+    'det.close': 'إغلاق التفاصيل', 'det.url': 'الرابط', 'det.page': 'الصفحة', 'det.folder': 'المجلد', 'det.size': 'الحجم', 'det.done': 'نزل منه',
+    'det.speed': 'السرعة', 'det.eta': 'المتبقي', 'det.conns': 'الاتصالات', 'det.resume': 'الاستئناف', 'det.resumeYes': 'مدعوم: يكمل من حيث توقف',
+    'det.resumeNo': 'غير مدعوم: يبدأ من جديد إذا توقف', 'det.parts': 'الأجزاء', 'det.added': 'أُضيف', 'det.finished': 'اكتمل', 'det.quality': 'الجودة',
+    'det.src': 'الملف الأصلي', 'det.srcIn': '{name} في «{folder}»', 'det.copyTo': 'تُحفظ النسخة في', 'det.music': 'الموسيقى', 'det.musicOff': 'تُزال، ويبقى الكلام والغناء', 'det.show': 'إظهار',
+    'btn.copy': 'نسخ', 'btn.open': 'فتح', 'btn.close': 'إغلاق', 'btn.cancel': 'إلغاء', 'btn.done': 'تم', 'btn.retry': 'إعادة المحاولة',
+    'btn.details': 'تفاصيل لفريق الدعم', 'btn.otherFolder': 'اختيار مكان آخر', 'btn.setup': 'تجهيز أدوات الفيديو', 'btn.openPage': 'فتح الصفحة في المتصفح', 'btn.newLink': 'رابط آخر',
+    'm.open': 'فتح الملف', 'm.folder': 'فتح المجلد', 'm.resume': 'استئناف', 'm.pause': 'إيقاف مؤقت', 'm.retry': 'إعادة المحاولة', 'm.copy': 'نسخ الرابط',
+    'm.page': 'فتح الصفحة', 'm.details': 'التفاصيل', 'm.delete': 'حذف من القائمة', 'm.deleteFile': 'حذف مع الملف',
+    'm.removeMusic': 'إزالة الموسيقى', 'm.original': 'إظهار الملف الأصلي',
+    'add.title': 'إضافة رابط', 'add.label': 'الصق رابط ملف أو فيديو', 'add.paste': 'لصق', 'add.go': 'متابعة', 'add.checking': 'جارٍ فحص الرابط…',
+    'add.hint': 'يعمل مع روابط الملفات المباشرة، ومع فيديوهات يوتيوب وفيسبوك وإنستجرام وتيك توك وإكس ومئات المواقع الأخرى.',
+    'add.nothing': 'لا يوجد رابط منسوخ. انسخ الرابط أولًا.',
+    'file.title': 'تنزيل جديد', 'file.count': '{i} من {n}', 'file.name': 'اسم الملف', 'file.kind': 'النوع', 'file.folder': 'الحفظ في', 'file.change': 'تغيير',
+    'file.unknown': 'حجم غير معروف', 'file.from': 'من {host}', 'file.fromBrowser': 'من المتصفح • {host}',
+    'file.noResume': 'هذا الموقع لا يدعم الاستئناف: إذا توقف التنزيل أو أُغلق البرنامج يبدأ من جديد.',
+    'file.existing': 'يوجد في القائمة تنزيل غير مكتمل لهذا الملف ({done}).', 'file.continue': 'إكماله بهذا الرابط',
+    'file.start': 'بدء التنزيل', 'file.later': 'لاحقًا',
+    'video.title': 'تنزيل فيديو', 'v.loading': 'جارٍ جلب بيانات الفيديو…', 'v.loadingSite': 'جارٍ جلب بيانات الفيديو من {site}…',
+    'v.updating': 'غيّر {site} طريقة عمله، جارٍ تحديث أداة الفيديو ثم المتابعة…', 'v.slowYt': 'يستغرق يوتيوب وقتًا أطول قليلًا، انتظر بضع ثوانٍ…',
+    'v.slow': 'ما زلنا نعمل… قد يستغرق ذلك بعض الوقت إذا كان الإنترنت بطيئًا.', 'v.items': 'يحتوي هذا المنشور على {n}، اختر ما تريد', 'v.tile': 'فيديو {n}',
+    'kind.aria': 'ماذا تريد أن تنزّل؟', 'kind.video': 'فيديو', 'kind.audio': 'صوت MP3', 'v.approx': 'الأحجام تقريبية', 'v.quality': 'الجودة',
+    'q.best': 'الأنسب', 'q.unknownSize': 'حجم غير معروف', 'v.where': 'سيُحفظ في {folder}', 'v.untitled': 'فيديو',
+    'v.dlVideo': 'تنزيل الفيديو', 'v.dlAudio': 'تنزيل الصوت', 'v.altText': 'شغّلت الصفحة هذه الملفات، ويمكنك تنزيلها بدلًا من ذلك:',
+    'v.oldExt': 'أغلق المتصفح وافتحه مرة أخرى لتعمل إضافة HELINK الجديدة: تختار الجودة في صفحة الفيديو نفسها، ويبدأ التنزيل فورًا.', 'v.alt': 'تنزيل',
+    'v.noMusic': 'بدون موسيقى', 'v.noMusicHint': 'تُزال الموسيقى بعد اكتمال التنزيل، ويبقى الكلام والغناء.',
+    'v.dlVideoNM': 'تنزيل الفيديو بدون موسيقى', 'v.dlAudioNM': 'تنزيل الصوت بدون موسيقى',
+    'v.noMusicFirst': 'أول مرة فقط: يُنزِّل HELINK أداة إزالة الموسيقى (نحو {size}).',
+    'v.inList': 'هذا الفيديو جزء من قائمة تشغيل.', 'v.wholeList': 'تنزيل القائمة كاملة',
+    'l.title': 'تنزيل كورس أو قائمة تشغيل', 'l.loading': 'جارٍ قراءة القائمة من يوتيوب…', 'l.quality': 'جودة كل الفيديوهات',
+    'l.info': '{n} • المدة الكلية {d}', 'l.all': 'تحديد الكل', 'l.sel': 'المحدد {n} • نحو {size}', 'l.selNoSize': 'المحدد {n}',
+    'l.off': 'غير متاح', 'l.more': 'تعرض هذه النافذة أول {n} من القائمة.', 'l.where': 'ستُحفظ في {folder} مرقّمة بترتيب القائمة • الأحجام تقديرية',
+    'l.dl': 'تنزيل {n}', 'l.none': 'اختر فيديو واحدًا على الأقل.', 'l.upTo': 'حتى {q}', 'l.have': 'في التنزيلات',
+    'toast.listAdded': 'أُضيف {n} إلى التنزيلات في مجلد «{folder}».', 'toast.listSkipped': '({n} في القائمة بالفعل)',
+    'upd.pill': 'تحديث', 'upd.pillTitle': 'يتوفر إصدار جديد من HELINK', 'upd.title': 'يتوفر إصدار جديد من HELINK',
+    'upd.ver': 'الإصدار {v}', 'upd.sub': 'لديك الإصدار {cur} • حجم التحديث {size}', 'upd.subNoSize': 'لديك الإصدار {cur}',
+    'upd.news': 'ما الجديد', 'upd.now': 'تحديث الآن', 'upd.later': 'ليس الآن', 'upd.retry': 'إعادة المحاولة', 'upd.cancel': 'إيقاف التنزيل',
+    'upd.page': 'صفحة التنزيل',
+    'upd.hint': 'يُغلق HELINK ويُفتح من جديد خلال ثوانٍ، وتكمل التنزيلات الجارية من حيث توقفت. لا تحتاج إلى فعل أي شيء آخر.',
+    'upd.downloading': 'جارٍ تنزيل التحديث… {done} من {total}', 'upd.installing': 'جارٍ التثبيت… سيُفتح HELINK من جديد خلال ثوانٍ.',
+    'upd.aboutTitle': 'التحديثات', 'upd.aboutLatest': 'لديك أحدث إصدار.', 'upd.aboutAvail': 'يتوفر الإصدار <b>{v}</b>.',
+    'upd.aboutChecking': 'جارٍ البحث عن تحديثات…', 'upd.aboutError': 'تعذّر التحقق من التحديثات. تأكد من اتصالك بالإنترنت.',
+    'upd.aboutAuto': 'يبحث HELINK عن التحديثات تلقائيًا عند الاتصال بالإنترنت، ولا يُحدِّث نفسه إلا بإذنك.',
+    'upd.check': 'التحقق من التحديثات', 'upd.show': 'عرض التحديث',
+    'upd.done': 'تم تحديث HELINK إلى الإصدار {v}.', 'upd.failedToast': 'لم يكتمل التحديث، وما زال الإصدار السابق يعمل.',
+    'det.list': 'القائمة',
+    'set.title': 'الإعدادات', 'set.general': 'عام', 'set.downloads': 'التنزيلات', 'set.browser': 'المتصفح', 'set.lang': 'اللغة',
+    'set.autostart': 'تشغيل HELINK مع ويندوز', 'set.autostartHint': 'يعمل بهدوء بجوار الساعة ليلتقط التنزيلات من المتصفح في أي وقت.',
+    'set.tray': 'إبقاء HELINK بجوار الساعة عند إغلاق النافذة', 'set.trayHint': 'تستمر التنزيلات. لإنهائه: اضغط أيقونته بالزر الأيمن ثم «إنهاء HELINK».',
+    'set.notify': 'إشعار عند اكتمال التنزيل أو تعذّره', 'set.folder': 'مكان الحفظ', 'set.open': 'فتح',
+    'set.categoryDirs': 'مجلد لكل نوع من الملفات', 'set.categoryDirsHint': 'داخل مكان الحفظ: الفيديو في Video والصوت في Music والصور في Pictures والبرامج في Programs والمستندات في Documents والملفات المضغوطة في Compressed، وغيرها في Other.',
+    'set.parallel': 'عدد التنزيلات في الوقت نفسه', 'set.parallelHint': 'تنتظر بقية التنزيلات دورها.',
+    'set.conns': 'عدد الاتصالات لكل ملف', 'set.connsHint': 'اتصالات أكثر تعني سرعة أكبر عادةً، وبعض المواقع تقبل عددًا قليلًا فقط.',
+    'set.catch': 'التقاط التنزيلات من المتصفح', 'set.catchHint': 'يتولى HELINK تنزيل الملفات التي تبدأ في المتصفح (يحتاج إلى الإضافة).',
+    'set.dialog': 'عرض نافذة «تنزيل جديد» قبل البدء', 'set.dialogHint': 'لتغيير الاسم أو المكان. إذا أوقفتها يبدأ التنزيل مباشرة.',
+    'set.types': 'أنواع الملفات التي يلتقطها', 'set.typesHint': 'امتدادات تفصل بينها مسافات، مثل: zip exe mp4', 'set.reset': 'استعادة القائمة الأصلية',
+    'set.minKB': 'أصغر حجم يلتقطه (كيلوبايت)', 'set.minHint': 'الأصغر يُنزّله المتصفح بنفسه. 0 لكل الأحجام.',
+    'set.skip': 'مواقع يُنزّل منها المتصفح بنفسه', 'set.sitesHint': 'موقع في كل سطر، مثل: example.com',
+    'set.buttons': 'زر «تنزيل» على الفيديوهات في المتصفح', 'set.buttonsHint': 'يظهر عند تمرير الفأرة فوق الفيديو، ويمكن سحبه إلى أي مكان.',
+    'set.buttonSkip': 'مواقع بلا زر', 'set.saved': 'حُفظ',
+    'br.title': 'أضف HELINK إلى متصفحك', 'br.lead': 'مع إضافة HELINK يلتقط البرنامج التنزيلات من المتصفح ويُسرّعها، ويظهر زر «تنزيل» على الفيديوهات، ويضيف «تنزيل بـ HELINK» إلى قائمة الزر الأيمن.',
+    'br.seen': 'الإضافة متصلة بـ HELINK (آخر اتصال {when}).', 'br.never': 'لم تتصل الإضافة بـ HELINK بعد. اتبع الخطوات أدناه، ثم أعد تشغيل المتصفح.',
+    'br.now': 'الآن', 'br.ago': 'منذ {n}',
+    'br.chromium': 'كروم وإيدج وبريف وأوبرا وفيفالدي',
+    'br.c1': 'افتح صفحة الإضافات في متصفحك (الأزرار أدناه).', 'br.c2': 'شغّل <b>«وضع المطوّر»</b> (Developer mode) أعلى الصفحة أو في جانبها.',
+    'br.c3': 'اضغط <b>«تحميل الإضافة غير المضغوطة»</b> (Load unpacked) واختر هذا المجلد:', 'br.copy': 'نسخ المسار', 'br.copied': 'نُسخ مسار المجلد.',
+    'br.openPage': 'فتح صفحة الإضافات', 'br.none': 'لم يُعثر على متصفح من هذه المتصفحات.', 'br.ffInstall': 'تثبيت في فايرفوكس', 'br.ffFile': 'إظهار الملف',
+    'br.ff1': 'اضغط «تثبيت في فايرفوكس» ثم «إضافة». يقبل فايرفوكس الإضافات الموقّعة من موزيلا فقط، فإذا رفضها فهذه النسخة لم توقَّع بعد.',
+    'br.ff2': 'للتجربة قبل التوقيع: افتح <b>about:debugging</b> ثم «هذا الفايرفوكس» واختر «تحميل إضافة مؤقتة»، وستبقى حتى إغلاق المتصفح.',
+    'del.one': 'حذف هذا التنزيل؟', 'del.many': 'حذف {n}؟', 'del.text': 'تُحذف التنزيلات غير المكتملة مع ما نزل منها. الملفات المكتملة تبقى في مكانها إلا إذا اخترت حذفها.',
+    'del.files': 'حذف الملفات المكتملة أيضًا (إلى سلة المحذوفات)',
+    'close.dlTitle': 'توجد تنزيلات جارية', 'close.dlMsg': 'إذا أنهيت HELINK الآن تتوقف التنزيلات مؤقتًا، وتُستأنف من حيث توقفت عندما تفتحه مرة أخرى.',
+    'close.setupTitle': 'ما زالت أدوات الفيديو تُجهَّز', 'close.setupMsg': 'إذا أنهيته الآن، يكمل التجهيز من حيث توقف في المرة القادمة.',
+    'close.keep': 'متابعة التنزيل', 'close.keepSetup': 'متابعة التجهيز', 'close.quit': 'إنهاء HELINK',
+    'setup.run': 'جارٍ تجهيز أدوات الفيديو لأول مرة ({pct})… يمكنك تنزيل الملفات الآن.', 'setup.verify': 'جارٍ التأكد من أن أدوات الفيديو تعمل…',
+    'setup.fail': 'لم يكتمل تجهيز أدوات الفيديو.', 'setup.need': 'تنزيل الفيديوهات يحتاج إلى أدوات تُجهَّز مرة واحدة (نحو {size}).', 'setup.start': 'تجهيزها الآن',
+    'setup.done': 'أدوات الفيديو جاهزة.',
+    'toast.done': 'اكتمل: {name}', 'toast.failed': 'لم يكتمل: {name}', 'toast.added': 'أُضيف إلى التنزيلات', 'toast.later': 'أُضيف إلى القائمة دون أن يبدأ',
+    'toast.exists': 'هذا التنزيل في القائمة بالفعل.', 'toast.copied': 'نُسخ', 'toast.missing': 'الملف غير موجود، ربما نُقل أو حُذف.',
+    'toast.numberCopied': 'نُسخ الرقم 01500025887', 'toast.folder': 'ستُحفظ التنزيلات في {folder}', 'toast.continued': 'يكمل التنزيل من حيث توقف',
+    'toast.addedNoMusic': 'أُضيف إلى التنزيلات، وستُزال الموسيقى بعد تنزيله.', 'toast.sepOne': 'ستُحفظ نسخة بدون موسيقى بجانب الملف.',
+    'toast.sepAdded': 'ستُزال الموسيقى من {files}، وتُحفظ كل نسخة بجانب ملفها.', 'toast.sepNone': 'لم يُضف أي ملف. اختر ملفات صوت أو فيديو.',
+    'toast.sepDone': 'أُزيلت الموسيقى: {name}', 'toast.dropFiles': 'لإزالة الموسيقى من ملفات على الكمبيوتر، اضغط زر «إزالة الموسيقى» في الأعلى.',
+    'drop.text': 'أفلت الرابط هنا', 'compact.open': 'فتح HELINK',
+    'mini.title': 'التنزيلات من المتصفح', 'mini.tip': 'اضغط لعرضه في HELINK',
+    'u.s': '{n} ث', 'u.m': '{n} د', 'u.h': '{h} س {m} د', 'u.hOnly': '{h} س',
+    'about.tagline': 'برنامج تحميل متكامل: الملفات والفيديوهات، بسرعة واستئناف',
+    'about.appTitle': 'عن البرنامج',
+    'about.appText': '<bdi dir="ltr">HELINK</bdi> برنامج لتنزيل الملفات والفيديوهات على ويندوز: يقسم الملف إلى أجزاء تنزل معًا فيصبح التنزيل أسرع، ويكمل من حيث توقف بعد أي انقطاع، ويلتقط التنزيلات من المتصفح، وينزّل الفيديوهات من يوتيوب وفيسبوك وإنستجرام وتيك توك وإكس ومئات المواقع الأخرى.',
+    'about.f1': 'تنزيل أسرع بحتى 16 اتصالًا لكل ملف، مع استئناف بعد الانقطاع أو إغلاق الكمبيوتر.',
+    'about.f2': 'إضافة لكروم وإيدج وبريف وأوبرا وفيفالدي وفايرفوكس: التقاط التنزيلات وزر «تنزيل» على الفيديوهات.',
+    'about.f3': 'اختيار جودة الفيديو حتى 4K أو تحويله إلى MP3، مع الصوت الأصلي غير المدبلج.',
+    'about.f4': 'قائمة تنزيلات مرتبة حسب النوع، مع إيقاف مؤقت واستئناف وتنزيل أكثر من ملف في وقت واحد.',
+    'about.f5': 'بالعربية والإنجليزية، بدون إعلانات، وبدون حسابات أو تسجيل دخول.',
+    'about.f6': 'إزالة الموسيقى من الفيديوهات والصوتيات مع إبقاء الكلام والغناء: عند التنزيل، أو لملفات على الكمبيوتر.',
+    'about.f7': 'تنزيل كورس أو قائمة تشغيل كاملة من يوتيوب مرة واحدة، مرقّمة بترتيبها في مجلد واحد.',
+    'about.ownerTitle': 'عن المالك', 'about.photoAlt': 'صورة علي حسام', 'about.ownerName': 'علي حسام',
+    'about.ownerRole': 'صانع البرنامج ومالك العلامة التجارية <bdi dir="ltr">HELINK</bdi>', 'about.coName': 'مالك شركة <b>هلال تكنولوجي</b> (Helal Technology)',
+    'about.coWhat': 'لبيع إكسسوارات الهاتف المحمول والكمبيوتر', 'about.contactTitle': 'للتواصل',
+    'about.contactNote': 'للاستفسارات والاقتراحات، أو إذا واجهتك أي مشكلة في البرنامج.', 'btn.copyNumber': 'نسخ الرقم', 'btn.whatsapp': 'واتساب',
+    'about.version': 'الإصدار', 'about.trademark': '<bdi dir="ltr">HELINK</bdi> علامة تجارية مملوكة لعلي حسام.', 'about.rights': '© 2026 جميع الحقوق محفوظة.',
+  },
+  en: {
+    'lang.other': 'عربي', 'lang.aria': 'Switch to Arabic',
+    'tb.add': 'Add link', 'tb.aria': 'Download commands', 'tb.resume': 'Resume', 'tb.pause': 'Pause', 'tb.delete': 'Delete',
+    'tb.pauseAll': 'Pause all', 'tb.resumeAll': 'Resume all', 'tb.browsers': 'Add HELINK to the browser', 'tb.settings': 'Settings',
+    'tb.about': 'About HELINK', 'search.ph': 'Search downloads',
+    'tb.sep': 'Remove music', 'tb.sepTitle': 'Remove the music from audio or video files on this computer', 'empty.sep': 'Remove music from a file',
+    'side.aria': 'Sections', 'side.all': 'All downloads', 'side.unfinished': 'Unfinished', 'side.finished': 'Finished', 'side.kinds': 'By kind',
+    'side.music': 'Music removal', 'side.noMusic': 'Without music', 'side.sepPick': 'Choose files on this computer',
+    'cat.video': 'Video', 'cat.music': 'Music', 'cat.pictures': 'Pictures', 'cat.programs': 'Programs', 'cat.documents': 'Documents', 'cat.compressed': 'Compressed', 'cat.other': 'Other',
+    'card.title': 'Add HELINK to your browser', 'card.text': 'It takes the browser\'s downloads and puts a Download button on videos.', 'card.btn': 'Add to browser',
+    'list.aria': 'Downloads', 'col.name': 'Name', 'col.size': 'Size', 'col.state': 'Status', 'col.speed': 'Speed', 'col.eta': 'Time left', 'col.date': 'Added',
+    'st.running': 'Downloading', 'st.queued': 'Waiting', 'st.paused': 'Paused', 'st.error': 'Failed', 'st.done': 'Done',
+    'st.preparing': 'Preparing…', 'st.updating': 'Updating the video tool…', 'st.merge': 'Joining sound and picture…', 'st.convert': 'Converting to MP3…',
+    'st.finish': 'Finishing up…', 'st.save': 'Saving the file…', 'st.pausing': 'Pausing…', 'st.deleting': 'Deleting…',
+    'st.partVideo': 'Picture', 'st.partAudio': 'Sound', 'st.noResume': 'Starts over when resumed',
+    'st.sepwait': 'Waiting its turn…', 'st.sepmodel': 'Setting up…', 'st.separate': 'Removing music…',
+    'tip.sepwait': 'Waits while the music is removed from another file', 'tip.sepmodel': 'HELINK downloads its music remover, once only',
+    'tip.separate': 'The music is removed; speech and singing stay',
+    'lab.noMusic': 'No music',
+    'empty.title': 'No downloads yet', 'empty.text': 'Add a link to a file or a video, or download in your browser: HELINK takes the download and speeds it up.',
+    'empty.tip': 'You can also paste a link with <span class="kbd">Ctrl+V</span> or drag it here from your browser.',
+    'empty.none': 'Nothing here', 'empty.noneText': 'No downloads in this section.', 'empty.noMatch': 'No results', 'empty.noMatchText': 'No download matches "{q}".',
+    'sb.active': 'Downloading: {n}', 'sb.waiting': 'Waiting: {n}', 'sb.none': 'Nothing is downloading', 'sb.speed': 'Total speed: {s}', 'sb.folder': 'Saving to:',
+    'det.close': 'Close details', 'det.url': 'Address', 'det.page': 'Page', 'det.folder': 'Folder', 'det.size': 'Size', 'det.done': 'Downloaded',
+    'det.speed': 'Speed', 'det.eta': 'Time left', 'det.conns': 'Connections', 'det.resume': 'Resume', 'det.resumeYes': 'Supported: continues where it stopped',
+    'det.resumeNo': 'Not supported: starts over if stopped', 'det.parts': 'Parts', 'det.added': 'Added', 'det.finished': 'Finished', 'det.quality': 'Quality',
+    'det.src': 'Original file', 'det.srcIn': '{name} in {folder}', 'det.copyTo': 'Copy saved in', 'det.music': 'Music', 'det.musicOff': 'Removed; speech and singing kept', 'det.show': 'Show',
+    'btn.copy': 'Copy', 'btn.open': 'Open', 'btn.close': 'Close', 'btn.cancel': 'Cancel', 'btn.done': 'Done', 'btn.retry': 'Try again',
+    'btn.details': 'Details for support', 'btn.otherFolder': 'Choose another place', 'btn.setup': 'Set up the video tools', 'btn.openPage': 'Open the page in the browser', 'btn.newLink': 'Another link',
+    'm.open': 'Open file', 'm.folder': 'Show in folder', 'm.resume': 'Resume', 'm.pause': 'Pause', 'm.retry': 'Try again', 'm.copy': 'Copy address',
+    'm.page': 'Open the page', 'm.details': 'Details', 'm.delete': 'Remove from list', 'm.deleteFile': 'Delete with the file',
+    'm.removeMusic': 'Remove the music', 'm.original': 'Show the original file',
+    'add.title': 'Add a link', 'add.label': 'Paste a link to a file or a video', 'add.paste': 'Paste', 'add.go': 'Continue', 'add.checking': 'Checking the link…',
+    'add.hint': 'Works with direct file links and with videos on YouTube, Facebook, Instagram, TikTok, X and hundreds of other sites.',
+    'add.nothing': 'No link is copied. Copy the link first.',
+    'file.title': 'New download', 'file.count': '{i} of {n}', 'file.name': 'File name', 'file.kind': 'Kind', 'file.folder': 'Save in', 'file.change': 'Change',
+    'file.unknown': 'Unknown size', 'file.from': 'From {host}', 'file.fromBrowser': 'From the browser • {host}',
+    'file.noResume': 'This site doesn\'t support resuming: if the download stops or HELINK closes, it starts over.',
+    'file.existing': 'An unfinished download of this file is in the list ({done}).', 'file.continue': 'Continue it with this link',
+    'file.start': 'Start download', 'file.later': 'Later',
+    'video.title': 'Download a video', 'v.loading': 'Getting the video\'s details…', 'v.loadingSite': 'Getting the video\'s details from {site}…',
+    'v.updating': '{site} changed something. Updating the video tool, then continuing…', 'v.slowYt': 'YouTube takes a little longer. Just a few seconds…',
+    'v.slow': 'Still working… this can take a while on a slow connection.', 'v.items': 'This post has {n}. Pick one.', 'v.tile': 'Video {n}',
+    'kind.aria': 'What do you want to download?', 'kind.video': 'Video', 'kind.audio': 'MP3 audio', 'v.approx': 'Sizes are approximate', 'v.quality': 'Quality',
+    'q.best': 'Best pick', 'q.unknownSize': 'Unknown size', 'v.where': 'Saves to {folder}', 'v.untitled': 'Video',
+    'v.dlVideo': 'Download video', 'v.dlAudio': 'Download audio', 'v.altText': 'The page played these files. You can download them instead:',
+    'v.oldExt': 'Close the browser and open it again so the new HELINK extension runs: you choose the quality right on the video\'s page, and the download starts at once.', 'v.alt': 'Download',
+    'v.noMusic': 'Without music', 'v.noMusicHint': 'The music is removed once the download is complete; speech and singing stay.',
+    'v.dlVideoNM': 'Download video without music', 'v.dlAudioNM': 'Download audio without music',
+    'v.noMusicFirst': 'The first time only, HELINK downloads its music remover (about {size}).',
+    'v.inList': 'This video is part of a playlist.', 'v.wholeList': 'Download the whole list',
+    'l.title': 'Download a course or playlist', 'l.loading': 'Reading the list from YouTube…', 'l.quality': 'Quality for every video',
+    'l.info': '{n} • {d} in all', 'l.all': 'Select all', 'l.sel': '{n} selected • about {size}', 'l.selNoSize': '{n} selected',
+    'l.off': 'Not available', 'l.more': 'This window shows the first {n} of the list.', 'l.where': 'Saves to {folder}, numbered in the list\'s order • Sizes are estimates',
+    'l.dl': 'Download {n}', 'l.none': 'Choose at least one video.', 'l.upTo': 'Up to {q}', 'l.have': 'In downloads',
+    'toast.listAdded': 'Added {n} to downloads, in the folder {folder}.', 'toast.listSkipped': '({n} already in the list)',
+    'upd.pill': 'Update', 'upd.pillTitle': 'A new version of HELINK is available', 'upd.title': 'A new version of HELINK is available',
+    'upd.ver': 'Version {v}', 'upd.sub': 'You have {cur} • Update size {size}', 'upd.subNoSize': 'You have {cur}',
+    'upd.news': 'What\'s new', 'upd.now': 'Update now', 'upd.later': 'Not now', 'upd.retry': 'Try again', 'upd.cancel': 'Stop downloading',
+    'upd.page': 'Download page',
+    'upd.hint': 'HELINK closes and opens again in a few seconds, and running downloads continue where they stopped. Nothing else to do.',
+    'upd.downloading': 'Downloading the update… {done} of {total}', 'upd.installing': 'Installing… HELINK opens again in a few seconds.',
+    'upd.aboutTitle': 'Updates', 'upd.aboutLatest': 'You have the latest version.', 'upd.aboutAvail': 'Version <b>{v}</b> is available.',
+    'upd.aboutChecking': 'Looking for updates…', 'upd.aboutError': 'Couldn\'t check for updates. Check your internet connection.',
+    'upd.aboutAuto': 'HELINK looks for updates by itself when you\'re online, and only updates itself when you say so.',
+    'upd.check': 'Check for updates', 'upd.show': 'See the update',
+    'upd.done': 'HELINK was updated to version {v}.', 'upd.failedToast': 'The update didn\'t finish; the previous version is still running.',
+    'det.list': 'List',
+    'set.title': 'Settings', 'set.general': 'General', 'set.downloads': 'Downloads', 'set.browser': 'Browser', 'set.lang': 'Language',
+    'set.autostart': 'Start HELINK with Windows', 'set.autostartHint': 'It waits quietly near the clock to take downloads from the browser at any time.',
+    'set.tray': 'Keep HELINK near the clock when the window closes', 'set.trayHint': 'Downloads go on. To quit: right-click its icon, then Exit HELINK.',
+    'set.notify': 'Notify when a download finishes or fails', 'set.folder': 'Save folder', 'set.open': 'Open',
+    'set.categoryDirs': 'A folder for each kind of file', 'set.categoryDirsHint': 'Inside the save folder: videos in Video, sound in Music, pictures in Pictures, programs in Programs, documents in Documents, archives in Compressed, the rest in Other.',
+    'set.parallel': 'Downloads at the same time', 'set.parallelHint': 'The others wait for their turn.',
+    'set.conns': 'Connections per file', 'set.connsHint': 'More connections are usually faster; some sites accept only a few.',
+    'set.catch': 'Take downloads from the browser', 'set.catchHint': 'HELINK downloads the files you start in the browser (needs the extension).',
+    'set.dialog': 'Show the "New download" window first', 'set.dialogHint': 'To change the name or the place. Turned off, downloads start right away.',
+    'set.types': 'Kinds of files it takes', 'set.typesHint': 'Extensions separated by spaces, like: zip exe mp4', 'set.reset': 'Restore the original list',
+    'set.minKB': 'Smallest size it takes (KB)', 'set.minHint': 'Smaller files stay with the browser. 0 takes every size.',
+    'set.skip': 'Sites the browser downloads from itself', 'set.sitesHint': 'One site per line, like: example.com',
+    'set.buttons': 'Download button on videos in the browser', 'set.buttonsHint': 'It appears when the mouse is over a video and can be dragged anywhere.',
+    'set.buttonSkip': 'Sites without the button', 'set.saved': 'Saved',
+    'br.title': 'Add HELINK to your browser', 'br.lead': 'With the HELINK extension, HELINK takes the browser\'s downloads and speeds them up, puts a Download button on videos, and adds "Download with HELINK" to the right-click menu.',
+    'br.seen': 'The extension is connected to HELINK (last contact {when}).', 'br.never': 'The extension hasn\'t contacted HELINK yet. Follow the steps below, then restart the browser.',
+    'br.now': 'just now', 'br.ago': '{n} ago',
+    'br.chromium': 'Chrome, Edge, Brave, Opera and Vivaldi',
+    'br.c1': 'Open your browser\'s extensions page (buttons below).', 'br.c2': 'Turn on <b>Developer mode</b> (at the top or the side of the page).',
+    'br.c3': 'Click <b>Load unpacked</b> and choose this folder:', 'br.copy': 'Copy path', 'br.copied': 'Folder path copied.',
+    'br.openPage': 'Open extensions page', 'br.none': 'None of these browsers was found.', 'br.ffInstall': 'Install in Firefox', 'br.ffFile': 'Show the file',
+    'br.ff1': 'Click Install in Firefox, then Add. Firefox accepts only add-ons signed by Mozilla: if it refuses, this copy is not signed yet.',
+    'br.ff2': 'To try it before signing: open <b>about:debugging</b>, then This Firefox, then Load Temporary Add-on. It stays until the browser closes.',
+    'del.one': 'Delete this download?', 'del.many': 'Delete {n}?', 'del.text': 'Unfinished downloads are deleted with what was downloaded. Finished files stay where they are unless you choose to delete them.',
+    'del.files': 'Also delete the finished files (to the Recycle Bin)',
+    'close.dlTitle': 'Downloads are in progress', 'close.dlMsg': 'If you exit HELINK now, downloads pause and continue from where they stopped next time you open it.',
+    'close.setupTitle': 'The video tools are still being set up', 'close.setupMsg': 'If you exit now, setup continues from where it stopped next time.',
+    'close.keep': 'Keep downloading', 'close.keepSetup': 'Keep setting up', 'close.quit': 'Exit HELINK',
+    'setup.run': 'Setting up the video tools for the first time ({pct})… You can download files meanwhile.', 'setup.verify': 'Checking that the video tools work…',
+    'setup.fail': 'The video tools aren\'t set up yet.', 'setup.need': 'Downloading videos needs tools that are set up once (about {size}).', 'setup.start': 'Set them up now',
+    'setup.done': 'The video tools are ready.',
+    'toast.done': 'Finished: {name}', 'toast.failed': 'Didn\'t finish: {name}', 'toast.added': 'Added to downloads', 'toast.later': 'Added to the list without starting',
+    'toast.exists': 'This download is already in the list.', 'toast.copied': 'Copied', 'toast.missing': 'The file isn\'t there anymore. It may have been moved or deleted.',
+    'toast.numberCopied': 'Number copied: 01500025887', 'toast.folder': 'Downloads will be saved in {folder}', 'toast.continued': 'Continuing from where it stopped',
+    'toast.addedNoMusic': 'Added to downloads. The music is removed once it\'s downloaded.', 'toast.sepOne': 'A copy without music will be saved next to the file.',
+    'toast.sepAdded': 'Removing the music from {files}. Each copy is saved next to its file.', 'toast.sepNone': 'No file was added. Choose audio or video files.',
+    'toast.sepDone': 'Music removed: {name}', 'toast.dropFiles': 'To remove the music from files on this computer, click Remove music at the top.',
+    'drop.text': 'Drop the link here', 'compact.open': 'Open HELINK',
+    'mini.title': 'Downloads from the browser', 'mini.tip': 'Click to see it in HELINK',
+    'u.s': '{n} s', 'u.m': '{n} min', 'u.h': '{h} h {m} min', 'u.hOnly': '{h} h',
+    'about.tagline': 'A complete download manager: files and videos, fast and resumable',
+    'about.appTitle': 'About the app',
+    'about.appText': '<bdi>HELINK</bdi> downloads files and videos on Windows: it splits each file into parts that download together, so it is faster, continues where it stopped after any interruption, takes downloads from the browser, and downloads videos from YouTube, Facebook, Instagram, TikTok, X and hundreds of other sites.',
+    'about.f1': 'Faster downloads with up to 16 connections per file, resumed after interruptions or a shutdown.',
+    'about.f2': 'An extension for Chrome, Edge, Brave, Opera, Vivaldi and Firefox: takes downloads and puts a Download button on videos.',
+    'about.f3': 'Video quality up to 4K or MP3 audio, with the original (not dubbed) sound.',
+    'about.f4': 'A downloads list sorted by kind, with pause, resume and several downloads at once.',
+    'about.f5': 'In Arabic and English, no ads, no accounts, no sign-in.',
+    'about.f6': 'Removes the music from videos and audio, keeping speech and singing: while downloading, or for files on your computer.',
+    'about.f7': 'Downloads a whole YouTube course or playlist at once, numbered in order in one folder.',
+    'about.ownerTitle': 'About the owner', 'about.photoAlt': 'Photo of Ali Hossam', 'about.ownerName': 'Ali Hossam',
+    'about.ownerRole': 'Creator of the app and owner of the <bdi>HELINK</bdi> trademark', 'about.coName': 'Owner of <b>Helal Technology</b> (هلال تكنولوجي)',
+    'about.coWhat': 'Mobile phone and computer accessories', 'about.contactTitle': 'Contact',
+    'about.contactNote': 'For questions and suggestions, or if you run into any problem with the app.', 'btn.copyNumber': 'Copy number', 'btn.whatsapp': 'WhatsApp',
+    'about.version': 'Version', 'about.trademark': '<bdi>HELINK</bdi> is a trademark owned by Ali Hossam.', 'about.rights': '© 2026 All rights reserved.',
+  },
+};
+let LANG = document.documentElement.lang === 'en' ? 'en' : 'ar';
+function T(key, vars) {
+  let s = L[LANG][key];
+  if (s == null) s = L.ar[key] != null ? L.ar[key] : key;
+  if (vars) s = s.replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+  return s;
+}
+function applyStatic() {
+  for (const e of document.querySelectorAll('[data-t]')) e.textContent = T(e.dataset.t);
+  for (const e of document.querySelectorAll('[data-th]')) e.innerHTML = T(e.dataset.th); // trusted texts from L
+  for (const e of document.querySelectorAll('[data-ta]')) {
+    for (const pair of e.dataset.ta.split(';')) {
+      const i = pair.indexOf(':');
+      e.setAttribute(pair.slice(0, i), T(pair.slice(i + 1)));
+    }
+  }
+}
+
+// ------------------------------------------------------------ the bridge
+const real = typeof window.nz_init === 'function' || typeof window.__nzMock !== 'function';
+const N = (name) => (...args) => {
+  const f = window[name];
+  return typeof f === 'function' ? Promise.resolve(f(...args)) : Promise.reject(new Error(name + ' missing'));
+};
+const API = ['init', 'ready', 'setup', 'setLang', 'paste', 'fetch', 'cancelFetch', 'download', 'pause', 'resume', 'pauseAll', 'resumeAll',
+  'deleteTask', 'remove', 'clearFinished', 'tasks', 'addLink', 'confirmFile', 'cancelFile', 'pendingFiles', 'useMedia', 'settings',
+  'setSettings', 'dialogDone', 'expand', 'hide', 'exit', 'copyText', 'openFile', 'showInFolder', 'openPage', 'openFolder', 'pickFolder',
+  'pickDir', 'contact', 'browsers', 'openBrowser', 'openExtFolder', 'confirmClose', 'log', 'removeMusic', 'pickSepFiles',
+  'showMini', 'miniFit', 'pong', 'downloadList', 'update', 'checkUpdate', 'updateNow', 'updateLater', 'cancelUpdate'];
+let api;
+if (real) {
+  api = {};
+  for (const n of API) api[n] = N('nz_' + n);
+} else {
+  api = window.__nzMock(emit);
+}
+const handlers = {};
+function emit(name, data) { const h = handlers[name]; if (h) h(data); }
+window.nzEvent = emit;
+// HELINK asks now and then whether the page still works (a page that does not answer is
+// loaded again).
+window.nzPing = (n) => { api.pong(n).catch(() => {}); };
+
+// ------------------------------------------------------------ helpers
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null && k !== false) e.append(k);
+  return e;
+}
+function svg(markup, size) {
+  const s = size || 18;
+  const t = document.createElement('template');
+  t.innerHTML = '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + markup + '</svg>';
+  return t.content.firstChild;
+}
+const ICONS = {
+  video: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.3 9.2v5.6l4.6-2.8z" fill="currentColor"/>',
+  music: '<path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/>',
+  pictures: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.5" r="1.7"/><path d="M4 17.5l5-4.6 3.6 3.2 2.6-2.3 4.8 4.2"/>',
+  programs: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 8.5h17"/><path d="M8 13l2.2 2L8 17"/>',
+  documents: '<path d="M7 3.5h7l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M13.5 3.5V8.5H18.5M8.5 12.5h7M8.5 16h5"/>',
+  compressed: '<rect x="4.5" y="3.5" width="15" height="17" rx="2"/><path d="M11 3.5v2h2v2h-2v2h2v2h-2"/><rect x="10" y="13" width="4" height="3.6" rx="1"/>',
+  other: '<path d="M7 3.5h7l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M13.5 3.5V8.5H18.5"/>',
+  nomusic: '<path d="M9 17.5V6.2l10-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/>',
+};
+for (const s of document.querySelectorAll('[data-icon]')) s.append(svg(ICONS[s.dataset.icon], 18));
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
+}
+window.nzToast = toast;
+function humanSpeed(b) {
+  if (!(b > 0)) return '';
+  if (b < 1048576) return Math.max(1, Math.round(b / 1024)) + (LANG === 'en' ? ' KB/s' : ' كيلوبايت/ث');
+  return (Math.round(b / 104857.6) / 10) + (LANG === 'en' ? ' MB/s' : ' ميجابايت/ث');
+}
+// humanSize writes a size the way the engine does (HumanSize).
+function humanSize(b) {
+  if (!(b > 0)) return '';
+  const trimN = (v, d) => String(Number(v.toFixed(d)));
+  const w = (ar, en) => (LANG === 'en' ? en : ar);
+  if (b < 1048576) return trimN(Math.max(1, Math.round(b / 1024)), 0) + w(' كيلوبايت', ' KB');
+  if (b < 10 * 1048576) return trimN(b / 1048576, 1) + w(' ميجابايت', ' MB');
+  if (b < 1000 * 1048576) return trimN(Math.round(b / 1048576), 0) + w(' ميجابايت', ' MB');
+  return trimN(b / 1073741824, 1) + w(' جيجابايت', ' GB');
+}
+function shortEta(sec) {
+  if (!(sec >= 0) || !isFinite(sec)) return '';
+  sec = Math.round(sec);
+  if (sec < 60) return T('u.s', { n: Math.max(1, sec) });
+  if (sec < 3600) return T('u.m', { n: Math.round(sec / 60) });
+  const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
+  return m ? T('u.h', { h, m }) : T('u.hOnly', { h });
+}
+// Counting in Arabic: one, two, three to ten, and eleven on take different words.
+function arCount(n, one, two, few, many) {
+  if (n === 1) return one;
+  if (n === 2) return two;
+  return n + ' ' + (n >= 3 && n <= 10 ? few : many);
+}
+function connsText(n) { return LANG === 'en' ? n + (n === 1 ? ' connection' : ' connections') : arCount(n, 'اتصال واحد', 'اتصالان', 'اتصالات', 'اتصالًا'); }
+function downloadsText(n) { return LANG === 'en' ? n + ' downloads' : arCount(n, 'تنزيل واحد', 'تنزيلَين', 'تنزيلات', 'تنزيلًا'); }
+function filesText(n) { return LANG === 'en' ? n + (n === 1 ? ' file' : ' files') : arCount(n, 'ملف واحد', 'ملفين', 'ملفات', 'ملفًا'); }
+function minutesText(n) { return LANG === 'en' ? n + ' min' : arCount(n, 'دقيقة', 'دقيقتين', 'دقائق', 'دقيقة'); }
+function hoursText(n) { return LANG === 'en' ? n + (n === 1 ? ' hour' : ' hours') : arCount(n, 'ساعة', 'ساعتين', 'ساعات', 'ساعة'); }
+function dateText(ms) {
+  if (!ms) return '';
+  const d = new Date(ms), now = new Date();
+  const loc = LANG === 'en' ? 'en-GB' : 'ar-EG-u-nu-latn';
+  if (d.toDateString() === now.toDateString()) return new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' }).format(d);
+  if (d.getFullYear() === now.getFullYear()) return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' }).format(d);
+  return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'numeric', year: '2-digit' }).format(d);
+}
+const SITE_CODES = { youtube: 'YT', facebook: 'FB', instagram: 'IG', tiktok: 'TT', x: 'X' };
+function catOf(t) {
+  if (t.category) return t.category;
+  if (t.type === 'file') return 'other';
+  return t.kind === 'audio' ? 'music' : 'video';
+}
+// prettyURL is an address as people read it (Arabic letters instead of %D8%A8…).
+function prettyURL(u) {
+  try { return decodeURI(u || ''); } catch (_) { return u || ''; }
+}
+function nameOf(t) {
+  if (t.type === 'sep') return t.state === 'done' && t.result ? t.result.name : (t.srcName || t.title);
+  return t.type === 'file' ? (t.fileName || t.title) : (t.title || T('v.untitled'));
+}
+// A finished sound or video that still has its music: a copy without it can be made.
+function canRemoveMusic(t) { return t.state === 'done' && !!t.result && !t.noMusic && (catOf(t) === 'video' || catOf(t) === 'music'); }
+function fileIcon(cat, thumb) {
+  const box = el('span', { class: 'ficon ' + cat });
+  if (thumb) {
+    const img = el('img', { src: thumb, alt: '' });
+    img.addEventListener('error', () => { img.remove(); box.append(svg(ICONS[cat] || ICONS.other, 18)); });
+    box.append(img);
+  } else box.append(svg(ICONS[cat] || ICONS.other, 18));
+  return box;
+}
+
+// ------------------------------------------------------------ state
+const S = {
+  tasks: new Map(), rows: new Map(), order: [], sel: new Set(), anchor: '', filter: 'all', query: '',
+  sort: { key: 'date', dir: 'desc' }, details: '', saveDir: '', saveDirLabel: '', settings: null, version: '',
+  pending: [], filePid: '', fileFolder: null, fileCat: '', answered: new Set(),
+  video: null, infos: new Map(), compact: false, dialogs: [], setup: null, setupSize: '', missing: [], extSeen: -1,
+  sepReady: false, sepSize: '', noMusic: false,
+  mini: [], miniMode: false, miniRows: new Map(), // the downloads started from the browser's menu
+};
+
+// ------------------------------------------------------------ the list
+function matches(t) {
+  const f = S.filter;
+  if (f === 'unfinished' && t.state === 'done') return false;
+  if (f === 'finished' && t.state !== 'done') return false;
+  if (f === 'nomusic' && !t.noMusic) return false;
+  if (f !== 'all' && f !== 'unfinished' && f !== 'finished' && f !== 'nomusic' && catOf(t) !== f) return false;
+  if (S.query) {
+    const q = S.query.toLowerCase();
+    if (!(nameOf(t).toLowerCase().includes(q) || (t.url || '').toLowerCase().includes(q) || (t.siteName || '').toLowerCase().includes(q) ||
+      (t.srcName || '').toLowerCase().includes(q))) return false;
+  }
+  return true;
+}
+const stateRank = { running: 0, queued: 1, paused: 2, error: 3, done: 4 };
+function sortKey(t) {
+  switch (S.sort.key) {
+    case 'name': return nameOf(t).toLowerCase();
+    case 'size': return t.size || t.total || 0;
+    case 'state': return stateRank[t.state] * 1000 - (t.percent || 0);
+    default: return t.createdAt || 0;
+  }
+}
+function sortedVisible() {
+  const list = [...S.tasks.values()].filter(matches);
+  const dir = S.sort.dir === 'asc' ? 1 : -1;
+  list.sort((a, b) => {
+    const x = sortKey(a), y = sortKey(b);
+    if (x < y) return -dir;
+    if (x > y) return dir;
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
+  return list;
+}
+function statusText(t) {
+  if (t.stopping === 'pause') return T('st.pausing');
+  if (t.stopping === 'delete') return T('st.deleting');
+  switch (t.state) {
+    case 'queued': return T('st.queued');
+    case 'paused': return T('st.paused');
+    case 'error': return (t.error && t.error.title) || T('st.error');
+    case 'done': return T('st.done');
+  }
+  switch (t.stage) {
+    case 'preparing': return T('st.preparing');
+    case 'updating': return T('st.updating');
+    case 'merge': return T('st.merge');
+    case 'convert': return T('st.convert');
+    case 'finish': return T('st.finish');
+    case 'save': return T('st.save');
+    case 'sepwait': return T('st.sepwait');
+    case 'sepmodel': return T('st.sepmodel');
+    case 'separate': return T('st.separate');
+    case 'video': return T('st.running') + (t.partsCount > 1 ? ' • ' + T('st.partVideo') : '');
+    case 'audio': return T('st.running') + (t.partsCount > 1 ? ' • ' + T('st.partAudio') : '');
+  }
+  return T('st.running');
+}
+function busyStage(t) {
+  return t.state === 'running' && (t.stage === 'preparing' || t.stage === 'updating' || t.stage === 'merge' || t.stage === 'convert' ||
+    t.stage === 'finish' || t.stage === 'save' || (t.type === 'file' && !(t.total > 0)));
+}
+function makeRow(t) {
+  const r = { el: el('div', { class: 'row item', role: 'row', tabindex: '-1', 'data-id': t.id, 'aria-selected': 'false' }) };
+  r.icon = el('span', { class: 'ficon' });
+  r.name = el('span', { class: 't' });
+  r.sub = el('span', { class: 's' });
+  r.size = el('span', { class: 'c-size' });
+  r.st = el('span', { class: 'st' });
+  r.pct = el('span', { class: 'pct' });
+  r.fill = el('i');
+  r.bar = el('span', { class: 'bar6' }, r.fill);
+  r.prog = el('span', { class: 'c-prog' }, r.st, r.bar);
+  r.speed = el('span', { class: 'c-speed' });
+  r.eta = el('span', { class: 'c-eta' });
+  r.date = el('span', { class: 'c-date' });
+  r.acts = el('span', { class: 'row-actions' });
+  r.el.append(el('span', { class: 'c-name', role: 'gridcell' }, r.icon, el('span', { class: 'nm' }, r.name, r.sub)), r.size, r.prog, r.speed, r.eta, r.date, r.acts);
+  r.el.addEventListener('mousedown', (e) => onRowDown(e, t.id));
+  r.el.addEventListener('dblclick', () => openTask(t.id));
+  r.el.addEventListener('contextmenu', (e) => { e.preventDefault(); if (!S.sel.has(t.id)) selectOnly(t.id); showMenu(e.clientX, e.clientY); });
+  return r;
+}
+function fillRow(r, t) {
+  const cat = catOf(t);
+  const iconKey = cat + '|' + (t.thumb ? 'thumb' : '');
+  if (r.iconKey !== iconKey) {
+    r.iconKey = iconKey;
+    const ic = fileIcon(cat, t.type !== 'file' ? t.thumb : '');
+    const code = SITE_CODES[t.site];
+    if (t.type !== 'file' && code && t.thumb) ic.append(el('span', { class: 'site' }, code));
+    r.icon.replaceWith(ic);
+    r.icon = ic;
+  }
+  r.el.className = 'row item s-' + t.state + (r.el.classList.contains('flash') ? ' flash' : '');
+  r.name.textContent = nameOf(t);
+  r.name.title = nameOf(t);
+  const sub = [];
+  const label = t.label && (t.type !== 'file' || t.label.length <= 5) ? t.label : '';
+  if (t.type === 'sep') sub.push(t.state === 'done' && t.result ? t.result.folderLabel : t.srcFolderLabel);
+  else if (t.siteName) sub.push(t.siteName);
+  if (t.type === 'file' && t.state !== 'done' && t.resumable === false && t.state !== 'running' && t.done > 0) sub.push(T('st.noResume'));
+  if (t.state === 'done' && t.result && t.type !== 'sep') sub.push(t.result.folderLabel || '');
+  const subText = sub.filter(Boolean).join(' • ');
+  if (r.subKey !== label + '|' + subText + '|' + !!t.noMusic + LANG) {
+    r.subKey = label + '|' + subText + '|' + !!t.noMusic + LANG;
+    r.sub.replaceChildren();
+    if (label) r.sub.append(el('span', { class: 'lab' }, label));
+    if (t.noMusic) r.sub.append(el('span', { class: 'lab nomusic', title: T('det.musicOff') }, T('lab.noMusic')));
+    r.sub.append(el('span', { class: 'tx', title: subText }, subText));
+  }
+  const total = t.total > 0 ? t.total : t.size;
+  r.size.textContent = t.state === 'done' && t.result ? t.result.sizeText : (t.stage === 'sepmodel' ? t.sizeText : t.totalText || t.sizeText || (t.doneText && t.type === 'file' ? t.doneText : '')) || '—';
+  if (!(total > 0) && t.type === 'file' && t.state !== 'done' && t.doneText) r.size.textContent = t.doneText;
+  const stText = statusText(t);
+  const stTip = t.state === 'running' && /^(sepwait|sepmodel|separate)$/.test(t.stage) && !t.stopping ? T('tip.' + t.stage) : stText;
+  r.st.replaceChildren(el('span', { class: 'dotc' }), el('span', { class: 'stx', title: stTip }, stText));
+  const pct = t.state === 'done' ? 100 : Math.max(0, Math.min(100, t.percent || 0));
+  if (t.state !== 'done' && t.state !== 'error' && (pct > 0 || t.state === 'running') && !busyStage(t) && !(t.state === 'running' && t.stage === 'sepwait')) {
+    r.pct.textContent = Math.floor(pct) + '%';
+    r.st.append(r.pct);
+  }
+  r.bar.classList.toggle('busy', busyStage(t));
+  r.fill.style.width = pct + '%';
+  r.speed.textContent = t.state === 'running' ? (t.speedText || '') : '';
+  r.eta.textContent = t.state === 'running' ? shortEta(t.eta) : '';
+  r.date.textContent = dateText(t.createdAt);
+  r.date.title = new Date(t.createdAt || 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'ar-EG-u-nu-latn');
+  // Quick buttons on the row (made again only when its state changes: a button replaced
+  // under the mouse would lose the click).
+  const actKey = t.state + '|' + LANG;
+  if (r.actKey === actKey) return;
+  r.actKey = actKey;
+  quickButtons(r.acts, t);
+}
+const QA_ICONS = {
+  pause: '<rect x="6.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.5" y="5.5" width="4" height="13" rx="1.2" fill="currentColor" stroke="none"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>',
+  open: '<path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>',
+  folder: '<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2 2.2h7.4A2.5 2.5 0 0 1 21 9.7v7.8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/>',
+};
+// The quick buttons of a download: pause, resume (or try again), open the file, its folder.
+function quickButtons(box, t) {
+  box.replaceChildren();
+  const qa = (title, icon, f) => el('button', { class: 'ra', type: 'button', title, 'aria-label': title, onclick: (e) => { e.stopPropagation(); f(); } }, svg(icon, 16));
+  if (t.state === 'running' || t.state === 'queued') box.append(qa(T('m.pause'), QA_ICONS.pause, () => api.pause(t.id)));
+  if (t.state === 'paused' || t.state === 'error') box.append(qa(t.state === 'error' ? T('m.retry') : T('m.resume'), QA_ICONS.play, () => api.resume(t.id)));
+  if (t.state === 'done') {
+    box.append(qa(T('m.open'), QA_ICONS.open, () => openTask(t.id)));
+    box.append(qa(T('m.folder'), QA_ICONS.folder, () => showFolder(t)));
+  }
+}
+function renderList() {
+  const rows = $('rows');
+  const vis = sortedVisible();
+  S.order = vis.map((t) => t.id);
+  const frag = document.createDocumentFragment();
+  for (const t of vis) {
+    let r = S.rows.get(t.id);
+    if (!r) { r = makeRow(t); S.rows.set(t.id, r); }
+    fillRow(r, t);
+    r.el.setAttribute('aria-selected', String(S.sel.has(t.id)));
+    frag.append(r.el);
+  }
+  rows.replaceChildren(frag);
+  for (const id of [...S.sel]) if (!S.tasks.has(id)) S.sel.delete(id);
+  const any = S.tasks.size > 0;
+  $('empty').hidden = vis.length > 0;
+  $('list').hidden = vis.length === 0;
+  if (!vis.length) {
+    if (!any) { $('empty-title').textContent = T('empty.title'); $('empty-text').textContent = T('empty.text'); $('empty-btns').hidden = false; }
+    else if (S.query) { $('empty-title').textContent = T('empty.noMatch'); $('empty-text').textContent = T('empty.noMatchText', { q: S.query }); $('empty-btns').hidden = true; }
+    else { $('empty-title').textContent = T('empty.none'); $('empty-text').textContent = T('empty.noneText'); $('empty-btns').hidden = true; }
+  }
+  for (const b of document.querySelectorAll('.head [data-sort]')) {
+    if (b.dataset.sort === S.sort.key) b.dataset.dir = S.sort.dir; else delete b.dataset.dir;
+  }
+  updateCounts();
+  updateToolbar();
+  updateStatus();
+  renderDetails();
+}
+let listTimer = 0;
+function renderSoon() { if (!listTimer) listTimer = requestAnimationFrame(() => { listTimer = 0; renderList(); }); }
+function updateOne(t) {
+  const r = S.rows.get(t.id);
+  // A change that may move it (state, filter) redraws the list; progress only redraws the row.
+  if (!r || !r.el.isConnected || matches(t) === false || (S.sort.key === 'state' && r.lastState !== t.state)) { renderSoon(); return; }
+  r.lastState = t.state;
+  fillRow(r, t);
+  r.el.setAttribute('aria-selected', String(S.sel.has(t.id)));
+  if (S.details === t.id) renderDetails();
+}
+function updateCounts() {
+  const c = { all: 0, unfinished: 0, finished: 0, video: 0, music: 0, pictures: 0, programs: 0, documents: 0, compressed: 0, other: 0, nomusic: 0 };
+  for (const t of S.tasks.values()) {
+    c.all++;
+    if (t.noMusic) c.nomusic++;
+    if (t.state === 'done') c.finished++; else c.unfinished++;
+    c[catOf(t)] = (c[catOf(t)] || 0) + 1;
+  }
+  for (const b of document.querySelectorAll('.cat')) {
+    b.setAttribute('aria-current', String(b.dataset.filter === S.filter));
+    b.querySelector('.n').textContent = c[b.dataset.filter] ? String(c[b.dataset.filter]) : '';
+  }
+}
+function updateStatus() {
+  let run = 0, wait = 0, speed = 0;
+  for (const t of S.tasks.values()) {
+    if (t.state === 'running') { run++; speed += t.speed || 0; }
+    if (t.state === 'queued') wait++;
+  }
+  const parts = [];
+  if (run) parts.push(T('sb.active', { n: run }));
+  if (wait) parts.push(T('sb.waiting', { n: wait }));
+  $('sb-active').textContent = parts.length ? parts.join(' • ') : T('sb.none');
+  $('sb-speed').textContent = speed > 0 ? T('sb.speed', { s: humanSpeed(speed) }) : '';
+  $('sb-folder').textContent = S.saveDirLabel;
+}
+function selected() { return [...S.sel].map((id) => S.tasks.get(id)).filter(Boolean); }
+function updateToolbar() {
+  const sel = selected();
+  $('tb-resume').disabled = !sel.some((t) => t.state === 'paused' || t.state === 'error');
+  $('tb-pause').disabled = !sel.some((t) => t.state === 'running' || t.state === 'queued');
+  $('tb-delete').disabled = sel.length === 0;
+  let active = 0, stopped = 0;
+  for (const t of S.tasks.values()) {
+    if (t.state === 'running' || t.state === 'queued') active++;
+    if (t.state === 'paused' || t.state === 'error') stopped++;
+  }
+  $('tb-pause-all').disabled = active === 0;
+  $('tb-resume-all').disabled = stopped === 0;
+}
+function selectOnly(id) {
+  S.sel = new Set(id ? [id] : []);
+  S.anchor = id || '';
+  if (S.details && id && S.details !== id) S.details = id;
+  refreshSelection();
+}
+function refreshSelection() {
+  for (const [id, r] of S.rows) r.el.setAttribute('aria-selected', String(S.sel.has(id)));
+  updateToolbar();
+  renderDetails();
+}
+function onRowDown(e, id) {
+  if (e.button === 2 && S.sel.has(id)) return;
+  if (e.shiftKey && S.anchor) {
+    const a = S.order.indexOf(S.anchor), b = S.order.indexOf(id);
+    if (a >= 0 && b >= 0) {
+      if (!e.ctrlKey) S.sel.clear();
+      for (let i = Math.min(a, b); i <= Math.max(a, b); i++) S.sel.add(S.order[i]);
+    }
+  } else if (e.ctrlKey || e.metaKey) {
+    if (S.sel.has(id)) S.sel.delete(id); else S.sel.add(id);
+    S.anchor = id;
+  } else {
+    S.sel = new Set([id]);
+    S.anchor = id;
+    if (S.details) S.details = id;
+  }
+  refreshSelection();
+}
+function openTask(id) {
+  const t = S.tasks.get(id);
+  if (!t) return;
+  if (t.state === 'done' && t.result) {
+    api.openFile(t.result.path).then((ok) => { if (!ok) toast(T('toast.missing')); });
+    return;
+  }
+  S.details = id;
+  selectOnly(id);
+}
+function showOriginal(t) { api.showInFolder(t.srcPath).then((ok) => { if (!ok) toast(T('toast.missing')); }); }
+function showFolder(t) {
+  if (t.result) api.showInFolder(t.result.path).then((ok) => { if (!ok) toast(T('toast.missing')); });
+  else api.openFolder(t.saveDir || '');
+}
+function onTask(ev) {
+  if (S.miniMode) miniSoon();
+  if (ev.op === 'remove') {
+    S.tasks.delete(ev.id);
+    S.rows.delete(ev.id);
+    S.sel.delete(ev.id);
+    if (S.details === ev.id) S.details = '';
+    renderSoon();
+    return;
+  }
+  const t = ev.task;
+  const old = S.tasks.get(t.id);
+  if (old && t.rev != null && old.rev != null && t.rev < old.rev) return; // late
+  if (old && !t.thumb && old.thumb) t.thumb = old.thumb;
+  S.tasks.set(t.id, t);
+  if (ev.op === 'add' || !old) {
+    renderSoon();
+    if (ev.op === 'add') requestAnimationFrame(() => flashRow(t.id));
+    return;
+  }
+  if (old.state !== t.state) {
+    if (t.state === 'done' && !S.compact) toast(T(t.type === 'sep' ? 'toast.sepDone' : 'toast.done', { name: nameOf(t) }));
+    if (t.state === 'error' && old.state === 'running' && !S.compact) toast(T('toast.failed', { name: nameOf(t) }));
+    renderSoon();
+    return;
+  }
+  updateOne(t);
+  updateStatus();
+}
+function flashRow(id) {
+  const r = S.rows.get(id);
+  if (!r) return;
+  r.el.classList.remove('flash');
+  void r.el.offsetWidth;
+  r.el.classList.add('flash');
+  r.el.scrollIntoView({ block: 'nearest' });
+}
+
+// ------------------------------------------------------------ details
+// The details of a download. Made again when what they show changes (its state, an
+// error); while it downloads only the numbers and the parts move (a button made again
+// under the mouse would lose the click).
+let D = { key: '' };
+const localDate = (ms) => new Date(ms).toLocaleString(LANG === 'en' ? 'en-GB' : 'ar-EG-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' });
+function detailValues(t) {
+  const running = t.state === 'running';
+  return {
+    'det.size': (t.result && t.result.sizeText) || t.totalText || t.sizeText || '',
+    'det.done': t.state !== 'done' && t.doneText ? t.doneText + (t.percent > 0 ? ' (' + Math.floor(t.percent) + '%)' : '') : '',
+    'det.speed': running ? t.speedText || '—' : '',
+    'det.eta': running ? t.etaText || '—' : '',
+    'det.conns': running && t.type === 'file' ? String(t.conns || 0) : '',
+  };
+}
+function hasSegs(t) { return !!(t.segments && t.segments.length && t.total > 0); }
+function renderDetails() {
+  const box = $('details');
+  const t = S.details && S.tasks.get(S.details);
+  if (!t) { box.hidden = true; D = { key: '' }; return; }
+  box.hidden = false;
+  const vals = detailValues(t);
+  const key = [t.id, t.state, t.error ? t.error.code : '', LANG, t.thumb ? 1 : 0, nameOf(t), t.url, t.resumable, hasSegs(t), t.noMusic,
+    ...Object.keys(vals).filter((k) => vals[k])].join('|');
+  if (key === D.key) {
+    for (const [k, v] of Object.entries(vals)) if (D.fields[k]) { D.fields[k].textContent = v; D.fields[k].title = v; }
+    drawSegs(t);
+    return;
+  }
+  D = { key, fields: {}, segs: null, segLabel: null };
+  const kids = [];
+  kids.push(el('div', { class: 'det-head' }, fileIcon(catOf(t), t.type !== 'file' ? t.thumb : ''), el('h2', { title: nameOf(t) }, nameOf(t)),
+    el('button', { class: 'xbtn', type: 'button', 'aria-label': T('det.close'), onclick: () => { S.details = ''; renderDetails(); } }, svg('<path d="M6 6l12 12M18 6L6 18"/>', 18))));
+  // Where it is (one per line), then its numbers (two per line).
+  const where = el('dl', { class: 'det-grid' });
+  const nums = el('dl', { class: 'det-grid two' });
+  const row = (dl, k, v, cls, extra) => {
+    if (!v) return;
+    const span = el('span', { class: 'v', title: v }, v);
+    D.fields[k] = span;
+    dl.append(el('dt', null, T(k)), el('dd', { class: cls || '' }, span, extra || null));
+  };
+  const copyBtn = (text) => el('button', { class: 'linkbtn', type: 'button', onclick: () => api.copyText(text).then(() => toast(T('toast.copied'))) }, T('btn.copy'));
+  if (t.type === 'sep') {
+    // Name and folder apart: a Windows path with Arabic names reads scrambled.
+    row(where, 'det.src', T('det.srcIn', { name: '\u2068' + (t.srcName || '') + '\u2069', folder: '\u2068' + (t.srcFolderLabel || '') + '\u2069' }), '',
+      el('button', { class: 'linkbtn', type: 'button', onclick: () => showOriginal(t) }, T('det.show')));
+    if (D.fields['det.src']) D.fields['det.src'].title = t.srcPath || '';
+  }
+  row(where, 'det.url', prettyURL(t.url), 'url', copyBtn(t.url));
+  if (t.page && t.page !== t.url) row(where, 'det.page', prettyURL(t.page), 'url', el('button', { class: 'linkbtn', type: 'button', onclick: () => api.openPage(t.page) }, T('btn.open')));
+  row(where, t.type === 'sep' ? 'det.copyTo' : 'det.folder', (t.result && t.result.folderLabel) || t.folderLabel, '', el('button', { class: 'linkbtn', type: 'button', onclick: () => showFolder(t) }, T('btn.open')));
+  if (t.list) row(where, 'det.list', t.list);
+  if (t.type !== 'file' && t.type !== 'sep' && t.label) row(nums, 'det.quality', t.label);
+  if (t.noMusic) row(nums, 'det.music', T('det.musicOff'));
+  for (const [k, v] of Object.entries(vals)) row(nums, k, v);
+  if (t.type === 'file' && t.state !== 'done' && t.resumable != null) row(nums, 'det.resume', t.resumable ? T('det.resumeYes') : T('det.resumeNo'));
+  row(nums, 'det.added', t.createdAt ? localDate(t.createdAt) : '');
+  if (t.finishedAt) row(nums, 'det.finished', localDate(t.finishedAt));
+  kids.push(where, nums);
+  if (hasSegs(t)) {
+    D.segs = el('div', { class: 'segs', title: T('det.parts') });
+    D.segLabel = el('span', { class: 'lab' });
+    kids.push(el('div', { class: 'field' }, D.segLabel, D.segs));
+  }
+  if (t.state === 'error' && t.error) kids.push(errorBox(t.error, taskErrorActions(t), 'det-err'));
+  box.replaceChildren(...kids);
+  drawSegs(t);
+}
+// drawSegs draws the parts of a file: what each connection has downloaded so far.
+function drawSegs(t) {
+  if (!D.segs || !hasSegs(t)) return;
+  const bars = [];
+  for (const [s, e, d] of t.segments) {
+    if (d > 0) bars.push(el('i', { style: 'inset-inline-start:' + (s / t.total) * 100 + '%;width:' + Math.max(0.3, (d / t.total) * 100) + '%' }));
+    if (e - s - d > 0 && t.state === 'running') bars.push(el('i', { class: 'part', style: 'inset-inline-start:' + ((s + d) / t.total) * 100 + '%;width:0.4%' }));
+  }
+  D.segs.replaceChildren(...bars);
+  D.segLabel.textContent = T('det.parts') + (t.conns ? ' • ' + connsText(t.conns) : '');
+}
+function taskErrorActions(t) {
+  const acts = [];
+  const e = t.error;
+  if (e.action === 'chooseFolder') acts.push(el('button', { class: 'btn small primary', type: 'button', onclick: () => api.pickFolder(t.id) }, T('btn.otherFolder')));
+  if (e.action === 'setup') acts.push(el('button', { class: 'btn small primary', type: 'button', onclick: startSetup }, T('btn.setup')));
+  if (e.action === 'openPage' && (t.page || t.url)) acts.push(el('button', { class: 'btn small', type: 'button', onclick: () => api.openPage(t.page || t.url) }, T('btn.openPage')));
+  if (e.retry !== false) acts.push(el('button', { class: 'btn small' + (acts.length ? '' : ' primary'), type: 'button', onclick: () => api.resume(t.id) }, T('btn.retry')));
+  return acts;
+}
+function errorBox(e, acts, cls) {
+  const box = el('div', { class: cls || 'err-box', role: 'alert' }, el('b', null, e.title || T('st.error')), el('span', null, e.message || ''));
+  if (acts && acts.length) box.append(el('div', { class: 'acts inline' }, ...acts));
+  if (e.details) {
+    const pre = el('pre', null, e.details);
+    box.append(el('details', null, el('summary', null, T('btn.details')), pre,
+      el('button', { class: 'linkbtn', type: 'button', onclick: () => api.copyText(e.details).then(() => toast(T('toast.copied'))) }, T('btn.copy'))));
+  }
+  return box;
+}
+
+// ------------------------------------------------------------ menu, toolbar, keys
+const menu = $('menu');
+function closeMenu() { menu.classList.remove('open'); }
+function showMenu(x, y) {
+  const sel = selected();
+  if (!sel.length) return;
+  const one = sel.length === 1 ? sel[0] : null;
+  const items = [];
+  const add = (label, f, cls) => items.push(el('button', { type: 'button', role: 'menuitem', class: cls || '', onclick: () => { closeMenu(); f(); } }, label));
+  if (one && one.state === 'done') { add(T('m.open'), () => openTask(one.id)); add(T('m.folder'), () => showFolder(one)); }
+  if (sel.some((t) => t.state === 'paused' || t.state === 'error')) add(sel.some((t) => t.state === 'error') && !sel.some((t) => t.state === 'paused') ? T('m.retry') : T('m.resume'), () => { for (const t of selected()) if (t.state === 'paused' || t.state === 'error') api.resume(t.id); });
+  if (sel.some((t) => t.state === 'running' || t.state === 'queued')) add(T('m.pause'), () => { for (const t of selected()) if (t.state === 'running' || t.state === 'queued') api.pause(t.id); });
+  if (sel.some(canRemoveMusic)) add(T('m.removeMusic'), () => removeMusicFrom(selected().filter(canRemoveMusic)));
+  if (one) {
+    items.push(el('hr'));
+    if (one.type === 'sep') add(T('m.original'), () => showOriginal(one));
+    else add(T('m.copy'), () => api.copyText(one.url).then(() => toast(T('toast.copied'))));
+    if (one.page || (one.type !== 'file' && one.type !== 'sep')) add(T('m.page'), () => api.openPage(one.page || one.url));
+    if (one.state !== 'done') add(T('m.folder'), () => showFolder(one));
+    add(T('m.details'), () => { S.details = one.id; renderDetails(); });
+  }
+  items.push(el('hr'));
+  add(T('m.delete'), () => askDelete(false), 'danger');
+  if (sel.some((t) => t.state === 'done')) add(T('m.deleteFile'), () => askDelete(true), 'danger');
+  menu.replaceChildren(...items);
+  menu.classList.add('open');
+  const w = menu.offsetWidth, h = menu.offsetHeight;
+  menu.style.left = Math.max(6, Math.min(x, innerWidth - w - 6)) + 'px';
+  menu.style.top = Math.max(6, Math.min(y, innerHeight - h - 6)) + 'px';
+  const first = menu.querySelector('button');
+  if (first) first.focus();
+}
+document.addEventListener('mousedown', (e) => { if (!menu.contains(e.target)) closeMenu(); });
+addEventListener('blur', closeMenu);
+$('tb-resume').addEventListener('click', () => { for (const t of selected()) if (t.state === 'paused' || t.state === 'error') api.resume(t.id); });
+$('tb-pause').addEventListener('click', () => { for (const t of selected()) if (t.state === 'running' || t.state === 'queued') api.pause(t.id); });
+$('tb-delete').addEventListener('click', () => askDelete(false));
+$('tb-pause-all').addEventListener('click', () => api.pauseAll());
+// ---- removing the music: from finished downloads, or files chosen on the computer
+async function removeMusicFrom(list) {
+  let n = 0, err = null, last = '';
+  for (const t of list) {
+    let r = {};
+    try { r = (await api.removeMusic(t.id)) || {}; } catch (_) {}
+    if (r.id) { n++; last = r.id; } else if (r.error) err = r.error;
+  }
+  if (n) {
+    toast(n === 1 ? T('toast.sepOne') : T('toast.sepAdded', { files: filesText(n) }));
+    if (S.filter !== 'all' && S.filter !== 'nomusic' && S.filter !== 'unfinished') S.filter = 'all';
+    renderSoon();
+    setTimeout(() => flashRow(last), 120);
+  } else if (err) toast(err.title || '');
+}
+function pickSepFiles() { api.pickSepFiles(); }
+function onSepPicked(d) {
+  const ids = (d && d.ids) || [];
+  if (!d || !d.ok) return; // closed without choosing
+  if (!ids.length) { toast(T('toast.sepNone')); return; }
+  toast(ids.length === 1 ? T('toast.sepOne') : T('toast.sepAdded', { files: filesText(ids.length) }));
+  if (S.filter !== 'all' && S.filter !== 'nomusic' && S.filter !== 'unfinished') S.filter = 'all';
+  renderSoon();
+  setTimeout(() => flashRow(ids[ids.length - 1]), 160);
+}
+$('sep-btn').addEventListener('click', pickSepFiles);
+$('side-sep').addEventListener('click', pickSepFiles);
+$('empty-sep').addEventListener('click', pickSepFiles);
+$('tb-resume-all').addEventListener('click', () => api.resumeAll());
+$('search').addEventListener('input', () => { S.query = $('search').value.trim(); renderList(); });
+for (const b of document.querySelectorAll('.cat')) b.addEventListener('click', () => { S.filter = b.dataset.filter; renderList(); });
+for (const b of document.querySelectorAll('.head [data-sort]')) {
+  b.addEventListener('click', () => {
+    const k = b.dataset.sort;
+    if (S.sort.key === k) S.sort.dir = S.sort.dir === 'asc' ? 'desc' : 'asc';
+    else S.sort = { key: k, dir: k === 'name' ? 'asc' : 'desc' };
+    renderList();
+  });
+}
+$('listwrap').addEventListener('mousedown', (e) => { if (e.target === $('listwrap') || e.target === $('rows')) selectOnly(''); });
+
+// ------------------------------------------------------------ dialogs
+function topDialog() { return S.dialogs[S.dialogs.length - 1]; }
+function openDialog(id) {
+  closeMenu();
+  const d = $(id);
+  if (S.dialogs.includes(id)) S.dialogs.splice(S.dialogs.indexOf(id), 1);
+  for (const x of S.dialogs) $(x).classList.remove('open');
+  S.dialogs.push(id);
+  d.classList.add('open');
+  $('overlay').classList.add('open');
+  // Focus a field to type in, else the window itself (Tab then moves through its buttons).
+  const f = d.querySelector('[autofocus], input[type="text"]:not([readonly])');
+  d.tabIndex = -1;
+  setTimeout(() => (f || d).focus(), 30);
+}
+function closeDialog(id) {
+  id = id || topDialog();
+  if (!id) return;
+  if (id === 'dlg-add') dropAddPid(); // closed while a link was being checked
+  const i = S.dialogs.indexOf(id);
+  if (i >= 0) S.dialogs.splice(i, 1);
+  $(id).classList.remove('open');
+  const next = topDialog();
+  if (next) $(next).classList.add('open');
+  else $('overlay').classList.remove('open');
+  afterDialogs();
+}
+// The small window disappears once nothing waits in it (or shows the downloads started
+// from the browser meanwhile).
+function afterDialogs() {
+  if (S.compact && !S.miniMode && !S.dialogs.length) {
+    if (S.pending.length) { showFile(); return; }
+    if (miniTasks().length) { api.showMini(); return; }
+    api.dialogDone();
+  }
+  if (!S.compact && !S.dialogs.length) setTimeout(maybePromptUpdate, 400);
+}
+for (const b of document.querySelectorAll('[data-close]')) b.addEventListener('click', () => closeDialog(b.closest('.dlg').id));
+$('overlay').addEventListener('mousedown', (e) => { if (e.target === $('overlay') && !S.compact) dismissTop(); });
+function dismissTop() {
+  const id = topDialog();
+  if (!id) return;
+  if (id === 'dlg-file') cancelFile();
+  else if (id === 'dlg-video') cancelVideo();
+  else if (id === 'dlg-update') { if (S.upd.state === 'downloading') closeDialog(id); else updateLater(); }
+  else if (id === 'dlg-close') closeDialog(id);
+  else closeDialog(id);
+}
+
+// ---- add a link
+// addPid is the link being checked (a file or a page?); its answer arrives as a "file" event.
+let addPid = '';
+const dropped = new Set(); // links whose checking the user closed: their answers are ignored
+function openAdd(text) {
+  if (S.dialogs.includes('dlg-add')) dropAddPid();
+  $('add-input').value = text || '';
+  addBusy(false);
+  $('add-err').hidden = true;
+  openDialog('dlg-add');
+  if (text) submitAdd();
+}
+function addBusy(on) {
+  $('add-busy').hidden = !on;
+  $('add-go').disabled = on;
+  $('add-input').readOnly = on;
+  $('add-paste').disabled = on;
+}
+function dropAddPid() {
+  if (!addPid) return;
+  api.cancelFile(addPid);
+  dropped.add(addPid);
+  addPid = '';
+}
+async function submitAdd() {
+  const text = $('add-input').value.trim();
+  if (!text || !$('add-busy').hidden) return;
+  $('add-err').hidden = true;
+  addBusy(true);
+  let r = {};
+  try { r = (await api.addLink(text)) || {}; } catch (_) {}
+  if (r.error) { addFailed(r.error); return; }
+  if (r.kind === 'media') { openVideo(r.seq, text); closeDialog('dlg-add'); return; }
+  if (r.kind === 'file' && !dropped.has(r.pid) && !S.answered.has(r.pid)) addPid = r.pid;
+}
+function addFailed(e) {
+  addBusy(false);
+  const box = errorBox(e, null, 'err-box');
+  box.id = 'add-err';
+  $('add-err').replaceWith(box);
+}
+// checking: the window shows the link and waits (a link sent from the browser opens it).
+function addChecking(d) {
+  if (!S.dialogs.includes('dlg-add')) {
+    $('add-input').value = d.url || '';
+    $('add-err').hidden = true;
+    openDialog('dlg-add');
+  }
+  addBusy(true);
+  addPid = d.pid;
+}
+$('add-btn').addEventListener('click', () => openAdd(''));
+$('empty-add').addEventListener('click', () => openAdd(''));
+$('add-go').addEventListener('click', submitAdd);
+$('add-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAdd(); });
+$('add-paste').addEventListener('click', async () => {
+  let t = '';
+  try { t = ((await api.paste()) || '').trim(); } catch (_) {}
+  if (!t) { toast(T('add.nothing')); return; }
+  $('add-input').value = t;
+  submitAdd();
+});
+
+// ---- files waiting in the "new download" window
+// A "file" event: checking (a link is being asked about), then ready (the "new download"
+// window), media (a page with videos: their qualities), started (no window wanted) or error.
+// In the small window, the next window opens before the current one closes (else the small
+// window would disappear in between).
+function onFile(d) {
+  if (dropped.has(d.pid)) return;
+  if (d.status === 'checking') { if (!S.answered.has(d.pid)) addChecking(d); return; }
+  S.answered.add(d.pid);
+  const mine = d.pid === addPid;
+  if (mine) addPid = '';
+  switch (d.status) {
+    case 'started':
+      if (mine) closeDialog('dlg-add');
+      toast(T('toast.added'));
+      return;
+    case 'error':
+      if (mine) addFailed(d.error);
+      else if (d.from === 'browser' && d.error) toast(d.error.title || '');
+      return;
+    case 'media':
+      if (mine) { openVideo(d.seq, d.url); closeDialog('dlg-add'); }
+      else if (d.from === 'browser') openVideo(d.seq, d.url);
+      return;
+    case 'ready':
+      if (!S.pending.some((p) => p.pid === d.pid)) S.pending.push(d);
+      if (!S.dialogs.includes('dlg-file')) showFile();
+      else updateFileCount();
+      if (mine) closeDialog('dlg-add');
+  }
+}
+function updateFileCount() { $('file-count').textContent = S.pending.length > 1 ? T('file.count', { i: 1, n: S.pending.length }) : ''; }
+function showFile() {
+  const p = S.pending[0];
+  if (!p) { if (S.dialogs.includes('dlg-file')) closeDialog('dlg-file'); return; }
+  S.filePid = p.pid;
+  S.fileCat = p.category;
+  S.fileFolder = null;
+  const icon = fileIcon(p.category, '');
+  icon.id = 'file-icon';
+  $('file-icon').replaceWith(icon);
+  $('file-size').textContent = p.sizeText || T('file.unknown');
+  $('file-from').textContent = p.from === 'browser' ? T('file.fromBrowser', { host: p.host }) : T('file.from', { host: p.host });
+  $('file-from').title = p.url;
+  $('file-name').value = p.name;
+  const sel = $('file-cat');
+  sel.replaceChildren(...['video', 'music', 'pictures', 'programs', 'documents', 'compressed', 'other'].map((c) => el('option', { value: c }, T('cat.' + c))));
+  sel.value = p.category;
+  fileFolderText();
+  $('file-noresume').hidden = p.resumable !== false;
+  $('file-existing').hidden = !p.existing;
+  if (p.existing) $('file-existing-txt').textContent = T('file.existing', { done: p.existing.doneText || Math.floor(p.existing.percent || 0) + '%' });
+  $('file-err').hidden = true;
+  updateFileCount();
+  openDialog('dlg-file');
+  setTimeout(() => { const n = $('file-name'); n.focus(); const dot = n.value.lastIndexOf('.'); n.setSelectionRange(0, dot > 0 ? dot : n.value.length); }, 40);
+}
+function fileFolderText() {
+  const p = S.pending[0];
+  if (!p) return;
+  if (S.fileFolder) { $('file-folder').textContent = S.fileFolder.label; $('file-folder').title = S.fileFolder.folder; return; }
+  const f = (p.folders && p.folders[S.fileCat]) || { folder: p.folder, label: p.folderLabel };
+  $('file-folder').textContent = f.label;
+  $('file-folder').title = f.folder;
+}
+$('file-cat').addEventListener('change', () => { S.fileCat = $('file-cat').value; fileFolderText(); });
+$('file-change').addEventListener('click', () => {
+  const p = S.pending[0];
+  const f = S.fileFolder || (p && p.folders && p.folders[S.fileCat]) || {};
+  api.pickDir('file', f.folder || '');
+});
+function nextFile() {
+  const done = S.pending.shift();
+  if (done) dropped.add(done.pid); // answered: a late copy of its event is ignored
+  if (S.pending.length) { showFile(); return; }
+  closeDialog('dlg-file');
+}
+async function confirmFile(start, cont) {
+  const p = S.pending[0];
+  if (!p) return;
+  const choice = { name: $('file-name').value.trim(), category: S.fileCat, folder: S.fileFolder ? S.fileFolder.folder : '', start: !!start, continue: cont || '' };
+  if (!S.fileFolder && p.folders && p.folders[S.fileCat]) choice.folder = '';
+  let r = {};
+  try { r = (await api.confirmFile(p.pid, choice)) || {}; } catch (_) {}
+  if (r.error) {
+    const box = errorBox(r.error, null, 'err-box');
+    box.id = 'file-err';
+    $('file-err').replaceWith(box);
+    return;
+  }
+  if (r.id) {
+    S.filter = S.filter === 'finished' ? 'all' : S.filter;
+    toast(cont ? T('toast.continued') : start ? T('toast.added') : T('toast.later'));
+    setTimeout(() => flashRow(r.id), 120);
+  }
+  nextFile();
+}
+function cancelFile() {
+  const p = S.pending[0];
+  if (p) api.cancelFile(p.pid);
+  nextFile();
+}
+$('file-start').addEventListener('click', () => confirmFile(true));
+$('file-later').addEventListener('click', () => confirmFile(false));
+$('file-cancel').addEventListener('click', cancelFile);
+$('file-x').addEventListener('click', cancelFile);
+$('file-continue').addEventListener('click', () => { const p = S.pending[0]; if (p && p.existing) confirmFile(true, p.existing.id); });
+$('file-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmFile(true); });
+
+// ---- a video (its qualities)
+let slowTimer = 0;
+// openVideo shows the reading number seq (its events may have arrived already: they are
+// kept for a moment in S.infos).
+function openVideo(seq, link) {
+  if (S.video && S.video.seq === seq) { openDialog('dlg-video'); return; }
+  $('v-oldext').hidden = true;
+  S.video = { seq, status: 'loading', info: null, item: 0, kind: 'video', sel: {}, site: '', siteName: '', error: null, lastLink: link || '',
+    isList: /[?&]list=|\/playlist\b/i.test(link || '') && /youtu/i.test(link || '') && !/[?&]v=|youtu\.be\//i.test(link || '') };
+  videoView();
+  openDialog('dlg-video');
+  for (const ev of S.infos.get(seq) || []) onInfo(ev);
+}
+function videoView() {
+  const v = S.video;
+  if (!v) return;
+  $('v-loading').hidden = v.status !== 'loading';
+  $('v-choose').hidden = v.status !== 'done';
+  $('v-list').hidden = v.status !== 'list';
+  $('v-error').hidden = v.status !== 'error';
+  $('video-retry').hidden = !(v.status === 'error' && v.error && v.error.retry !== false && v.lastLink);
+  $('video-go').hidden = v.status !== 'done' && v.status !== 'list';
+  if (v.status !== 'list') $('video-go').disabled = false;
+  $('video-title').textContent = T(v.status === 'list' || (v.status === 'loading' && v.isList) ? 'l.title' : 'video.title');
+  $('v-inlist').hidden = !(v.status === 'done' && v.info && v.info.listUrl);
+  if (v.status === 'loading') {
+    $('v-loading-txt').textContent = v.updating ? T('v.updating', { site: v.siteName || '' }) : v.isList ? T('l.loading') : v.siteName ? T('v.loadingSite', { site: v.siteName }) : T('v.loading');
+    clearTimeout(slowTimer);
+    $('v-slow').hidden = true;
+    slowTimer = setTimeout(() => { if (S.video === v && v.status === 'loading') { $('v-slow').textContent = v.site === 'youtube' ? T('v.slowYt') : T('v.slow'); $('v-slow').hidden = false; } }, 7000);
+  }
+  if (v.status === 'error') {
+    const acts = [];
+    const e = v.error || {};
+    if (e.action === 'setup') acts.push(el('button', { class: 'btn small primary', type: 'button', onclick: () => { startSetup(); closeVideo(); } }, T('btn.setup')));
+    if (e.action === 'newLink') acts.push(el('button', { class: 'btn small', type: 'button', onclick: () => { clearTimeout(slowTimer); S.video = null; openAdd(''); closeDialog('dlg-video'); } }, T('btn.newLink')));
+    const box = errorBox(e, acts, 'err-box');
+    box.id = 'v-err';
+    $('v-err').replaceWith(box);
+    const alts = v.media || [];
+    $('v-alts').hidden = alts.length === 0;
+    $('v-alt-list').replaceChildren(...alts.map((m) => el('div', { class: 'alt' }, el('span', { class: 'k' }, m.label), el('span', { class: 'w' }, [m.host, m.sizeText].filter(Boolean).join(' • ')),
+      el('button', { class: 'btn small primary', type: 'button', onclick: () => useMedia(m.index) }, T('v.alt')))));
+  }
+}
+async function useMedia(index) {
+  const v = S.video;
+  let r = {};
+  try { r = (await api.useMedia(v.seq, index)) || {}; } catch (_) {}
+  if (r.kind === 'media') { S.video = null; openVideo(r.seq); return; }
+  // A file: the "checking" window is open already (its event came first).
+  if (r.kind === 'file') { if (S.video === v) closeVideo(true); return; }
+  if (r.error) toast(r.error.title || '');
+}
+function keepInfo(d) {
+  const list = S.infos.get(d.seq) || [];
+  if (d.status === 'loading') list.length = 0;
+  list.push(d);
+  S.infos.delete(d.seq);
+  S.infos.set(d.seq, list);
+  while (S.infos.size > 4) S.infos.delete(S.infos.keys().next().value);
+}
+function onInfo(d) {
+  const v = S.video;
+  if (!v || d.seq !== v.seq) return;
+  if (d.siteName) v.siteName = d.siteName;
+  if (d.site) v.site = d.site;
+  if (d.status === 'loading') { v.status = 'loading'; videoView(); return; }
+  if (d.status === 'updating') { v.updating = true; videoView(); return; }
+  if (d.status === 'error') { v.status = 'error'; v.error = d.error; v.media = d.media || []; videoView(); return; }
+  if (d.status === 'done') {
+    v.status = 'done';
+    v.info = d;
+    v.kind = S.lastKind === 'audio' ? 'audio' : 'video';
+    chooseItem(0);
+    videoView();
+  }
+  if (d.status === 'list' && d.list) {
+    v.status = 'list';
+    v.list = d.list;
+    v.lkind = S.lastKind === 'audio' ? 'audio' : 'video';
+    v.lsel = {};
+    for (const k of ['video', 'audio']) { const of = d.list.options.filter((o) => o.kind === k); const r = of.find((o) => o.recommended) || of[0]; v.lsel[k] = r ? r.key : ''; }
+    v.picked = defaultPicks(v);
+    v.touched = false;
+    renderPlaylist(true);
+    videoView();
+  }
+}
+function curItem() { return S.video && S.video.info && S.video.info.items[S.video.item]; }
+function hasKind(it, k) { return !!it && it.options.some((o) => o.kind === k); }
+function recommended(it, k) { const of = it.options.filter((o) => o.kind === k); const r = of.find((o) => o.recommended) || of[0]; return r ? r.key : null; }
+function chooseItem(i) {
+  const v = S.video;
+  v.item = i;
+  const it = curItem();
+  for (const k of ['video', 'audio']) if (!v.sel[k] || !it.options.some((o) => o.key === v.sel[k])) v.sel[k] = recommended(it, k);
+  if (!hasKind(it, v.kind)) v.kind = hasKind(it, 'video') ? 'video' : 'audio';
+  renderVideoCard(it.meta);
+  renderTiles();
+  renderKind();
+  renderOptions();
+}
+function renderVideoCard(m) {
+  const box = $('v-card');
+  const thumb = el('div', { class: 'thumb' });
+  if (m.thumbnail) thumb.append(thumbImg(thumb, m.thumbnail));
+  if (m.durationText) thumb.append(el('span', { class: 'dur' }, m.durationText));
+  box.replaceChildren(thumb, el('div', null, el('div', { class: 'vt' }, m.title || T('v.untitled')),
+    el('div', { class: 'vc' }, S.video.siteName ? el('span', { class: 'site-pill' }, S.video.siteName) : null, m.channel || '')));
+}
+function thumbImg(thumb, src) {
+  const img = el('img', { src, alt: '', referrerpolicy: 'no-referrer' });
+  img.addEventListener('load', () => thumb.classList.toggle('tall', img.naturalHeight > img.naturalWidth * 1.05));
+  img.addEventListener('error', () => img.remove());
+  return img;
+}
+function onThumb(d) {
+  const v = S.video;
+  if (!v || !v.info || d.seq !== v.seq) return;
+  const it = v.info.items[d.index];
+  if (!it) return;
+  it.meta.thumbnail = d.src;
+  if (d.index === v.item) renderVideoCard(it.meta);
+  renderTiles();
+}
+function countVideos(n) {
+  if (LANG === 'en') return n + ' videos';
+  return arCount(n, 'مقطع فيديو واحد', 'مقطعَي فيديو', 'مقاطع فيديو', 'مقطع فيديو');
+}
+function renderTiles() {
+  const v = S.video;
+  const items = v.info.items;
+  $('v-items').hidden = items.length < 2;
+  if (items.length < 2) return;
+  $('v-items-title').textContent = T('v.items', { n: countVideos(items.length) });
+  $('v-tiles').replaceChildren(...items.map((it, i) => {
+    const b = el('button', { class: 'tile', type: 'button', role: 'radio', 'aria-checked': String(i === v.item), 'aria-label': T('v.tile', { n: i + 1 }) });
+    if (it.meta.thumbnail) b.append(el('img', { src: it.meta.thumbnail, alt: '', referrerpolicy: 'no-referrer' }));
+    b.append(el('span', { class: 'n' }, String(i + 1)));
+    b.addEventListener('click', () => { if (i !== v.item) chooseItem(i); });
+    return b;
+  }));
+}
+function renderKind() {
+  const it = curItem();
+  for (const b of $('v-kind').children) { b.hidden = !hasKind(it, b.dataset.kind); b.setAttribute('aria-checked', String(b.dataset.kind === S.video.kind)); }
+}
+for (const b of $('v-kind').children) b.addEventListener('click', () => { if (S.video.kind !== b.dataset.kind) { S.video.kind = b.dataset.kind; renderKind(); renderOptions(); } });
+function renderOptions() {
+  const v = S.video;
+  const it = curItem();
+  const list = $('v-qlist');
+  list.replaceChildren();
+  for (const o of it.options.filter((x) => x.kind === v.kind)) {
+    const chosen = o.key === v.sel[v.kind];
+    const input = el('input', { type: 'radio', name: 'q', value: o.key, 'aria-label': o.label + (o.sizeText ? ', ' + o.sizeText : '') });
+    if (chosen) input.checked = true;
+    const row = el('label', { class: 'q' + (chosen ? ' sel' : ''), 'data-key': o.key }, input, el('span', { class: 'dot', 'aria-hidden': 'true' }),
+      el('span', { class: 'q-name' }, el('span', { class: 'q-label' }, o.label), o.tag ? el('span', { class: 'q-tag' }, o.tag) : null),
+      el('span', { class: 'q-size' }, o.sizeText || T('q.unknownSize')),
+      el('span', { class: 'q-desc' }, o.desc, o.recommended ? el('span', { class: 'badge' }, T('q.best')) : null, o.compatNote ? el('span', { class: 'q-note' }, o.compatNote) : null));
+    input.addEventListener('change', () => { v.sel[v.kind] = o.key; for (const r of list.children) r.classList.toggle('sel', r.dataset.key === o.key); });
+    list.append(row);
+  }
+  const folders = S.settings && S.settings.categoryDirs;
+  $('v-where').textContent = T('v.where', { folder: S.saveDirLabel + (folders ? (LANG === 'en' ? ' › ' : ' ← ') + (v.kind === 'audio' ? 'Music' : 'Video') : '') }) + ' • ' + T('v.approx');
+  renderNoMusic();
+}
+// "Without music": kept while HELINK runs (off again the next time it opens).
+function renderNoMusic() {
+  const on = !!S.noMusic;
+  $('v-nomusic').setAttribute('aria-checked', String(on));
+  $('v-nomusic-note').hidden = !on;
+  $('v-nomusic-hint').textContent = S.sepReady ? T('v.noMusicHint') : T('v.noMusicHint') + ' ' + T('v.noMusicFirst', { size: S.sepSize || '…' });
+  const audio = S.video && S.video.kind === 'audio';
+  $('video-go').textContent = on ? T(audio ? 'v.dlAudioNM' : 'v.dlVideoNM') : T(audio ? 'v.dlAudio' : 'v.dlVideo');
+}
+$('v-nomusic').addEventListener('click', () => { S.noMusic = !S.noMusic; renderNoMusic(); });
+async function downloadVideo() {
+  const v = S.video;
+  const it = curItem();
+  const key = v && v.sel[v.kind];
+  if (!it || !key) return;
+  S.lastKind = v.kind;
+  const noMusic = !!S.noMusic;
+  let r = {};
+  try { r = (await api.download(v.item, key, noMusic)) || {}; } catch (_) {}
+  if (r.error) { v.status = 'error'; v.error = r.error; v.media = []; videoView(); return; }
+  if (!r.id) return;
+  closeVideo(true);
+  toast(r.existing ? T('toast.exists') : noMusic ? T('toast.addedNoMusic') : T('toast.added'));
+  setTimeout(() => flashRow(r.id), 120);
+}
+function closeVideo(keep) {
+  clearTimeout(slowTimer);
+  if (!keep) api.cancelFetch(false);
+  S.video = null;
+  closeDialog('dlg-video');
+}
+function cancelVideo() { closeVideo(false); }
+$('video-go').addEventListener('click', () => { if (S.video && S.video.status === 'list') downloadPlaylist(); else downloadVideo(); });
+$('v-inlist-btn').addEventListener('click', () => {
+  const v = S.video;
+  if (!v || !v.info || !v.info.listUrl) return;
+  clearTimeout(slowTimer);
+  S.video = null;
+  openAdd(v.info.listUrl); // before closing this one (the small window would close in between)
+  closeDialog('dlg-video');
+});
+
+// ---- a course or playlist: all of it at once
+function mp3Text(n) { return LANG === 'en' ? n + (n === 1 ? ' MP3 file' : ' MP3 files') : arCount(n, 'ملف MP3 واحد', 'ملفَي MP3', 'ملفات MP3', 'ملف MP3'); }
+// defaultPicks: every video that can be downloaded, except those in the downloads already as
+// the kind chosen (a course pasted again gets its new lessons).
+function defaultPicks(v) { return new Set(v.list.entries.filter((e) => e.available && !(e.have || []).includes(v.lkind)).map((e) => e.n)); }
+function listOpt() { const v = S.video; return v.list.options.find((o) => o.key === v.lsel[v.lkind]); }
+// renderPlaylist draws the list (all of it when full, only what depends on the choices otherwise).
+function renderPlaylist(full) {
+  const v = S.video;
+  const l = v.list;
+  if (full) {
+    const first = l.entries.find((e) => e.available) || l.entries[0];
+    const thumb = el('div', { class: 'lthumb' });
+    if (first && first.thumbnail) thumb.append(el('img', { src: first.thumbnail, alt: '', referrerpolicy: 'no-referrer' }));
+    thumb.append(el('span', { class: 'lcount' }, svg('<path d="M4 6h11M4 11h11M4 16h7"/><path d="M17 13.5v6l4.5-3z" fill="currentColor"/>', 18), String(l.count)));
+    $('l-card').replaceChildren(thumb, el('div', null, el('div', { class: 'vt' }, l.title || T('v.untitled')),
+      el('div', { class: 'vc' }, el('span', { class: 'site-pill' }, v.siteName || 'YouTube'), l.channel || ''),
+      el('div', { class: 'vc' }, T('l.info', { n: countVideos(l.count), d: l.durationText || '—' }))));
+    const width = String(l.entries.length ? l.entries[l.entries.length - 1].n : 1).length;
+    const frag = document.createDocumentFragment();
+    for (const e of l.entries) {
+      const box = el('input', { type: 'checkbox', 'aria-label': e.title });
+      box.checked = e.available && v.picked.has(e.n);
+      box.disabled = !e.available;
+      box.dataset.n = e.n;
+      const img = el('img', { class: 'lt', alt: '', loading: 'lazy', referrerpolicy: 'no-referrer', src: e.thumbnail });
+      img.addEventListener('error', () => { img.removeAttribute('src'); });
+      frag.append(el('label', { class: 'le' + (e.available ? '' : ' off'), role: 'listitem' }, box,
+        el('span', { class: 'n' }, String(e.n).padStart(Math.max(2, width), '0')), img,
+        el('span', { class: 't', title: e.title }, el('span', { class: 'tt' }, e.title), e.have && e.have.length ? el('span', { class: 'hv' }, T('l.have')) : null),
+        el('span', { class: 'd' }, e.available ? e.durationText || '' : T('l.off'))));
+    }
+    $('l-entries').replaceChildren(frag);
+    $('l-more').hidden = !l.more;
+    $('l-more').textContent = T('l.more', { n: countVideos(l.entries.length) });
+  }
+  for (const b of $('l-kind').children) b.setAttribute('aria-checked', String(b.dataset.kind === v.lkind));
+  $('l-q').replaceChildren(...l.options.filter((o) => o.kind === v.lkind).map((o) => {
+    const b = el('button', { type: 'button', role: 'radio', 'aria-checked': String(o.key === v.lsel[v.lkind]) },
+      el('span', { class: 'ql' }, ...(o.kind === 'video' ? T('l.upTo').split('{q}').map((x, i) => (i ? [el('bdi', { dir: 'ltr' }, o.label), x] : [x])).flat().filter((x) => x !== '')
+        : [el('bdi', { dir: 'ltr' }, o.label + ' MP3')])),
+      el('span', { class: 'qd' }, o.desc), o.recommended ? el('span', { class: 'badge' }, T('q.best')) : null);
+    b.addEventListener('click', () => { v.lsel[v.lkind] = o.key; renderPlaylist(false); });
+    return b;
+  }));
+  const on = !!S.noMusic;
+  $('l-nomusic').setAttribute('aria-checked', String(on));
+  $('l-nomusic-note').hidden = !on;
+  $('l-nomusic-hint').textContent = S.sepReady ? T('v.noMusicHint') : T('v.noMusicHint') + ' ' + T('v.noMusicFirst', { size: S.sepSize || '…' });
+  playlistCounts();
+  const folders = S.settings && S.settings.categoryDirs;
+  const sepW = LANG === 'en' ? ' › ' : ' ← ';
+  $('l-where').textContent = T('l.where', { folder: S.saveDirLabel + (folders ? sepW + (v.lkind === 'audio' ? 'Music' : 'Video') : '') + sepW + (l.title || '') });
+}
+// playlistCounts: what is ticked, about how big it is, and the button's words.
+function playlistCounts() {
+  const v = S.video;
+  let n = 0, secs = 0, all = 0;
+  for (const e of v.list.entries) {
+    if (!e.available) continue;
+    all++;
+    if (v.picked.has(e.n)) { n++; secs += e.duration || 0; }
+  }
+  const o = listOpt();
+  const size = o && secs > 0 ? humanSize(secs / 60 * o.perMinute) : '';
+  const words = v.lkind === 'audio' ? mp3Text(n) : countVideos(n);
+  $('l-count').textContent = size ? T('l.sel', { n: words, size }) : T('l.selNoSize', { n: words });
+  const allBox = $('l-all');
+  allBox.checked = n > 0 && n === all;
+  allBox.indeterminate = n > 0 && n < all;
+  const go = $('video-go');
+  go.textContent = T('l.dl', { n: words });
+  go.disabled = n === 0;
+}
+$('l-entries').addEventListener('change', (e) => {
+  const box = e.target;
+  const v = S.video;
+  if (!v || !v.list || !box || box.type !== 'checkbox') return;
+  const n = +box.dataset.n;
+  if (box.checked) v.picked.add(n); else v.picked.delete(n);
+  v.touched = true;
+  playlistCounts();
+});
+$('l-all').addEventListener('change', () => {
+  const v = S.video;
+  if (!v || !v.list) return;
+  const on = $('l-all').checked;
+  v.picked = new Set(on ? v.list.entries.filter((e) => e.available).map((e) => e.n) : []);
+  v.touched = true;
+  for (const b of $('l-entries').querySelectorAll('input[type="checkbox"]')) if (!b.disabled) b.checked = on;
+  playlistCounts();
+});
+for (const b of $('l-kind').children) b.addEventListener('click', () => {
+  const v = S.video;
+  if (!v || !v.list || v.lkind === b.dataset.kind) return;
+  v.lkind = b.dataset.kind;
+  if (!v.touched) {
+    // Not ticked by hand yet: what is new for this kind.
+    v.picked = defaultPicks(v);
+    for (const c of $('l-entries').querySelectorAll('input[type="checkbox"]')) if (!c.disabled) c.checked = v.picked.has(+c.dataset.n);
+  }
+  renderPlaylist(false);
+});
+$('l-nomusic').addEventListener('click', () => { S.noMusic = !S.noMusic; if (S.video && S.video.list) renderPlaylist(false); });
+async function downloadPlaylist() {
+  const v = S.video;
+  if (!v || !v.list) return;
+  const picks = [...v.picked].sort((a, b) => a - b);
+  if (!picks.length) { toast(T('l.none')); return; }
+  const key = v.lsel[v.lkind];
+  S.lastKind = v.lkind;
+  const go = $('video-go');
+  go.disabled = true;
+  let r = {};
+  try { r = (await api.downloadList(v.seq, picks, key, !!S.noMusic)) || {}; } catch (_) {}
+  go.disabled = false;
+  if (r.error) { v.status = 'error'; v.error = r.error; v.media = []; videoView(); return; }
+  closeVideo(true);
+  const n = r.added || 0;
+  let msg = T('toast.listAdded', { n: v.lkind === 'audio' ? mp3Text(n) : countVideos(n), folder: r.folder || '' });
+  if (r.skipped) msg += ' ' + T('toast.listSkipped', { n: r.skipped });
+  toast(msg);
+  if (r.ids && r.ids.length) setTimeout(() => flashRow(r.ids[0]), 120);
+}
+
+// ---- a new version of HELINK
+S.upd = { state: '' };
+function updOffered() { const s = S.upd.state; return s === 'available' || s === 'downloading' || s === 'installing' || (s === 'error' && S.upd.failedIn === 'install'); }
+function onUpdate(u) {
+  S.upd = u || { state: '' };
+  if (S.upd.prompt) S.updPrompt = true;
+  renderUpdate();
+  maybePromptUpdate();
+}
+// The window about the update opens by itself once: when HELINK's window is shown, with
+// nothing else open in it.
+function maybePromptUpdate() {
+  if (!S.updPrompt || !updOffered() || S.compact || S.miniMode || document.hidden || S.dialogs.length) return;
+  S.updPrompt = false;
+  openUpdate();
+}
+function openUpdate() { fillUpdate(); openDialog('dlg-update'); }
+function renderUpdate() {
+  const u = S.upd;
+  $('upd-btn').hidden = !updOffered();
+  const txt = $('ab-upd-txt'), btn = $('ab-upd-btn');
+  btn.disabled = u.state === 'checking';
+  if (updOffered()) { txt.innerHTML = T('upd.aboutAvail', { v: escapeHTML(u.version || '') }); btn.textContent = T('upd.show'); btn.className = 'btn small primary'; }
+  else {
+    txt.textContent = u.state === 'checking' ? T('upd.aboutChecking') : u.state === 'error' ? T('upd.aboutError') : u.state === 'latest' ? T('upd.aboutLatest') : '';
+    btn.textContent = T('upd.check');
+    btn.className = 'btn small';
+  }
+  if (S.dialogs.includes('dlg-update')) fillUpdate();
+}
+function escapeHTML(t) { return String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function fillUpdate() {
+  const u = S.upd;
+  const dl = u.state === 'downloading', inst = u.state === 'installing', err = u.state === 'error' && u.failedIn === 'install';
+  $('upd-ver').textContent = T('upd.ver', { v: u.version || '' });
+  $('upd-sub').textContent = u.sizeText ? T('upd.sub', { cur: u.current || S.version, size: u.sizeText }) : T('upd.subNoSize', { cur: u.current || S.version });
+  const notes = u.notes || [];
+  $('upd-news').hidden = !notes.length;
+  $('upd-notes').replaceChildren(...notes.map((n) => el('li', null, svg('<path d="M5 12.5l4.2 4.2L19 7"/>', 16), el('span', null, n))));
+  $('upd-prog').hidden = !(dl || inst);
+  $('upd-fill').style.width = (inst ? 100 : Math.max(2, Math.min(100, u.percent || 0))) + '%';
+  $('upd-prog-txt').textContent = inst ? T('upd.installing') : T('upd.downloading', { done: u.doneText || '0', total: u.totalText || u.sizeText || '' });
+  const box = err && u.error ? errorBox(u.error, null, 'err-box') : el('div', { class: 'err-box', hidden: '' });
+  box.id = 'upd-err';
+  $('upd-err').replaceWith(box);
+  $('upd-hint').hidden = dl || inst;
+  $('upd-page').hidden = !err;
+  const now = $('upd-now'), later = $('upd-later');
+  now.hidden = dl || inst;
+  now.textContent = err ? T('upd.retry') : T('upd.now');
+  later.hidden = inst;
+  later.textContent = dl ? T('upd.cancel') : T('upd.later');
+}
+// "Not now" (and the window closed): asked again in a day; the button at the top stays.
+function updateLater() {
+  const st = S.upd.state;
+  if (st === 'downloading') { api.cancelUpdate(); return; }
+  if (st !== 'installing') api.updateLater();
+  closeDialog('dlg-update');
+}
+$('upd-now').addEventListener('click', async () => {
+  let r = {};
+  try { r = (await api.updateNow()) || {}; } catch (_) {}
+  if (r.error) { S.upd = Object.assign({}, S.upd, { state: 'error', failedIn: 'install', error: r.error }); renderUpdate(); }
+});
+$('upd-later').addEventListener('click', updateLater);
+$('upd-x').addEventListener('click', () => { if (S.upd.state === 'downloading') closeDialog('dlg-update'); else updateLater(); });
+$('upd-page').addEventListener('click', () => api.openPage(S.upd.page || ''));
+$('upd-btn').addEventListener('click', openUpdate);
+$('ab-upd-btn').addEventListener('click', async () => {
+  if (updOffered()) { openUpdate(); return; }
+  try { onUpdate(await api.checkUpdate()); } catch (_) {}
+});
+document.addEventListener('visibilitychange', maybePromptUpdate);
+$('video-cancel').addEventListener('click', cancelVideo);
+$('video-x').addEventListener('click', cancelVideo);
+$('video-retry').addEventListener('click', () => {
+  const v = S.video;
+  if (!v || !v.lastLink) return;
+  clearTimeout(slowTimer);
+  S.video = null;
+  openAdd(v.lastLink); // before closing this one (the small window would close in between)
+  closeDialog('dlg-video');
+});
+
+// ---- settings
+// The extension's dot and card: shown until the extension has talked to HELINK.
+function showExtState() {
+  const off = S.extSeen < 0;
+  $('br-btn').classList.toggle('off', off);
+  $('side-card').hidden = !off;
+}
+function fillSettings(s) {
+  S.settings = s;
+  S.saveDir = s.saveDir;
+  S.saveDirLabel = s.saveDirLabel;
+  $('set-lang').value = LANG;
+  for (const c of document.querySelectorAll('[data-set]')) c.checked = !!s[c.dataset.set];
+  for (const st of document.querySelectorAll('[data-step]')) st.querySelector('output').textContent = String(s[st.dataset.step]);
+  $('set-folder').textContent = s.saveDirLabel;
+  $('set-folder').title = s.saveDir;
+  $('set-types').value = (s.catchTypes || []).join(' ');
+  $('set-min').value = String(s.catchMinKB || 0);
+  $('set-skip').value = (s.skipSites || []).join('\n');
+  $('set-bskip').value = (s.buttonSkip || []).join('\n');
+  updateStatus();
+  showExtState();
+}
+let savedTimer = 0;
+async function saveSetting(ch) {
+  let s = null;
+  try { s = await api.setSettings(ch); } catch (_) {}
+  if (s) fillSettings(s);
+  $('set-saved').textContent = T('set.saved');
+  clearTimeout(savedTimer);
+  savedTimer = setTimeout(() => { $('set-saved').textContent = ''; }, 1600);
+}
+for (const c of document.querySelectorAll('[data-set]')) c.addEventListener('change', () => saveSetting({ [c.dataset.set]: c.checked }));
+for (const st of document.querySelectorAll('[data-step]')) {
+  for (const b of st.querySelectorAll('button')) {
+    b.addEventListener('click', () => {
+      const k = st.dataset.step;
+      const cur = Number(st.querySelector('output').textContent) || 1;
+      const n = Math.max(Number(st.dataset.min), Math.min(Number(st.dataset.max), cur + Number(b.dataset.d)));
+      if (n !== cur) { st.querySelector('output').textContent = String(n); saveSetting({ [k]: n }); }
+    });
+  }
+}
+const words = (s) => s.split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean);
+$('set-types').addEventListener('change', () => saveSetting({ catchTypes: words($('set-types').value) }));
+$('set-types-reset').addEventListener('click', () => saveSetting({ catchTypes: null }));
+$('set-min').addEventListener('change', () => saveSetting({ catchMinKB: Math.max(0, parseInt($('set-min').value, 10) || 0) }));
+$('set-skip').addEventListener('change', () => saveSetting({ skipSites: words($('set-skip').value) }));
+$('set-bskip').addEventListener('change', () => saveSetting({ buttonSkip: words($('set-bskip').value) }));
+$('set-lang').addEventListener('change', () => setLang($('set-lang').value));
+$('set-folder-open').addEventListener('click', () => api.openFolder(''));
+$('set-folder-change').addEventListener('click', () => api.pickFolder(''));
+$('sb-folder').addEventListener('click', () => api.openFolder(''));
+for (const b of document.querySelectorAll('.stabs button')) {
+  b.addEventListener('click', () => {
+    for (const x of document.querySelectorAll('.stabs button')) x.setAttribute('aria-selected', String(x === b));
+    for (const p of document.querySelectorAll('.spane')) p.classList.toggle('open', p.dataset.pane === b.dataset.pane);
+  });
+}
+async function openSettings(pane) {
+  try { fillSettings(await api.settings()); } catch (_) {}
+  if (pane) document.querySelector('.stabs [data-pane="' + pane + '"]').click();
+  openDialog('dlg-settings');
+}
+$('set-btn').addEventListener('click', () => openSettings());
+
+// ---- the browsers
+async function openBrowsers() {
+  let r = {};
+  try { r = (await api.browsers()) || {}; } catch (_) {}
+  S.extSeen = r.seenAgo != null ? r.seenAgo : -1;
+  showExtState();
+  const conn = $('br-conn');
+  conn.classList.toggle('ok', S.extSeen >= 0);
+  if (S.extSeen >= 0) {
+    const s = S.extSeen;
+    const when = s < 60 ? T('br.now') : s < 86400 ? T('br.ago', { n: s < 3600 ? minutesText(Math.round(s / 60)) : hoursText(Math.round(s / 3600)) })
+      : dateText(Date.now() - s * 1000);
+    $('br-conn-txt').textContent = T('br.seen', { when });
+  } else $('br-conn-txt').textContent = T('br.never');
+  $('br-path').textContent = r.folder || '';
+  const list = (r.browsers || []).filter((b) => b.kind === 'chromium');
+  $('br-list').replaceChildren(...(list.length ? list.map((b) => el('div', { class: 'inline' }, el('b', { class: 'grow' }, b.name),
+    el('button', { class: 'btn small primary', type: 'button', onclick: () => api.openBrowser(b.id, '') }, T('br.openPage')))) : [el('p', { class: 'hint' }, T('br.none'))]));
+  const ff = (r.browsers || []).find((b) => b.kind === 'firefox');
+  $('br-ff-install').hidden = !ff;
+  openDialog('dlg-browsers');
+}
+$('br-copy').addEventListener('click', () => api.copyText($('br-path').textContent).then(() => toast(T('br.copied'))));
+$('br-open').addEventListener('click', () => api.openExtFolder('chromium'));
+$('br-ff-install').addEventListener('click', () => api.openBrowser('firefox', 'xpi'));
+$('br-ff-file').addEventListener('click', () => api.openExtFolder('firefox'));
+$('br-btn').addEventListener('click', openBrowsers);
+$('card-btn').addEventListener('click', openBrowsers);
+$('empty-br').addEventListener('click', openBrowsers);
+
+// ---- about
+$('about-btn').addEventListener('click', () => openDialog('dlg-about'));
+$('copy-num').addEventListener('click', () => api.contact('copy').then((ok) => { if (ok) toast(T('toast.numberCopied')); }));
+$('wa').addEventListener('click', () => api.contact('whatsapp'));
+
+// ---- delete
+let delWith = false;
+function askDelete(withFile) {
+  const sel = selected();
+  if (!sel.length) return;
+  $('del-title').textContent = sel.length === 1 ? T('del.one') : T('del.many', { n: downloadsText(sel.length) });
+  $('del-text').textContent = T('del.text');
+  const anyDone = sel.some((t) => t.state === 'done');
+  $('del-files-row').hidden = !anyDone;
+  $('del-files').checked = !!withFile;
+  delWith = withFile;
+  openDialog('dlg-delete');
+}
+$('del-ok').addEventListener('click', () => {
+  const ids = [...S.sel];
+  api.remove(ids, $('del-files').checked);
+  closeDialog('dlg-delete');
+});
+
+// ---- closing
+function onCloseRequest(d) {
+  const setup = d && d.what === 'setup';
+  $('close-title').textContent = setup ? T('close.setupTitle') : T('close.dlTitle');
+  $('close-msg').textContent = setup ? T('close.setupMsg') : T('close.dlMsg');
+  $('close-keep').textContent = setup ? T('close.keepSetup') : T('close.keep');
+  openDialog('dlg-close');
+}
+$('close-quit').addEventListener('click', () => api.confirmClose());
+
+// ------------------------------------------------------------ the video tools (first run)
+function startSetup() {
+  S.setup = { phase: 'download', percent: 0 };
+  renderBanner();
+  api.setup();
+}
+function renderBanner() {
+  const b = $('banner');
+  const s = S.setup;
+  if (!s && !S.missing.length) { b.hidden = true; return; }
+  b.hidden = false;
+  b.classList.toggle('bad', !!(s && s.phase === 'error'));
+  const btn = $('banner-btn');
+  if (!s) {
+    $('banner-spin').hidden = true; $('banner-mini').hidden = true;
+    $('banner-txt').textContent = T('setup.need', { size: S.setupSize || '…' });
+    btn.hidden = false; btn.textContent = T('setup.start'); btn.onclick = startSetup;
+    return;
+  }
+  if (s.phase === 'error') {
+    $('banner-spin').hidden = true; $('banner-mini').hidden = true;
+    $('banner-txt').textContent = T('setup.fail') + ' ' + ((s.error && s.error.message) || '');
+    btn.hidden = false; btn.textContent = T('btn.retry'); btn.onclick = startSetup;
+    return;
+  }
+  btn.hidden = true;
+  $('banner-spin').hidden = false; $('banner-mini').hidden = s.phase === 'verify';
+  $('banner-txt').textContent = s.phase === 'verify' ? T('setup.verify') : T('setup.run', { pct: Math.floor(s.percent || 0) + '%' });
+  $('banner-fill').style.width = Math.max(2, Math.min(100, s.percent || 0)) + '%';
+}
+function onSetup(p) {
+  if (p.phase === 'done') { S.setup = null; S.missing = []; renderBanner(); toast(T('setup.done')); return; }
+  S.setup = p;
+  renderBanner();
+}
+
+// ------------------------------------------------------------ the small window, language, keys
+// A quality chosen in the browser's menu downloads at once. When HELINK's window is closed,
+// a small window near the clock shows how it goes, without taking the browser's keyboard,
+// and goes away a little after everything finished (a download that failed stays).
+const MINI_MAX = 3, MINI_LINGER = 12000;
+let miniTimer = 0, miniHover = false, miniRaf = 0, miniHeight = 0, miniKey = '';
+function miniTasks() { return S.mini.map((id) => S.tasks.get(id)).filter(Boolean); }
+function miniSoon() { if (!miniRaf) miniRaf = requestAnimationFrame(() => { miniRaf = 0; renderMini(); }); }
+function makeMiniRow(t) {
+  const r = { el: el('div', { class: 'mrow', role: 'listitem', tabindex: '0', 'data-id': t.id }) };
+  r.icon = el('span', { class: 'ficon' });
+  r.name = el('span', { class: 't' });
+  r.st = el('span', { class: 'st' });
+  r.fill = el('i');
+  r.bar = el('span', { class: 'bar6' }, r.fill);
+  r.acts = el('span', { class: 'acts' });
+  r.el.append(r.icon, r.name, r.acts, r.st, r.bar);
+  r.el.addEventListener('click', () => miniOpen(t.id));
+  r.el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target === r.el) miniOpen(t.id); });
+  return r;
+}
+function fillMiniRow(r, t) {
+  const cat = catOf(t);
+  const iconKey = cat + '|' + (t.type !== 'file' ? t.thumb || '' : '');
+  if (r.iconKey !== iconKey) {
+    r.iconKey = iconKey;
+    const ic = fileIcon(cat, t.type !== 'file' ? t.thumb : '');
+    r.icon.replaceWith(ic);
+    r.icon = ic;
+  }
+  r.el.className = 'mrow s-' + t.state;
+  r.el.title = T('mini.tip');
+  r.name.textContent = nameOf(t);
+  const more = [];
+  if (t.state === 'running' && !busyStage(t)) {
+    if (t.speedText) more.push(t.speedText);
+    const eta = shortEta(t.eta);
+    if (eta) more.push(eta);
+  }
+  if (t.state === 'done' && t.result) more.push(t.result.sizeText); // where it is: the folder button
+  const stx = el('span', { class: 'stx' }, statusText(t));
+  const kids = [el('span', { class: 'dotc' })];
+  const label = t.label && (t.type !== 'file' || t.label.length <= 5) ? t.label : '';
+  if (label && t.state !== 'error') kids.push(el('span', { class: 'lab' }, label));
+  kids.push(stx);
+  const moreText = more.filter(Boolean).join(' • ');
+  if (moreText) kids.push(el('span', { class: 'more', title: moreText }, moreText));
+  const pct = t.state === 'done' ? 100 : Math.max(0, Math.min(100, t.percent || 0));
+  if ((t.state === 'running' || t.state === 'paused') && !busyStage(t) && !(t.stage === 'sepwait')) kids.push(el('span', { class: 'pct' }, Math.floor(pct) + '%'));
+  r.st.replaceChildren(...kids);
+  r.st.title = t.state === 'error' && t.error ? t.error.message || '' : '';
+  r.bar.classList.toggle('busy', busyStage(t));
+  r.fill.style.width = pct + '%';
+  const actKey = t.state + '|' + LANG;
+  if (r.actKey !== actKey) { r.actKey = actKey; quickButtons(r.acts, t); }
+}
+function renderMini() {
+  if (!S.miniMode) return;
+  const ts = miniTasks().slice(0, MINI_MAX);
+  const key = ts.map((t) => t.id).join(',');
+  for (const t of ts) {
+    let r = S.miniRows.get(t.id);
+    if (!r) { r = makeMiniRow(t); S.miniRows.set(t.id, r); }
+    fillMiniRow(r, t);
+  }
+  if (key !== miniKey) {
+    // Rows are put again only when the downloads shown change: a row moved under the
+    // mouse would lose the click.
+    miniKey = key;
+    for (const id of [...S.miniRows.keys()]) if (!ts.some((t) => t.id === id)) S.miniRows.delete(id);
+    $('mini').replaceChildren(...ts.map((t) => S.miniRows.get(t.id).el));
+  }
+  const h = Math.ceil(document.querySelector('#overlay .cbar').getBoundingClientRect().height + $('mini').scrollHeight);
+  if (h !== miniHeight) { miniHeight = h; api.miniFit(h).catch(() => {}); }
+  clearTimeout(miniTimer);
+  if (!ts.length) miniTimer = setTimeout(hideMini, 400);
+  else if (!miniHover && ts.every((t) => t.state === 'done')) miniTimer = setTimeout(hideMini, MINI_LINGER);
+}
+function hideMini() {
+  clearTimeout(miniTimer);
+  if (!S.miniMode) return;
+  S.mini = [];
+  api.dialogDone();
+}
+// A click on a download: the full window, with that download chosen.
+function miniOpen(id) {
+  if (S.tasks.has(id)) { S.details = id; selectOnly(id); }
+  api.expand();
+}
+document.documentElement.addEventListener('mouseenter', () => { miniHover = true; if (S.miniMode) clearTimeout(miniTimer); });
+document.documentElement.addEventListener('mouseleave', () => { miniHover = false; if (S.miniMode) renderMini(); });
+handlers.browserTask = (d) => {
+  if (!d || !d.id) return;
+  S.mini = [d.id, ...S.mini.filter((x) => x !== d.id)].slice(0, MINI_MAX);
+  if (S.miniMode) miniSoon();
+  else if (!S.compact) requestAnimationFrame(() => flashRow(d.id)); // the full window shows it in the list
+};
+
+const smallDialogs = ['dlg-add', 'dlg-file', 'dlg-video'];
+function onMode(d) {
+  const wasMini = S.miniMode;
+  S.compact = !!d.compact;
+  S.miniMode = S.compact && d.reason === 'task';
+  body.classList.toggle('compact', S.compact);
+  body.classList.toggle('mini-mode', S.miniMode);
+  clearTimeout(miniTimer);
+  if (!S.miniMode) { S.miniRows.clear(); miniKey = ''; miniHeight = 0; $('mini').replaceChildren(); }
+  if (!S.compact) {
+    S.mini = [];
+    if (wasMini) $('overlay').classList.toggle('open', S.dialogs.length > 0);
+    return;
+  }
+  closeMenu();
+  if (S.miniMode) {
+    $('overlay').classList.add('open');
+    renderMini();
+    return;
+  }
+  // The small window shows only downloads waiting for an answer.
+  for (const id of [...S.dialogs]) {
+    if (!smallDialogs.includes(id)) {
+      S.dialogs.splice(S.dialogs.indexOf(id), 1);
+      $(id).classList.remove('open');
+    }
+  }
+  const top = topDialog();
+  if (top) { $(top).classList.add('open'); $('overlay').classList.add('open'); }
+  else $('overlay').classList.remove('open');
+  if (!top && S.pending.length) showFile();
+  else if (!top && miniTasks().length) api.showMini();
+  else if (!top) api.dialogDone();
+}
+$('expand').addEventListener('click', () => api.expand());
+async function setLang(lang) {
+  LANG = lang === 'en' ? 'en' : 'ar';
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === 'en' ? 'ltr' : 'rtl';
+  applyStatic();
+  try { await api.setLang(LANG); } catch (_) {}
+  // The engine's words (sizes, states, errors) come again in the new language.
+  try { setTasks(await api.tasks()); } catch (_) {}
+  try { fillSettings(await api.settings()); } catch (_) {}
+  S.rows.clear();
+  renderList();
+  renderBanner();
+  if (S.video && S.video.status === 'done') { renderOptions(); renderKind(); }
+  if (S.video) videoView();
+  if (S.video && S.video.status === 'list') renderPlaylist(true);
+  try { onUpdate(await api.update()); } catch (_) { renderUpdate(); }
+  if (S.dialogs.includes('dlg-file')) { fileFolderText(); }
+}
+$('lang-btn').addEventListener('click', () => setLang(LANG === 'en' ? 'ar' : 'en'));
+function setTasks(list) {
+  const keep = new Map();
+  for (const t of list || []) {
+    const old = S.tasks.get(t.id);
+    if (old && !t.thumb && old.thumb) t.thumb = old.thumb;
+    keep.set(t.id, t);
+  }
+  S.tasks = keep;
+}
+function looksLikeLink(t) { return /https?:\/\/\S+|www\.\S+\.\S+/i.test(t || ''); }
+document.addEventListener('keydown', (e) => {
+  // The browser's own keys would reload, print, zoom or search this page: not here.
+  if (e.key === 'F5' || e.key === 'F3' || e.key === 'F7' || e.key === 'F12' ||
+      ((e.ctrlKey || e.metaKey) && /^[rpgusofRPGUSOF=+\-0]$/.test(e.key))) e.preventDefault();
+  if (S.miniMode) { if (e.key === 'Escape') hideMini(); return; } // the list behind is not shown
+  const inField = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '');
+  if (e.key === 'Escape') {
+    if (menu.classList.contains('open')) { closeMenu(); return; }
+    if (S.dialogs.length) {
+      // A download taken from the browser is gone from the browser: only Cancel drops it.
+      const p = S.pending[0];
+      if (!(topDialog() === 'dlg-file' && p && p.from === 'browser')) dismissTop();
+      return;
+    }
+    if (S.details) { S.details = ''; renderDetails(); }
+    return;
+  }
+  if (S.dialogs.length || inField) return;
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'n' || e.key === 'N' || e.key === 'l' || e.key === 'L')) { e.preventDefault(); openAdd(''); return; }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) { e.preventDefault(); S.sel = new Set(S.order); refreshSelection(); return; }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); $('search').focus(); return; }
+  if (e.key === 'Delete' && S.sel.size) { askDelete(e.shiftKey); return; }
+  if (e.key === 'Enter' && S.sel.size === 1) { openTask([...S.sel][0]); return; }
+  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && S.order.length) {
+    e.preventDefault();
+    let i = S.order.indexOf(S.anchor);
+    i = e.key === 'ArrowDown' ? Math.min(S.order.length - 1, i + 1) : Math.max(0, i - 1);
+    selectOnly(S.order[i]);
+    const r = S.rows.get(S.order[i]);
+    if (r) r.el.scrollIntoView({ block: 'nearest' });
+  }
+});
+document.addEventListener('paste', (e) => {
+  const inField = /^(INPUT|TEXTAREA)$/.test((e.target && e.target.tagName) || '');
+  if (inField || S.dialogs.length || S.miniMode) return;
+  const t = ((e.clipboardData && e.clipboardData.getData('text')) || '').trim();
+  if (looksLikeLink(t)) { e.preventDefault(); openAdd(t); }
+});
+document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+// The browser's own menu (back, reload, print…) has nothing to do here; text fields keep
+// theirs (cut, copy, paste).
+document.addEventListener('contextmenu', (e) => {
+  if (!(e.target.closest && e.target.closest('input, textarea, pre'))) e.preventDefault();
+});
+let dragDepth = 0;
+addEventListener('dragenter', (e) => { if (S.compact) return; dragDepth++; $('drop').classList.add('show'); e.preventDefault(); });
+addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $('drop').classList.remove('show'); });
+addEventListener('dragover', (e) => e.preventDefault());
+addEventListener('drop', (e) => {
+  e.preventDefault();
+  dragDepth = 0;
+  $('drop').classList.remove('show');
+  const t = ((e.dataTransfer && (e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text'))) || '').split('\n').find((x) => x && !x.startsWith('#'));
+  if (t && looksLikeLink(t) && !/^file:/i.test(t.trim())) openAdd(t.trim());
+  else if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) toast(T('toast.dropFiles'));
+});
+
+// ------------------------------------------------------------ events
+handlers.task = onTask;
+handlers.file = onFile;
+handlers.info = (d) => { keepInfo(d); onInfo(d); };
+handlers.thumb = (d) => {
+  for (const ev of S.infos.get(d.seq) || []) {
+    if (ev.status === 'done' && ev.items && ev.items[d.index]) ev.items[d.index].meta.thumbnail = d.src;
+  }
+  onThumb(d);
+};
+handlers.setup = onSetup;
+handlers.mode = onMode;
+handlers.closeRequest = onCloseRequest;
+handlers.browserVideo = (d) => {
+  if (S.video && S.video.seq === d.seq) return;
+  clearTimeout(slowTimer);
+  S.video = null; // a newer reading replaces the one shown
+  openVideo(d.seq);
+  $('v-oldext').hidden = !d.oldExt;
+};
+// The small window's own close button: it cancels what it shows.
+handlers.dialogClose = () => {
+  if (S.miniMode) { hideMini(); return; }
+  const id = topDialog();
+  if (id === 'dlg-file') cancelFile();
+  else if (id === 'dlg-video') cancelVideo();
+  else if (id) closeDialog(id);
+  else api.dialogDone();
+};
+handlers.addLink = () => openAdd('');
+handlers.folder = (d) => {
+  if (d.error) { toast(d.error); return; }
+  S.saveDir = d.saveDir;
+  S.saveDirLabel = d.saveDirLabel;
+  if (d.changed && !d.taskId) toast(T('toast.folder', { folder: d.saveDirLabel }));
+  api.settings().then(fillSettings).catch(() => {});
+  updateStatus();
+};
+handlers.dirPicked = (d) => {
+  if (d.purpose !== 'file' || !d.ok) { if (d.error) toast(d.error.title || ''); return; }
+  S.fileFolder = { folder: d.folder, label: d.label };
+  fileFolderText();
+};
+handlers.settings = (s) => fillSettings(s);
+handlers.sepPicked = onSepPicked;
+handlers.update = onUpdate;
+handlers.showUpdate = () => { if (updOffered()) { S.updPrompt = false; openUpdate(); } };
+handlers.sep = (d) => { if (d && d.ready) { S.sepReady = true; if (S.video && S.video.status === 'done') renderNoMusic(); } };
+
+// ------------------------------------------------------------ start
+(async function boot() {
+  applyStatic();
+  let r = {};
+  try { r = (await api.init()) || {}; } catch (_) {}
+  if (r.lang && r.lang !== LANG) {
+    LANG = r.lang === 'en' ? 'en' : 'ar';
+    document.documentElement.lang = LANG;
+    document.documentElement.dir = LANG === 'en' ? 'ltr' : 'rtl';
+    applyStatic();
+  }
+  S.version = r.version || '';
+  $('about-version').textContent = S.version;
+  $('about-version2').textContent = S.version;
+  S.saveDir = r.saveDir || '';
+  S.saveDirLabel = r.saveDirLabel || '';
+  S.lastKind = r.lastKind || 'video';
+  S.missing = r.missing || [];
+  S.setupSize = r.setupSizeText || '';
+  S.sepReady = !!r.sepReady;
+  S.sepSize = r.sepSizeText || '';
+  setTasks(r.tasks || []);
+  if (r.settings) fillSettings(r.settings);
+  try { const b = await api.browsers(); S.extSeen = b && b.seenAgo != null ? b.seenAgo : -1; } catch (_) {}
+  showExtState();
+  renderList();
+  // The video tools: prepared in the background the first time (files need nothing).
+  if (r.busy === 'setup') { S.setup = { phase: 'download', percent: 0 }; renderBanner(); }
+  else if (S.missing.length) startSetup();
+  for (const p of r.pending || []) onFile(p);
+  // HELINK's own update: where it stands, and whether HELINK was just updated.
+  onUpdate(r.update);
+  if (r.updated) toast(T('upd.done', { v: r.updated }));
+  else if (r.updateFailed) toast(T('upd.failedToast'));
+  // The very first time: how to add HELINK to the browser (its most useful step).
+  if (S.extSeen < 0 && !S.dialogs.length && S.settings && S.settings.introShown === false) {
+    api.setSettings({ introShown: true }).catch(() => {});
+    openBrowsers();
+  }
+  // Now the events that came while the page was opening (a download from the browser).
+  try { await api.ready(); } catch (_) {}
+})();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HELINK</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body class="options">
+<header class="top">
+  <svg class="logo" viewBox="220 745 1603 335" role="img" aria-label="HELINK"><path fill="currentColor" d="M222 747V1078L284.5 1032.5V950.5H402.5V1030.5L461 1078V858L402.5 896.5H284.5V793ZM539 784V1047H743V998.5H599.5V936.5H722V890.5H599.5V832.5H738V784ZM822 784V1047H1016V998.5H882.5V784ZM1080 784V1047H1141V784ZM1234 784V1047H1294V887.5L1425 1047H1476V784H1416V943L1284.5 784ZM1569 784V1047H1629.5V980.5L1665 944L1749 1047H1820L1704.5 901L1813.5 784H1746L1629.5 906V784Z"/><path fill="#F27221" d="M466 758L408 804L403 878L460 840.5Z"/></svg>
+  <span class="ver" id="ver"></span>
+</header>
+<main>
+  <h1 data-t="optTitle"></h1>
+
+  <section class="card">
+    <h2 data-t="secConnection"></h2>
+    <ul class="results" id="results"></ul>
+    <div class="row"><button class="ghost" id="test" type="button" data-t="testConn"></button></div>
+  </section>
+
+  <section class="card">
+    <h2 data-t="secDownloads"></h2>
+    <label class="switch-row" for="catch"><span><b data-t="catchOpt"></b><small data-t="catchHint"></small></span><input type="checkbox" class="switch" id="catch" role="switch"></label>
+    <label class="switch-row" for="dialog"><span><b data-t="dialogOpt"></b></span><input type="checkbox" class="switch" id="dialog" role="switch"></label>
+    <div class="field">
+      <label for="types" data-t="typesLabel"></label>
+      <textarea id="types" spellcheck="false"></textarea>
+      <div class="row"><small data-t="typesHint"></small><button class="ghost" id="typesReset" type="button" data-t="typesReset"></button></div>
+    </div>
+    <div class="field">
+      <label for="minKB" data-t="minSize"></label>
+      <input type="number" id="minKB" min="0" step="1">
+      <small data-t="minSizeHint"></small>
+    </div>
+    <div class="field">
+      <label for="skip" data-t="skipSites"></label>
+      <textarea id="skip" spellcheck="false"></textarea>
+      <small data-t="sitesHint"></small>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 data-t="secButtons"></h2>
+    <label class="switch-row" for="buttons"><span><b data-t="buttonsOpt"></b><small data-t="buttonsHint"></small></span><input type="checkbox" class="switch" id="buttons" role="switch"></label>
+    <div class="field">
+      <label for="noButtons" data-t="buttonSkip"></label>
+      <textarea id="noButtons" spellcheck="false"></textarea>
+      <small data-t="sitesHint"></small>
+    </div>
+    <div class="row"><button class="ghost" id="resetPos" type="button" data-t="resetPos"></button><span class="hint" id="posMsg"></span></div>
+  </section>
+
+  <section class="card">
+    <h2 data-t="optLang"></h2>
+    <select id="lang">
+      <option value="auto" data-t="langAuto"></option>
+      <option value="ar">العربية</option>
+      <option value="en">English</option>
+    </select>
+  </section>
+
+  <section class="card">
+    <h2 data-t="secAbout"></h2>
+    <p class="about" data-t="aboutText"></p>
+  </section>
+
+  <div class="savebar"><button class="primary" id="save" type="button" data-t="save"></button><span class="msg" id="saveMsg" role="status"></span></div>
+</main>
+<script src="strings.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

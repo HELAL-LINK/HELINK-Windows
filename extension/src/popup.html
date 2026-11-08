@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HELINK</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body class="popup">
+<header class="top">
+  <svg class="logo" viewBox="220 745 1603 335" role="img" aria-label="HELINK"><path fill="currentColor" d="M222 747V1078L284.5 1032.5V950.5H402.5V1030.5L461 1078V858L402.5 896.5H284.5V793ZM539 784V1047H743V998.5H599.5V936.5H722V890.5H599.5V832.5H738V784ZM822 784V1047H1016V998.5H882.5V784ZM1080 784V1047H1141V784ZM1234 784V1047H1294V887.5L1425 1047H1476V784H1416V943L1284.5 784ZM1569 784V1047H1629.5V980.5L1665 944L1749 1047H1820L1704.5 901L1813.5 784H1746L1629.5 906V784Z"/><path fill="#F27221" d="M466 758L408 804L403 878L460 840.5Z"/></svg>
+  <span class="ver" id="ver"></span>
+</header>
+<main>
+  <section class="status" id="status" aria-live="polite"><span class="dot"></span><div><b id="statusText">…</b><p id="statusHelp"></p></div></section>
+  <label class="switch-row" for="catch"><span><b data-t="catchLabel"></b><small data-t="catchHint"></small></span><input type="checkbox" class="switch" id="catch" role="switch"></label>
+  <button class="primary" id="pageVideo" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg><span data-t="pageVideo"></span></button>
+  <h2 data-t="foundTitle"></h2>
+  <ul class="media" id="media"></ul>
+  <p class="empty" id="none" data-t="noneFound"></p>
+  <p class="toast" id="toast" role="status"></p>
+</main>
+<footer>
+  <button class="ghost" id="open" type="button" data-t="openApp"></button>
+  <button class="ghost" id="settings" type="button" data-t="settings"></button>
+</footer>
+<script src="strings.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
