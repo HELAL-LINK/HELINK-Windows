@@ -7,7 +7,7 @@
 # usage: ./release.sh [--no-tests]
 set -e
 cd "$(dirname "$0")"
-VERSION=2.4.0
+VERSION=2.4.1
 ./build.sh "$@"
 rm -rf release
 mkdir -p release

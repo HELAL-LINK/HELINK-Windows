@@ -19,7 +19,7 @@ import (
 )
 
 // appVersion is this HELINK's version (a variable only so the update tests can play an older or newer one).
-var appVersion = "2.4.0"
+var appVersion = "2.4.1"
 
 const (
 	// Finished downloads kept in the list (the files themselves stay in their folder).

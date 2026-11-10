@@ -434,9 +434,9 @@ window.__nzMock = function (emit) {
   if (demo === 'update-dl') { upd.state = 'downloading'; upd.done = 1.9 * MB; }
   if (demo === 'update-error') { upd.state = 'error'; upd.failedIn = 'install'; }
   function updView(prompt) {
-    const v = { state: upd.state, current: '2.4.0', page: 'https://github.com/HELAL-LINK/HELINK-Windows', prompt: !!prompt, checkedAt: Date.now() };
+    const v = { state: upd.state, current: '2.4.1', page: 'https://github.com/HELAL-LINK/HELINK-Windows', prompt: !!prompt, checkedAt: Date.now() };
     if (upd.state !== 'latest' && upd.state !== '' && upd.state !== 'checking') {
-      Object.assign(v, { version: '2.4.1', notes: updNotes(), sizeText: size(3.9 * MB), snoozed: upd.snoozed });
+      Object.assign(v, { version: '2.4.2', notes: updNotes(), sizeText: size(3.9 * MB), snoozed: upd.snoozed });
     }
     if (upd.state === 'downloading') Object.assign(v, { done: upd.done, total: 3.9 * MB, doneText: size(upd.done), totalText: size(3.9 * MB), percent: upd.done / (3.9 * MB) * 100 });
     if (upd.state === 'error') { v.error = err('network', 'github.com', 'Get "https://raw.githubusercontent.com/...": dial tcp: lookup raw.githubusercontent.com: no such host'); v.failedIn = upd.failedIn || 'check'; }
@@ -587,10 +587,10 @@ window.__nzMock = function (emit) {
     init: async () => {
       const setup = demo.startsWith('setup');
       return {
-        screen: setup ? 'setup' : 'ready', platform: 'windows', saveDir, saveDirLabel: folderLabel(saveDir), version: '2.4.0', lang,
+        screen: setup ? 'setup' : 'ready', platform: 'windows', saveDir, saveDirLabel: folderLabel(saveDir), version: '2.4.1', lang,
         setupSizeText: setup ? size(146 * MB) : '', missing: setup ? ['ytdlp', 'deno', 'ffmpeg'] : [], busy: '', lastKind: q.get('kind') === 'audio' ? 'audio' : 'video',
         parallel: settings.maxParallel, restore: { info: null }, tasks: list(), settings: view(), pending: [],
-        sepReady, sepSizeText: size(64 * MB), update: updView(false), updated: demo === 'updated' ? '2.4.0' : undefined,
+        sepReady, sepSizeText: size(64 * MB), update: updView(false), updated: demo === 'updated' ? '2.4.1' : undefined,
       };
     },
     update: async () => updView(false),

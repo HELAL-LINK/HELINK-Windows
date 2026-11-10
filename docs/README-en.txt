@@ -1,4 +1,4 @@
-HELINK: a complete download manager for Windows 11 and 10 - version 2.4.0
+HELINK: a complete download manager for Windows 11 and 10 - version 2.4.1
 =========================================================================
 HELINK downloads files and videos on Windows:
 - Any file (programs, documents, archives, music, video) downloads faster: HELINK splits it into
@@ -44,7 +44,7 @@ New in version 2.3:
 
 1) Installing
 -------------
-Recommended: open HELINK-2.4.0-Setup.exe and click Next, then Install.
+Recommended: open HELINK-2.4.1-Setup.exe and click Next, then Install.
 - It needs no administrator rights, installs for your account only, and adds shortcuts on the
   desktop and in the Start menu.
 - If HELINK is running, the installer closes it first; its downloads continue when it opens again.
@@ -54,7 +54,7 @@ Recommended: open HELINK-2.4.0-Setup.exe and click Next, then Install.
   menu of qualities) runs. From 2.2 on, the extension in Chrome, Edge, Brave, Opera and Vivaldi
   updates itself after HELINK is updated.
 
-Or the portable copy: extract HELINK-2.4.0-portable.zip and open HELINK.exe from any folder.
+Or the portable copy: extract HELINK-2.4.1-portable.zip and open HELINK.exe from any folder.
 It updates itself too, when it is in a folder Windows lets it change (Downloads or Documents, say).
 
 If a blue screen says "Windows protected your PC", click "More info", then "Run anyway". Windows

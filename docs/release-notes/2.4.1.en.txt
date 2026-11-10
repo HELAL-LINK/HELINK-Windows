@@ -1,0 +1,3 @@
+# What's new in HELINK 2.4.1
+Fixed: downloading the photos and videos of products (Amazon, Alibaba, AliExpress, Noon) failed with "Couldn't reach", and now works.
+Fixed: files HELINK takes from the browser on big sites sometimes stayed with the browser; HELINK takes them now.

@@ -4,7 +4,7 @@
 # usage: ./build.sh [--no-tests]
 set -e
 cd "$(dirname "$0")"
-VERSION=2.4.0
+VERSION=2.4.1
 export CGO_ENABLED=0
 mkdir -p build embed
 # The extension (Chromium folder + Firefox package), put where HELINK.exe embeds it.

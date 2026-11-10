@@ -214,6 +214,14 @@ var downloadTransport = func() *http.Transport {
 	t.Proxy = systemProxy
 	t.ForceAttemptHTTP2 = false
 	t.TLSNextProto = map[string]func(string, *tls.Conn) http.RoundTripper{}
+	// HTTP/1.1 only, and said so to the server: since Go 1.24 a transport cloned from the
+	// default one still offers HTTP/2 when the connection is opened (ALPN "h2"), and a server
+	// that takes it (Amazon's, AliExpress's and Alibaba's pictures, most big sites) then answers
+	// in HTTP/2, which this transport can't read ("malformed HTTP response \x00\x00…").
+	var p http.Protocols
+	p.SetHTTP1(true)
+	t.Protocols = &p
+	t.TLSClientConfig = &tls.Config{NextProtos: []string{"http/1.1"}}
 	t.DialContext = (&net.Dialer{Timeout: 20 * time.Second, KeepAlive: 30 * time.Second}).DialContext
 	t.TLSHandshakeTimeout = 20 * time.Second
 	t.ResponseHeaderTimeout = 45 * time.Second

@@ -10,7 +10,7 @@ import json, os, shutil, sys, zipfile
 here = os.path.dirname(os.path.abspath(__file__))
 src = os.path.join(here, 'src')
 dist = os.path.join(here, 'dist')
-version = sys.argv[1] if len(sys.argv) > 1 else '2.4.0'
+version = sys.argv[1] if len(sys.argv) > 1 else '2.4.1'
 embed = sys.argv[2] if len(sys.argv) > 2 else None
 SKIP = {'.DS_Store'}
 
